@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "564369732548",
+    "firebase_url": "https://gufyguber-1f0d1.firebaseio.com",
+    "project_id": "gufyguber-1f0d1",
+    "storage_bucket": "gufyguber-1f0d1.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:564369732548:android:4770d3b7517ad0e9e52a91",
+        "android_client_info": {
+          "package_name": "com.example.gufyguber"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "564369732548-96aq9skla7luovn2iu7mddghevmtq669.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAtsoVmhyaUqxW6g2v5IKb6ftaVTr4vWnA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "564369732548-96aq9skla7luovn2iu7mddghevmtq669.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
