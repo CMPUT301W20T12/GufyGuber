@@ -20,11 +20,17 @@ public class RegisterUserActivity extends AppCompatActivity {
     EditText phone;
     EditText password;
     EditText confirmPassword;
+    EditText make;
+    EditText model;
+    EditText plateNumber;
+    EditText seatNumber;
     Button register;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
 
         Intent intent = getIntent();
         String userType = intent.getStringExtra("userType");
@@ -33,12 +39,15 @@ public class RegisterUserActivity extends AppCompatActivity {
         }
         else{
             setContentView(R.layout.register_driver);
+            make = findViewById(R.id.make);
+            model = findViewById(R.id.model);
+            plateNumber = findViewById(R.id.plate_number);
+            seatNumber = findViewById(R.id.seat_number);
+
         }
 
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
 
         username = findViewById(R.id.user_name);
-        username.setText(userType); //debug check
         email = findViewById(R.id.email);
         firstName = findViewById(R.id.first_name);
         lastName = findViewById(R.id.last_name);
@@ -47,9 +56,6 @@ public class RegisterUserActivity extends AppCompatActivity {
         confirmPassword = findViewById(R.id.confirm_password);
         register = findViewById(R.id.register);
 
-        if(userType.equals("Driver")){
-            //
-        }
 
         register.setOnClickListener(new View.OnClickListener() {
             @Override
