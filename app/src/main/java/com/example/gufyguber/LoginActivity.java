@@ -23,7 +23,7 @@ public class LoginActivity extends AppCompatActivity {
         registerButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                new UserTypeFragment().show(getSupportFragmentManager(), "USER_TYPE");
             }
         });
 

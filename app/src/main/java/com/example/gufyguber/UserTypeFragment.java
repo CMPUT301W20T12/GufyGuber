@@ -26,11 +26,13 @@ public class UserTypeFragment extends DialogFragment {
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
 //        return super.onCreateDialog(savedInstanceState);
+
         View view = LayoutInflater.from(getActivity()).inflate(R.layout.user_type_fragment, null);
         riderButton = view.findViewById(R.id.rider_button);
         driverButton = view.findViewById(R.id.driver_button);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+
         return builder
                 .setView(view)
                 .create();
