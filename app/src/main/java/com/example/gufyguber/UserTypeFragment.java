@@ -29,7 +29,6 @@ public class UserTypeFragment extends DialogFragment {
     @NonNull
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
-//        return super.onCreateDialog(savedInstanceState);
 
         View view = LayoutInflater.from(getActivity()).inflate(R.layout.user_type_fragment, null);
         riderButton = view.findViewById(R.id.rider_button);
