@@ -21,6 +21,13 @@ import android.widget.Button;
 
 import com.google.firebase.firestore.FirebaseFirestore;
 
+/**
+ * App activity displayed when the app first launches. Allows user to enter email and password to
+ * sign in, register a new account. If the user requests to make a new account, they will be given
+ * an option to register a RIDER ar DRIVER account via a dialog fragment.
+ *
+ * @see UserTypeFragment
+ */
 public class LoginActivity extends AppCompatActivity {
 
     @Override

@@ -1,4 +1,3 @@
-
 /*
  * RegisterUserActivity.java
  *
@@ -42,6 +41,10 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+/**
+ * App activity to allow the user to register a new account. Depending on what account type the user
+ * selected via the user type dialog fragment, the activity will be set up with a different layout.
+ */
 public class RegisterUserActivity extends AppCompatActivity {
     private static final String TAG = "EmailPassword";
     EditText username;

@@ -26,8 +26,12 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 
-import com.google.firebase.firestore.FirebaseFirestore;
-
+/**
+ * Builds a DialogFragment with two buttons for user to choose what type of account to create:
+ * RIDER or DRIVER. Fragment is displayed on top of the LoginActivity.java screen.
+ *
+ * @see LoginActivity
+ */
 public class UserTypeFragment extends DialogFragment {
 
     private Button riderButton;
@@ -43,7 +47,8 @@ public class UserTypeFragment extends DialogFragment {
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
 
-        View view = LayoutInflater.from(getActivity()).inflate(R.layout.user_type_fragment, null);
+        View view = LayoutInflater.from(getActivity()).inflate(R.layout.user_type_fragment,
+                null);
         riderButton = view.findViewById(R.id.rider_button);
         driverButton = view.findViewById(R.id.driver_button);
 
