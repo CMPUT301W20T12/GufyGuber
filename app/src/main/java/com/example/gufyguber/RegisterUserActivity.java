@@ -53,6 +53,7 @@ public class RegisterUserActivity extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
         final FirebaseFirestore db = FirebaseFirestore.getInstance();
         final CollectionReference users = db.collection("users");
+        final CollectionReference usernames = db.collection("usernames");
 
         Intent intent = getIntent();
         final String userType = intent.getStringExtra("userType");
@@ -82,6 +83,25 @@ public class RegisterUserActivity extends AppCompatActivity {
             public void onClick(View v) {
                 createAccount(email.getText().toString(), password.getText().toString());
                 signIn(email.getText().toString(), password.getText().toString());
+
+                HashMap<String, String> data = new HashMap<>();
+                data.put("email", email.getText().toString());
+
+
+                usernames.document(username.getText().toString())
+                        .set(data)
+                        .addOnSuccessListener(new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void aVoid) {
+                                Log.d(TAG, "Username addition successful");
+                            }
+                        })
+                        .addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                Log.d(TAG, "Username addition failed" + e.toString());
+                            }
+                        });
 
                 FirebaseUser user = mAuth.getCurrentUser();
 
