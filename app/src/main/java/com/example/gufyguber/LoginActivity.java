@@ -1,3 +1,16 @@
+/*
+ * LoginActivity.java
+ *
+ * Version 1
+ *
+ * Last edit: dalton, 24/02/20 3:12 PM
+ *
+ * Copyright (c) CMPUT301W20T12, 2020. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0).
+ *
+ */
+
 package com.example.gufyguber;
 
 import androidx.appcompat.app.AppCompatActivity;
