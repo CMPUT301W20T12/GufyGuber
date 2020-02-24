@@ -15,12 +15,17 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class RegisterUserActivity extends AppCompatActivity {
     private static final String TAG = "EmailPassword";
@@ -45,9 +50,11 @@ public class RegisterUserActivity extends AppCompatActivity {
 
         // Initialize Firebase Auth
         mAuth = FirebaseAuth.getInstance();
+        final FirebaseFirestore db = FirebaseFirestore.getInstance();
+        final CollectionReference users = db.collection("users");
 
         Intent intent = getIntent();
-        String userType = intent.getStringExtra("userType");
+        final String userType = intent.getStringExtra("userType");
         if (userType.equals("Rider")){
             setContentView(R.layout.register_rider);
         }
@@ -73,7 +80,32 @@ public class RegisterUserActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 createAccount(email.getText().toString(), password.getText().toString());
-                
+
+                HashMap<String, String> userData = new HashMap<>();
+
+                userData.put("username", username.getText().toString());
+                userData.put("email", email.getText().toString());
+                userData.put("first_name", firstName.getText().toString());
+                userData.put("last_name", lastName.getText().toString());
+                userData.put("phone", phone.getText().toString());
+                userData.put("userType", userType);
+
+                users
+                        .document(username.getText().toString())
+                        .set(userData)
+                        .addOnSuccessListener(new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void aVoid) {
+                                Log.d(TAG, "User addition successful");
+                            }
+                        })
+                        .addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                Log.d(TAG, "User addition failed" + e.toString());
+                            }
+                        });
+                finish();
             }
         });
     }
@@ -103,7 +135,7 @@ public class RegisterUserActivity extends AppCompatActivity {
     private boolean validateForm() {
         boolean valid = true;
 
-        ArrayList<String> fieldArray = new ArrayList<String>;
+        ArrayList<String> fieldArray = new ArrayList<String>();
 
         String usernameStr = username.getText().toString();
         fieldArray.add(usernameStr);
