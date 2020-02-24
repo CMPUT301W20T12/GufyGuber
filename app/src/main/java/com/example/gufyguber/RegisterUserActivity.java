@@ -21,6 +21,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -80,18 +81,21 @@ public class RegisterUserActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 createAccount(email.getText().toString(), password.getText().toString());
+                signIn(email.getText().toString(), password.getText().toString());
+
+                FirebaseUser user = mAuth.getCurrentUser();
+
 
                 HashMap<String, String> userData = new HashMap<>();
 
                 userData.put("username", username.getText().toString());
-                userData.put("email", email.getText().toString());
                 userData.put("first_name", firstName.getText().toString());
                 userData.put("last_name", lastName.getText().toString());
                 userData.put("phone", phone.getText().toString());
                 userData.put("userType", userType);
 
                 users
-                        .document(username.getText().toString())
+                        .document(email.getText().toString())
                         .set(userData)
                         .addOnSuccessListener(new OnSuccessListener<Void>() {
                             @Override
@@ -131,6 +135,32 @@ public class RegisterUserActivity extends AppCompatActivity {
                     }
                 });
     }
+
+    private void signIn(String email, String password) {
+        Log.d(TAG, "signIn:" + email);
+
+        // [START sign_in_with_email]
+        mAuth.signInWithEmailAndPassword(email, password)
+                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        if (task.isSuccessful()) {
+                            // Sign in success, update UI with the signed-in user's information
+                            Log.d(TAG, "signInWithEmail:success");
+                            FirebaseUser user = mAuth.getCurrentUser();
+                        } else {
+                            // If sign in fails, display a message to the user.
+                            Log.w(TAG, "signInWithEmail:failure", task.getException());
+                            Toast.makeText(RegisterUserActivity.this, "Authentication failed.",
+                                    Toast.LENGTH_SHORT).show();
+                        }
+
+                        // [END_EXCLUDE]
+                    }
+                });
+        // [END sign_in_with_email]
+    }
+
 
     private boolean validateForm() {
         boolean valid = true;
