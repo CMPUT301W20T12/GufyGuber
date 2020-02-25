@@ -38,6 +38,7 @@ import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.lang.ref.Reference;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -101,7 +102,7 @@ public class RegisterUserActivity extends AppCompatActivity {
         register.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                createAccount(email.getText().toString(), password.getText().toString(), userType, db);
+                createAccount(email.getText().toString().replace(" ", "").toLowerCase(), password.getText().toString(), userType, db);
 //                signIn(email.getText().toString(), password.getText().toString());
 //                finish();
             }
@@ -132,9 +133,9 @@ public class RegisterUserActivity extends AppCompatActivity {
                     }
                 });
         HashMap<String, String> data = new HashMap<>();
-        data.put("email", email.getText().toString());
+        data.put("email", emailStr);
 
-        usernames.document(username.getText().toString())
+        usernames.document(username.getText().toString().toLowerCase())
                 .set(data)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
@@ -157,7 +158,7 @@ public class RegisterUserActivity extends AppCompatActivity {
         userData.put("phone", phone.getText().toString());
         userData.put("userType", userType);
 
-        users.document(email.getText().toString())
+        users.document(emailStr)
                 .set(userData)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
@@ -230,6 +231,7 @@ public class RegisterUserActivity extends AppCompatActivity {
                 confirmPassword.setText("");
             }
         }
+        
 
         if (validCounter == 8) {
             /* if all 8 checks pass, the register form is valid */

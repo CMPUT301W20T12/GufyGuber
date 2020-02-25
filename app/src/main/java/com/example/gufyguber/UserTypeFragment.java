@@ -59,6 +59,7 @@ public class UserTypeFragment extends DialogFragment {
                 Intent intent  = new Intent(getActivity(), RegisterUserActivity.class);
                 intent.putExtra("userType", userType);
                 startActivity(intent);
+                dismiss();
             }
         });
 
@@ -69,6 +70,7 @@ public class UserTypeFragment extends DialogFragment {
                 Intent intent  = new Intent(getActivity(), RegisterUserActivity.class);
                 intent.putExtra("userType", userType);
                 startActivity(intent);
+                dismiss();
             }
         });
 
