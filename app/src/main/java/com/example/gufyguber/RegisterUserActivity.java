@@ -157,8 +157,7 @@ public class RegisterUserActivity extends AppCompatActivity {
         userData.put("phone", phone.getText().toString());
         userData.put("userType", userType);
 
-        users
-                .document(email.getText().toString())
+        users.document(email.getText().toString())
                 .set(userData)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
@@ -172,12 +171,12 @@ public class RegisterUserActivity extends AppCompatActivity {
                         Log.d(TAG, "User addition failed" + e.toString());
                     }
                 });
+        finish();
     }
 
     private void signIn(String email, String password) {
         Log.d(TAG, "signIn:" + email);
 
-        // [START sign_in_with_email]
         mAuth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
@@ -192,18 +191,16 @@ public class RegisterUserActivity extends AppCompatActivity {
                             Toast.makeText(RegisterUserActivity.this, "Authentication failed.",
                                     Toast.LENGTH_SHORT).show();
                         }
-
-                        // [END_EXCLUDE]
                     }
                 });
-        // [END sign_in_with_email]
     }
 
     private boolean validateForm() {
-        boolean valid = false;
-        int validCounter = 0;
+        boolean valid = false;          // return boolean
+        int validCounter = 0;           // counter to check all needs of form are satisfied
         HashMap<EditText, String> fields = new HashMap<>();
 
+        /* populate HashMap of fields with EditText and user inputted values */
         fields.put(username, username.getText().toString());
         fields.put(email, email.getText().toString());
         fields.put(firstName, firstName.getText().toString());
@@ -213,15 +210,29 @@ public class RegisterUserActivity extends AppCompatActivity {
         fields.put(confirmPassword, confirmPassword.getText().toString());
 
         for (Map.Entry field : fields.entrySet()) {
+            /* iterate over Map and check all fields are filled in*/
             if (TextUtils.isEmpty((String) field.getValue())) {
-                ((EditText) field.getKey()).setError("Required");
+                ((EditText) field.getKey()).setError("Required");   /* if not filled in, flag */
             } else {
                 ((EditText) field.getKey()).setError(null);
-                validCounter++;
+                validCounter++;                                     /* else, update counter */
             }
         }
 
         if (validCounter == 7) {
+            /* if counter is 7, all fields filled in; check if password confirmed */
+            if (fields.get(password).equals(fields.get(confirmPassword))) {
+                validCounter++;         /* if fields are the same, password is OK */
+            } else {                    /* otherwise, notify user */
+                password.setError("Passwords do not match.");
+                confirmPassword.setError("Passwords do not match.");
+                password.setText("");
+                confirmPassword.setText("");
+            }
+        }
+
+        if (validCounter == 8) {
+            /* if all 8 checks pass, the register form is valid */
             valid = true;
         }
 
