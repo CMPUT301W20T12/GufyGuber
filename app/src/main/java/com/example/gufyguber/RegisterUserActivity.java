@@ -38,8 +38,11 @@ import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 /**
  * App activity to allow the user to register a new account. Depending on what account type the user
@@ -69,8 +72,8 @@ public class RegisterUserActivity extends AppCompatActivity {
         // Initialize Firebase Auth
         mAuth = FirebaseAuth.getInstance();
         final FirebaseFirestore db = FirebaseFirestore.getInstance();
-        final CollectionReference users = db.collection("users");
-        final CollectionReference usernames = db.collection("usernames");
+//        final CollectionReference users = db.collection("users");
+//        final CollectionReference usernames = db.collection("usernames");
 
         Intent intent = getIntent();
         final String userType = intent.getStringExtra("userType");
@@ -98,66 +101,23 @@ public class RegisterUserActivity extends AppCompatActivity {
         register.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                createAccount(email.getText().toString(), password.getText().toString());
-                signIn(email.getText().toString(), password.getText().toString());
-
-                HashMap<String, String> data = new HashMap<>();
-                data.put("email", email.getText().toString());
-
-
-                usernames.document(username.getText().toString())
-                        .set(data)
-                        .addOnSuccessListener(new OnSuccessListener<Void>() {
-                            @Override
-                            public void onSuccess(Void aVoid) {
-                                Log.d(TAG, "Username addition successful");
-                            }
-                        })
-                        .addOnFailureListener(new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull Exception e) {
-                                Log.d(TAG, "Username addition failed" + e.toString());
-                            }
-                        });
-
-                FirebaseUser user = mAuth.getCurrentUser();
-
-
-                HashMap<String, String> userData = new HashMap<>();
-
-                userData.put("username", username.getText().toString());
-                userData.put("first_name", firstName.getText().toString());
-                userData.put("last_name", lastName.getText().toString());
-                userData.put("phone", phone.getText().toString());
-                userData.put("userType", userType);
-
-                users
-                        .document(email.getText().toString())
-                        .set(userData)
-                        .addOnSuccessListener(new OnSuccessListener<Void>() {
-                            @Override
-                            public void onSuccess(Void aVoid) {
-                                Log.d(TAG, "User addition successful");
-                            }
-                        })
-                        .addOnFailureListener(new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull Exception e) {
-                                Log.d(TAG, "User addition failed" + e.toString());
-                            }
-                        });
-                finish();
+                createAccount(email.getText().toString(), password.getText().toString(), userType, db);
+//                signIn(email.getText().toString(), password.getText().toString());
+//                finish();
             }
         });
     }
 
-    private void createAccount(String email, String password) {
-        Log.d(TAG, "createAccount:" + email);
+    private void createAccount(String emailStr, String passwordStr, String userType, FirebaseFirestore db) {
+        final CollectionReference users = db.collection("users");
+        final CollectionReference usernames = db.collection("usernames");
+
+        Log.d(TAG, "createAccount:" + emailStr);
         if (!validateForm()) {
             return;
         }
 
-        mAuth.createUserWithEmailAndPassword(email, password)
+        mAuth.createUserWithEmailAndPassword(emailStr, passwordStr)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
@@ -169,6 +129,47 @@ public class RegisterUserActivity extends AppCompatActivity {
                             Toast.makeText(RegisterUserActivity.this, "Authentication failed.",
                                     Toast.LENGTH_SHORT).show();
                         }
+                    }
+                });
+        HashMap<String, String> data = new HashMap<>();
+        data.put("email", email.getText().toString());
+
+        usernames.document(username.getText().toString())
+                .set(data)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Log.d(TAG, "Username addition successful");
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.d(TAG, "Username addition failed" + e.toString());
+                    }
+                });
+
+        HashMap<String, String> userData = new HashMap<>();
+
+        userData.put("username", username.getText().toString());
+        userData.put("first_name", firstName.getText().toString());
+        userData.put("last_name", lastName.getText().toString());
+        userData.put("phone", phone.getText().toString());
+        userData.put("userType", userType);
+
+        users
+                .document(email.getText().toString())
+                .set(userData)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Log.d(TAG, "User addition successful");
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.d(TAG, "User addition failed" + e.toString());
                     }
                 });
     }
@@ -198,48 +199,32 @@ public class RegisterUserActivity extends AppCompatActivity {
         // [END sign_in_with_email]
     }
 
-
     private boolean validateForm() {
-        boolean valid = true;
+        boolean valid = false;
+        int validCounter = 0;
+        HashMap<EditText, String> fields = new HashMap<>();
 
-        ArrayList<String> fieldArray = new ArrayList<String>();
+        fields.put(username, username.getText().toString());
+        fields.put(email, email.getText().toString());
+        fields.put(firstName, firstName.getText().toString());
+        fields.put(lastName, lastName.getText().toString());
+        fields.put(phone, phone.getText().toString());
+        fields.put(password, password.getText().toString());
+        fields.put(confirmPassword, confirmPassword.getText().toString());
 
-        String usernameStr = username.getText().toString();
-        fieldArray.add(usernameStr);
-        String emailStr = email.getText().toString();
-        fieldArray.add(emailStr);
-        String firstNameStr = firstName.getText().toString();
-        fieldArray.add(firstNameStr);
-        String lastNameStr = lastName.getText().toString();
-        fieldArray.add(lastNameStr);
-        String phoneStr = phone.getText().toString();
-        fieldArray.add(phoneStr);
-        String passwordStr = password.getText().toString();
-        fieldArray.add(passwordStr);
-        String confirmPasswordStr = confirmPassword.getText().toString();
-        fieldArray.add(confirmPasswordStr);
-
-//        for (String field : fieldArray) {
-//            if (TextUtils.isEmpty(field)) {
-//
-//            }
-//        }
-
-        if (TextUtils.isEmpty(emailStr)) {
-            email.setError("Required.");
-            valid = false;
-        } else {
-            email.setError(null);
+        for (Map.Entry field : fields.entrySet()) {
+            if (TextUtils.isEmpty((String) field.getValue())) {
+                ((EditText) field.getKey()).setError("Required");
+            } else {
+                ((EditText) field.getKey()).setError(null);
+                validCounter++;
+            }
         }
 
-        if (TextUtils.isEmpty(passwordStr)) {
-            password.setError("Required.");
-            valid = false;
-        } else {
-            password.setError(null);
+        if (validCounter == 7) {
+            valid = true;
         }
 
         return valid;
     }
-
 }
