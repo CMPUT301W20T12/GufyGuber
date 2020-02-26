@@ -23,7 +23,6 @@
 
 package com.example.gufyguber;
 
-import java.time.Duration;
 import java.util.Date;
 
 /**
@@ -50,7 +49,4 @@ public class TimeInfo {
     }
 
     //TODO: Should estimate time to travel between two coordinates
-    public static Duration estimateRideDuration() {
-
-    }
 }
