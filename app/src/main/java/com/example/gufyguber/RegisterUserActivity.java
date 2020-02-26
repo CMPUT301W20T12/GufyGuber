@@ -60,18 +60,19 @@ import java.util.Map;
  */
 public class RegisterUserActivity extends AppCompatActivity {
     private static final String TAG = "EmailPassword";
-    EditText username;
-    EditText email;
-    EditText firstName;
-    EditText lastName;
-    EditText phone;
-    EditText password;
-    EditText confirmPassword;
-    EditText make;
-    EditText model;
-    EditText plateNumber;
-    EditText seatNumber;
-    Button register;
+    private EditText username;
+    private EditText email;
+    private EditText firstName;
+    private EditText lastName;
+    private EditText phoneNumber;
+    private EditText password;
+    private EditText confirmPassword;
+    private EditText make;
+    private EditText model;
+    private EditText plateNumber;
+    private EditText seatNumber;
+    private Button register;
+    private User newUser;
 
     private FirebaseAuth mAuth;
 
@@ -103,7 +104,7 @@ public class RegisterUserActivity extends AppCompatActivity {
         email = findViewById(R.id.email);
         firstName = findViewById(R.id.first_name);
         lastName = findViewById(R.id.last_name);
-        phone = findViewById(R.id.phone);
+        phoneNumber = findViewById(R.id.phone);
         password = findViewById(R.id.password);
         confirmPassword = findViewById(R.id.confirm_password);
         register = findViewById(R.id.register);
@@ -111,23 +112,35 @@ public class RegisterUserActivity extends AppCompatActivity {
         register.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                createAccount(email.getText().toString().replace(" ", "").toLowerCase(), password.getText().toString(), userType, db);
-//                signIn(email.getText().toString(), password.getText().toString());
-//                finish();
+                if(validateForm()) {
+                    if(userType.equals("Rider")) {
+                        newUser = new Rider(username.getText().toString().toLowerCase(),
+                                email.getText().toString().toLowerCase(),
+                                firstName.getText().toString().toLowerCase(),
+                                lastName.getText().toString().toLowerCase(),
+                                phoneNumber.getText().toString());
+                    }else{
+                        newUser = new Driver(username.getText().toString().toLowerCase(),
+                                email.getText().toString().toLowerCase(),
+                                firstName.getText().toString().toLowerCase(),
+                                lastName.getText().toString().toLowerCase(),
+                                phoneNumber.getText().toString());
+                    }
+                    createAccount(newUser, password.getText().toString(), userType, db);
+
+                }
+
             }
         });
     }
 
-    private void createAccount(String emailStr, String passwordStr, String userType, FirebaseFirestore db) {
+    private void createAccount(User newUser, String passwordString, String userType, FirebaseFirestore db) {
         final CollectionReference users = db.collection("users");
         final CollectionReference usernames = db.collection("usernames");
 
-        Log.d(TAG, "createAccount:" + emailStr);
-        if (!validateForm()) {
-            return;
-        }
+        Log.d(TAG, "createAccount:" + newUser.getEmail());
 
-        mAuth.createUserWithEmailAndPassword(emailStr, passwordStr)
+        mAuth.createUserWithEmailAndPassword(newUser.getEmail(), passwordString)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
@@ -141,10 +154,11 @@ public class RegisterUserActivity extends AppCompatActivity {
                         }
                     }
                 });
-        HashMap<String, String> data = new HashMap<>();
-        data.put("email", emailStr);
 
-        usernames.document(username.getText().toString().toLowerCase())
+        HashMap<String, String> data = new HashMap<>();
+        data.put("email", newUser.getEmail());
+
+       /* usernames.document(newUser.getUsername())
                 .set(data)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
@@ -157,17 +171,17 @@ public class RegisterUserActivity extends AppCompatActivity {
                     public void onFailure(@NonNull Exception e) {
                         Log.d(TAG, "Username addition failed" + e.toString());
                     }
-                });
+                }); */
 
         HashMap<String, String> userData = new HashMap<>();
 
-        userData.put("username", username.getText().toString());
-        userData.put("first_name", firstName.getText().toString());
-        userData.put("last_name", lastName.getText().toString());
-        userData.put("phone", phone.getText().toString());
+        userData.put("username", newUser.getUsername());
+        userData.put("first_name", newUser.getFirstName());
+        userData.put("last_name", newUser.getLastName());
+        userData.put("phone", newUser.getPhoneNumber());
         userData.put("userType", userType);
 
-        users.document(emailStr)
+        users.document(newUser.getEmail())
                 .set(userData)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
@@ -184,27 +198,6 @@ public class RegisterUserActivity extends AppCompatActivity {
         finish();
     }
 
-    private void signIn(String email, String password) {
-        Log.d(TAG, "signIn:" + email);
-
-        mAuth.signInWithEmailAndPassword(email, password)
-                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if (task.isSuccessful()) {
-                            // Sign in success, update UI with the signed-in user's information
-                            Log.d(TAG, "signInWithEmail:success");
-                            FirebaseUser user = mAuth.getCurrentUser();
-                        } else {
-                            // If sign in fails, display a message to the user.
-                            Log.w(TAG, "signInWithEmail:failure", task.getException());
-                            Toast.makeText(RegisterUserActivity.this, "Authentication failed.",
-                                    Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                });
-    }
-
     private boolean validateForm() {
         boolean valid = false;          // return boolean
         int validCounter = 0;           // counter to check all needs of form are satisfied
@@ -215,7 +208,7 @@ public class RegisterUserActivity extends AppCompatActivity {
         fields.put(email, email.getText().toString());
         fields.put(firstName, firstName.getText().toString());
         fields.put(lastName, lastName.getText().toString());
-        fields.put(phone, phone.getText().toString());
+        fields.put(phoneNumber, phoneNumber.getText().toString());
         fields.put(password, password.getText().toString());
         fields.put(confirmPassword, confirmPassword.getText().toString());
 
