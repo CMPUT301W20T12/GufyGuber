@@ -14,6 +14,13 @@
  *    limitations under the License.
  */
 
+// Name: Robert MacGillivray
+// File: RideRequestTests.java
+// Date: Feb.25.2020
+// Purpose: To unit-test the RideRequest class
+
+// Last Updated: Feb.25.2020 by Robert MacGillivray
+
 package com.example.gufyguber;
 
 import org.junit.Before;
