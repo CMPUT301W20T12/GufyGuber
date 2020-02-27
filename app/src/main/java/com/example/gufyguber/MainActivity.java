@@ -14,5 +14,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        new CurrentRideFragment().show(getSupportFragmentManager(), "fragment");
     }
 }
