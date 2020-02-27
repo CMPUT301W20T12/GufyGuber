@@ -34,7 +34,6 @@ public class CurrentRideFragment extends DialogFragment {
 
         return builder
                 .setView(view)
-                .setTitle("Current Ride: STATUS")
                 .setNegativeButton("Back", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {

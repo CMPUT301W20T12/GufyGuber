@@ -27,7 +27,6 @@ public class CancelRequestFragment extends DialogFragment {
 
         return builder
                 .setView(view)
-                .setTitle("Cancel Request")
                 .setNegativeButton("No", null)
                 .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                     @Override
