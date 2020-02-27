@@ -9,4 +9,5 @@
     <string name="user_type_fragment_title">CREATE USER</string>
     <string name="rider_tag">Rider</string>
     <string name="driver_tag">Driver</string>
+    <string name="title_activity_maps">Map</string>
 </resources>
