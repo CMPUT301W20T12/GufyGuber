@@ -6,13 +6,25 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <TextView
+
+    <Button
+        android:id="@+id/press"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Hello World!"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:text="Press to scan"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:layout_editor_absoluteY="311dp" />
+
+    <TextView
+        android:id="@+id/result"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/scan"
+        android:layout_marginTop="5dp"
+        android:layout_centerHorizontal="true"
+        android:textSize="25sp"
+        android:padding="5dp"
+        android:gravity="center_horizontal"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
