@@ -23,6 +23,8 @@
 
 package com.example.gufyguber;
 
+import com.google.type.LatLng;
+
 import org.junit.Before;
 import org.junit.Test;
 
@@ -34,7 +36,9 @@ public class RideRequestTests {
 
     @Before
     public void testInit() {
-        testRideRequest = new RideRequest(13.13f);
+        LatLng testPickup = LatLng.newBuilder().setLatitude(13).setLongitude(13).build();
+        LatLng testDropoff = LatLng.newBuilder().setLatitude(31).setLongitude(31).build();
+        testRideRequest = new RideRequest("123456789", 13.13f, testPickup, testDropoff);
     }
 
     @Test
