@@ -8,12 +8,20 @@ import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.Button;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 
+/**
+ * This class creates a fragment that displays a message confirming the cancellation of a ride request.
+ */
+
 public class CancelFragment extends DialogFragment {
+
+    private Button okBtn;
+
     @Override
     public void onAttach(Context context){
         super.onAttach(context);
@@ -23,12 +31,21 @@ public class CancelFragment extends DialogFragment {
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
         final View view = LayoutInflater.from(getActivity()).inflate(R.layout.cancelled_rider, null);
+
+        okBtn = view.findViewById(R.id.cancelled_rider_button);
+
+        okBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        });
+
         final AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-        builder.setView(view);
+
 
         return builder
                 .setView(view)
-                .setPositiveButton("OK", null)
                 .create();
 
     }

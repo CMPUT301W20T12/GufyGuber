@@ -19,9 +19,33 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Are you sure you want to cancel?"
-        android:layout_marginTop="20dp"
+        android:layout_margin="20dp"
         android:textColor="#000"
         android:textStyle="normal"
         android:gravity="center"/>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp">
+
+        <Button
+            android:id="@+id/cancel_rider_no_btn"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="No"
+            android:background="@color/colorPrimaryDark"
+            android:layout_marginRight="5dp"/>
+
+        <Button
+            android:id="@+id/cancel_ride_yes_btn"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Yes"
+            android:background="@color/colorPrimaryDark"/>
+    </LinearLayout>
 
 </LinearLayout>
