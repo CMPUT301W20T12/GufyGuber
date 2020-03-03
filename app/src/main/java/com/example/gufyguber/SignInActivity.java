@@ -46,8 +46,8 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
 
 /**
- * Activity to demonstrate basic retrieval of the Google user's ID, email address, and basic
- * profile.
+ * Activity to demonstrate basic retrieval of the Google user's ID, email
+ * address, and basic profile.
  */
 public class SignInActivity extends AppCompatActivity implements
         View.OnClickListener {
@@ -74,8 +74,9 @@ public class SignInActivity extends AppCompatActivity implements
         findViewById(R.id.sign_in_button).setOnClickListener(this);
         findViewById(R.id.sign_out_button).setOnClickListener(this);
 
-        // Configure Google sign-in to request the user's ID, email address, and basic
-        // profile. ID and basic profile are included in DEFAULT_SIGN_IN.
+        // Configure Google sign-in to request the user's ID, email address,
+        // and basic profile. ID and basic profile are included in
+        // DEFAULT_SIGN_IN.
         GoogleSignInOptions gso = new
                 GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(getString(R.string.default_web_client_id))
@@ -87,7 +88,7 @@ public class SignInActivity extends AppCompatActivity implements
 
         // Set the dimensions of the sign-in button.
         SignInButton signInButton = findViewById(R.id.sign_in_button);
-        signInButton.setSize(SignInButton.SIZE_STANDARD);
+        signInButton.setSize(SignInButton.SIZE_WIDE);
         signInButton.setColorScheme(SignInButton.COLOR_LIGHT);
 
         // Initialize firebase authorization
@@ -97,8 +98,8 @@ public class SignInActivity extends AppCompatActivity implements
     @Override
     public void onStart() {
         super.onStart();
-        // Check for existing Google Sign In account, if the user is already signed in
-        // the GoogleSignInAccount will be non-null.
+        // Check for existing Google Sign In account, if the user is already
+        // signed in the GoogleSignInAccount will be non-null.
         FirebaseUser currentUser = mFirebaseAuth.getCurrentUser();
         updateUI(currentUser);
     }
@@ -107,10 +108,13 @@ public class SignInActivity extends AppCompatActivity implements
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        // Result returned from launching the Intent from GoogleSignInClient.getSignInIntent(...);
+        // Result returned from launching the Intent from
+        // GoogleSignInClient.getSignInIntent(...);
         if (requestCode == RC_SIGN_IN) {
-            // The Task returned from this call is always completed, no need to attach a listener.
-            Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
+            // The Task returned from this call is always completed, no need to
+            // attach a listener.
+            Task<GoogleSignInAccount> task =
+                    GoogleSignIn.getSignedInAccountFromIntent(data);
             try {
                 GoogleSignInAccount account = task.getResult(ApiException.class);
                 firebaseAuthWithGoogle(account);
@@ -124,7 +128,8 @@ public class SignInActivity extends AppCompatActivity implements
     private void firebaseAuthWithGoogle(GoogleSignInAccount account) {
         Log.d(TAG, "firebaseAuthWithGoogle:" + account.getId());
 
-        AuthCredential credential = GoogleAuthProvider.getCredential(account.getIdToken(), null);
+        AuthCredential credential = GoogleAuthProvider.getCredential(
+                account.getIdToken(), null);
         mFirebaseAuth.signInWithCredential(credential)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
@@ -135,7 +140,9 @@ public class SignInActivity extends AppCompatActivity implements
                             updateUI(user);
                         } else {
                             Log.w(TAG, "signInWithCredential: failure");
-                            Snackbar.make(findViewById(R.id.main_layout), "Authentication Failed.", Snackbar.LENGTH_SHORT).show();
+                            Snackbar.make(findViewById(R.id.main_layout),
+                                    "Authentication Failed.",
+                                    Snackbar.LENGTH_SHORT).show();
                             updateUI(null);
                         }
                     }
@@ -150,7 +157,8 @@ public class SignInActivity extends AppCompatActivity implements
     private void signOut() {
         mFirebaseAuth.signOut();
         mGoogleSignInClient.signOut()
-                .addOnCompleteListener(this, new OnCompleteListener<Void>() {
+                .addOnCompleteListener(this,
+                        new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
                         updateUI(null);
@@ -160,10 +168,12 @@ public class SignInActivity extends AppCompatActivity implements
 
     private void updateUI(FirebaseUser user) {
        if (user != null) {
-            mStatusTextView.setText(getString(R.string.signed_in_fmt, user.getDisplayName()));
+            mStatusTextView.setText(getString(R.string.signed_in_fmt,
+                    user.getDisplayName()));
 
             findViewById(R.id.sign_in_button).setVisibility(View.GONE);
-            findViewById(R.id.sign_out_and_disconnect).setVisibility(View.VISIBLE);
+            findViewById(R.id.sign_out_and_disconnect).setVisibility(
+                    View.VISIBLE);
         } else {
             mStatusTextView.setText(R.string.signed_out);
 

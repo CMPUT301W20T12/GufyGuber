@@ -15,8 +15,4 @@
     <string name="signed_in">Signed in</string>
     <string name="signing_in">Signing in…</string>
     <string name="sign_out">Sign Out</string>
-    <string name="disconnect">Disconnect</string>
-    <string name="refresh_token">Get Fresh Token</string>
-
-
 </resources>

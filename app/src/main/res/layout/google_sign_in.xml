@@ -82,8 +82,8 @@
 
         <LinearLayout
             android:id="@+id/sign_out_and_disconnect"
-            android:layout_width="172dp"
-            android:layout_height="63dp"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
             android:layout_centerInParent="true"
             android:orientation="horizontal"
             android:paddingLeft="16dp"
@@ -98,6 +98,7 @@
                 android:layout_weight="1"
                 android:text="@string/sign_out"
                 android:theme="@style/ThemeOverlay.LightButton" />
+
 
         </LinearLayout>
 
