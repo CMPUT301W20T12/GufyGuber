@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">GufyGuber</string>
+    <string name="fare_edittext_hint">Proposed Fare</string>
+    <string name="fair_fair_default_hint">Fair Fare(TM): $13</string>
 </resources>
