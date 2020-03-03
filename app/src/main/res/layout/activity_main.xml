@@ -9,18 +9,17 @@
 
     <Button
         android:id="@+id/press"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Press to scan"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        tools:layout_editor_absoluteY="311dp" />
+        android:text="SCAN"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"/>
 
     <TextView
         android:id="@+id/result"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/scan"
+        android:layout_below="@+id/press"
         android:layout_marginTop="5dp"
         android:layout_centerHorizontal="true"
         android:textSize="25sp"

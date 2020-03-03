@@ -20,7 +20,6 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.util.SparseArray;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -35,6 +34,7 @@ import com.google.android.gms.vision.barcode.Barcode;
 import com.google.android.gms.vision.barcode.BarcodeDetector;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 public class Scan extends AppCompatActivity {
     SurfaceView cameraView;
@@ -54,6 +54,7 @@ public class Scan extends AppCompatActivity {
         barcode = new BarcodeDetector.Builder(this)
                 .setBarcodeFormats(Barcode.QR_CODE)
                 .build();
+
         if(!barcode.isOperational()) {
             Toast.makeText(getApplicationContext(), "Error", Toast.LENGTH_LONG).show();
             this.finish();
@@ -97,9 +98,14 @@ public class Scan extends AppCompatActivity {
             @Override
             public void receiveDetections(Detector.Detections<Barcode> detections) {
                 final SparseArray<Barcode> barcodes = detections.getDetectedItems();
+                ArrayList<String> barcodeResult = new ArrayList<>();
+
                 if(barcodes.size() > 0) {
                     Intent intent = new Intent();
-                    intent.putExtra("barcode", barcodes.valueAt(0));
+                    for (int word = 0; word < barcodes.size(); word++) {
+                        barcodeResult.add(barcodes.valueAt(word).rawValue);
+                    }
+                    intent.putExtra("barcode", barcodeResult);
                     setResult(RESULT_OK, intent);
                     finish();
                 }

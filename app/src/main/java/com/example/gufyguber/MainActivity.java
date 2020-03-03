@@ -15,8 +15,6 @@ import android.widget.TextView;
 import com.google.android.gms.vision.barcode.Barcode;
 import com.google.firebase.firestore.FirebaseFirestore;
 
-import javax.annotation.Nullable;
-
 public class MainActivity extends AppCompatActivity {
     Button scan;
     TextView result;
@@ -31,23 +29,25 @@ public class MainActivity extends AppCompatActivity {
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 
-        scan = findViewById(R.id.scan);
+        scan = findViewById(R.id.press);
         result = findViewById(R.id.result);
 
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, PERMISSION_REQUEST);
+        if(ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String [] {Manifest.permission.CAMERA}, PERMISSION_REQUEST);
         }
         scan.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent (MainActivity.this, Scan.class);
+                Intent intent = new Intent(MainActivity.this, Scan.class);
                 startActivityForResult(intent, REQUEST_CODE);
             }
         });
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
         if(requestCode == REQUEST_CODE && resultCode == RESULT_OK) {
             if(data != null) {
                 final Barcode barcode = data.getParcelableExtra("barcode");
