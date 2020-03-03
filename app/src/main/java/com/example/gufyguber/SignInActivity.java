@@ -15,7 +15,7 @@
  *
  * SignInActivity.java
  *
- * Last edit: dalton, 02/03/20 4:28 PM
+ * Last edit: dalton, 02/03/20 8:50 PM
  *
  * Version
  */
@@ -109,8 +109,7 @@ public class SignInActivity extends AppCompatActivity implements
 
         // Result returned from launching the Intent from GoogleSignInClient.getSignInIntent(...);
         if (requestCode == RC_SIGN_IN) {
-            // The Task returned from this call is always completed, no need to attach
-            // a listener.
+            // The Task returned from this call is always completed, no need to attach a listener.
             Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
             try {
                 GoogleSignInAccount account = task.getResult(ApiException.class);
