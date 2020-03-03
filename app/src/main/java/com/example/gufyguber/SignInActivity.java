@@ -15,7 +15,7 @@
  *
  * SignInActivity.java
  *
- * Last edit: dalton, 02/03/20 8:50 PM
+ * Last edit: dalton, 02/03/20 11:12 PM
  *
  * Version
  */
@@ -28,6 +28,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
@@ -49,8 +50,7 @@ import com.google.firebase.auth.GoogleAuthProvider;
  * Activity to demonstrate basic retrieval of the Google user's ID, email
  * address, and basic profile.
  */
-public class SignInActivity extends AppCompatActivity implements
-        View.OnClickListener {
+public class SignInActivity extends AppCompatActivity {
 
     // Activity tag and request code
     private static final String TAG = "SignInActivity";
@@ -61,6 +61,8 @@ public class SignInActivity extends AppCompatActivity implements
 
     private GoogleSignInClient mGoogleSignInClient;
     private TextView mStatusTextView;
+    private SignInButton signInButton;
+    private Button signOutButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,8 +73,22 @@ public class SignInActivity extends AppCompatActivity implements
         mStatusTextView = findViewById(R.id.status);
 
         // Button listeners
-        findViewById(R.id.sign_in_button).setOnClickListener(this);
-        findViewById(R.id.sign_out_button).setOnClickListener(this);
+        signInButton = findViewById(R.id.sign_in_button);
+        signInButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                signIn();
+            }
+        });
+
+        signOutButton = findViewById(R.id.sign_out_button);
+        signOutButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                signOut();
+            }
+        });
+
 
         // Configure Google sign-in to request the user's ID, email address,
         // and basic profile. ID and basic profile are included in
@@ -159,15 +175,15 @@ public class SignInActivity extends AppCompatActivity implements
         mGoogleSignInClient.signOut()
                 .addOnCompleteListener(this,
                         new OnCompleteListener<Void>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Void> task) {
-                        updateUI(null);
-                    }
-                });
+                            @Override
+                            public void onComplete(@NonNull Task<Void> task) {
+                                updateUI(null);
+                            }
+                        });
     }
 
     private void updateUI(FirebaseUser user) {
-       if (user != null) {
+        if (user != null) {
             mStatusTextView.setText(getString(R.string.signed_in_fmt,
                     user.getDisplayName()));
 
@@ -179,18 +195,6 @@ public class SignInActivity extends AppCompatActivity implements
 
             findViewById(R.id.sign_in_button).setVisibility(View.VISIBLE);
             findViewById(R.id.sign_out_and_disconnect).setVisibility(View.GONE);
-        }
-    }
-
-    @Override
-    public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.sign_in_button:
-                signIn();
-                break;
-            case R.id.sign_out_button:
-                signOut();
-                break;
         }
     }
 }
