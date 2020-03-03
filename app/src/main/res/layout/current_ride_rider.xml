@@ -28,6 +28,7 @@
             android:text="Destination:"/>
 
         <TextView
+            android:id="@+id/user_destination"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -49,6 +50,7 @@
             android:text="Pick Up Time:"/>
 
         <TextView
+            android:id="@+id/user_pickup_time"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -70,6 +72,7 @@
             android:text="Arrival Time:"/>
 
         <TextView
+            android:id="@+id/user_arrival_time"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -91,6 +94,7 @@
             android:text="Pick Up Location:"/>
 
         <TextView
+            android:id="@+id/user_pickup_location"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -112,6 +116,7 @@
             android:text="Drop Off Location:"/>
 
         <TextView
+            android:id="@+id/user_dropoff_location"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"

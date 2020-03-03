@@ -3,13 +3,9 @@ package com.example.gufyguber;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
 import android.os.Bundle;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -22,6 +18,12 @@ import androidx.fragment.app.DialogFragment;
  */
 
 public class CurrentRideFragment extends DialogFragment {
+
+    private TextView userDestination;
+    private TextView userPickupTime;
+    private TextView userArrivalTime;
+    private TextView userPickupLocation;
+    private TextView userDropoffLocation;
 
     private Button backBtn;
     private Button cancelBtn;
@@ -37,13 +39,19 @@ public class CurrentRideFragment extends DialogFragment {
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
         View view = LayoutInflater.from(getActivity()).inflate(R.layout.current_ride_rider, null);
 
+        userDestination = view.findViewById(R.id.user_destination);
+        userPickupTime = view.findViewById(R.id.user_pickup_time);
+        userArrivalTime = view.findViewById(R.id.user_arrival_time);
+        userPickupLocation = view.findViewById(R.id.user_pickup_location);
+        userDropoffLocation = view.findViewById(R.id.user_dropoff_location);
         backBtn = view.findViewById(R.id.back_btn);
         cancelBtn = view.findViewById(R.id.cancel_btn);
+
 
         backBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                new DriverInfo().show(getFragmentManager(), "driver_info_fragment");
+                new DriverInfoFragment().show(getFragmentManager(), "driver_info_fragment");
             }
         });
 
