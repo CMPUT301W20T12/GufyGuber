@@ -33,6 +33,8 @@ public class Driver extends User{
     //TODO: reference to a Vehicle
     //TODO: reference to a Rating
 
+    private Vehicle vehicle;
+
     /**
      * This is the constructor method that sets the drivers attributes by calling the superclass
      * constructor method

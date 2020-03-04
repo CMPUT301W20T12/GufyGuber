@@ -107,10 +107,13 @@ public class RegisterUserActivity extends AppCompatActivity {
                                 lastName.getText().toString().toLowerCase(),
                                 phoneNumber.getText().toString());
                     }else{
-                        newUser = new Driver(email.getText().toString().toLowerCase(),
-                                firstName.getText().toString().toLowerCase(),
-                                lastName.getText().toString().toLowerCase(),
-                                phoneNumber.getText().toString());
+                        if(validateVehicleInfo()) {
+                            newUser = new Driver(email.getText().toString().toLowerCase(),
+                                    firstName.getText().toString().toLowerCase(),
+                                    lastName.getText().toString().toLowerCase(),
+                                    phoneNumber.getText().toString());
+
+                        }
                     }
                     createAccount(newUser, userType, db);
                 }
@@ -175,5 +178,32 @@ public class RegisterUserActivity extends AppCompatActivity {
         }
 
         return valid;
+    }
+
+    private boolean validateVehicleInfo() {
+        boolean valid = false;
+        int validCounter = 0;
+
+        HashMap<EditText, String> fields = new HashMap<>();
+
+        /* populate HashMap of fields with EditText and user inputted values */
+        fields.put(make, make.getText().toString());
+        fields.put(model, model.getText().toString());
+        fields.put(plateNumber, plateNumber.getText().toString());
+        fields.put(seatNumber, seatNumber.getText().toString());
+
+        for (Map.Entry field : fields.entrySet()) {
+            if (TextUtils.isEmpty((String) field.getValue())) {
+                ((EditText) field.getKey()).setError("Required");
+            } else {
+                ((EditText) field.getKey()).setError(null);
+                validCounter++;
+            }
+        }
+        if (validCounter == 4) {
+            valid = true;
+        }
+        return valid;
+
     }
 }

@@ -87,7 +87,12 @@ public class UserTypeFragment extends DialogFragment {
             public void onClick(View v){
                 userType = "Driver";
                 Intent intent  = new Intent(getActivity(), RegisterUserActivity.class);
-                intent.putExtra("userType", userType);
+                Bundle bundle = new Bundle();
+                bundle.putString("userType", userType);
+                bundle.putString("email", email);
+                bundle.putString("firstName", firstName);
+                bundle.putString("lastName", lastName);
+                intent.putExtras(bundle);
                 startActivity(intent);
                 dismiss();
             }

@@ -13,6 +13,10 @@
     <string name="phone_number">Phone number</string>
     <string name="register_message">Almost there! We just need to confirm the last details of your user profile.
         You can change these at any time.</string>
+    <string name="make">Make</string>
+    <string name="model">Model</string>
+    <string name="seat_number">Number of seats</string>
+    <string name="plate_number">License Plate</string>
     <string name="signed_out">Signed out</string>
     <string name="signed_in_fmt">Signed in as: %s</string>
     <string name="signed_in">Signed in</string>
