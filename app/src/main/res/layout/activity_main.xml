@@ -9,13 +9,7 @@
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Generate Code"
-        android:id="@+id/generate"/>
-
-    <ImageView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:layout_constraintTop_toBottomOf="@+id/generate"
-        android:id="@+id/qrCode"/>
+        android:text="Rider Arrived Fragment"
+        android:id="@+id/arrived" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

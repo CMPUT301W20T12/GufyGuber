@@ -16,11 +16,7 @@ import com.google.zxing.common.BitMatrix;
 import com.journeyapps.barcodescanner.BarcodeEncoder;
 
 public class MainActivity extends AppCompatActivity {
-    Button generate;
-    BitMatrix matrix;
-    Bitmap map;
-    String codeMessage;
-    ImageView qrCode;
+    Button startAct;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,23 +25,13 @@ public class MainActivity extends AppCompatActivity {
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 
-        generate = findViewById(R.id.generate);
-        qrCode = findViewById(R.id.qrCode);
+        setContentView(R.layout.activity_main);
+        startAct = findViewById(R.id.arrived);
 
-        generate.setOnClickListener(new View.OnClickListener() {
+        startAct.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                codeMessage = "Trial!!!";
-                MultiFormatWriter multi = new MultiFormatWriter();
-                try {
-                    matrix = multi.encode(codeMessage, BarcodeFormat.QR_CODE, 200, 200);
-                    BarcodeEncoder barcodeEncoder = new BarcodeEncoder();
-                    map = barcodeEncoder.createBitmap(matrix);
-                    qrCode.setImageBitmap(map);
-
-                } catch (WriterException e) {
-                    e.printStackTrace();
-                }
+                new GenerateQrFragment().show(getSupportFragmentManager(), "FragQR");
             }
         });
     }
