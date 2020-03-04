@@ -15,6 +15,7 @@ package com.example.gufyguber;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -51,6 +52,8 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 //
+                Intent openMap = new Intent(LoginActivity.this,MapsActivity.class);
+                startActivity(openMap);
             }
         });
 
