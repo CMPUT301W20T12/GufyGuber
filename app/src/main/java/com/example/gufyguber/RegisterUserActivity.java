@@ -178,7 +178,7 @@ public class RegisterUserActivity extends AppCompatActivity {
             }
         }
         if (validCounter == 3) {
-            /* if all 8 checks pass, the register form is valid */
+            /* if all 3 checks pass, the register form is valid */
             valid = true;
         }
 

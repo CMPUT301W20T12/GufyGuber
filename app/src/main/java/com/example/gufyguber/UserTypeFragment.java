@@ -55,6 +55,8 @@ public class UserTypeFragment extends DialogFragment {
     @NonNull
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
+
+        // Get user details from bundle
         Bundle bundle = getArguments();
         final String email = bundle.getString("email");
         final String firstName = bundle.getString("firstName");
@@ -71,6 +73,7 @@ public class UserTypeFragment extends DialogFragment {
             public void onClick(View v){
                 userType = "Rider";
                 Intent intent  = new Intent(getActivity(), RegisterUserActivity.class);
+                // pass account info into fragment to auto-pop some details in registration form
                 Bundle bundle = new Bundle();
                 bundle.putString("userType", userType);
                 bundle.putString("email", email);

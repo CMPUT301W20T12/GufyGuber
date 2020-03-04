@@ -53,14 +53,22 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
 /**
- * Activity to demonstrate basic retrieval of the Google user's ID, email
- * address, and basic profile.
+ * Activity to allow user to login to the App via Google. If the user has
+ * previously signed in with a registered account, this activity will redirect
+ * them to the map screen. If the user has not registered, a fragment will
+ * display allowing them to select their user type (driver or rider) and redirect
+ * them to the registration screen
+ *
+ * @author dalton, harrison
+ * @see UserTypeFragment
+ * @see RegisterUserActivity
+ * @version 1.1
  */
 public class SignInActivity extends AppCompatActivity {
 
     // Activity tag and request code
     private static final String TAG = "SignInActivity";
-    private static final int RC_SIGN_IN = 9001;
+    private static final int RC_SIGN_IN = 9001;    // Just pick a random number?
 
     // Declare firebase authorization
     private FirebaseAuth mFirebaseAuth;
@@ -76,10 +84,10 @@ public class SignInActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.google_sign_in);
 
-        // Views
+        // View for signed in status - can maybe delete this depending on how we implement map view?
         mStatusTextView = findViewById(R.id.status);
 
-        // Button listeners
+        // Button listeners and onClick methods
         signInButton = findViewById(R.id.sign_in_button);
         signInButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -98,10 +106,9 @@ public class SignInActivity extends AppCompatActivity {
 
 
         // Configure Google sign-in to request the user's ID, email address,
-        // and basic profile. ID and basic profile are included in
-        // DEFAULT_SIGN_IN.
         GoogleSignInOptions gso = new
                 GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                // Pass server's client ID to requestIdToken method
                 .requestIdToken(getString(R.string.default_web_client_id))
                 .requestEmail()
                 .build();
@@ -109,16 +116,20 @@ public class SignInActivity extends AppCompatActivity {
         // Build a GoogleSignInClient with the options specified by gso.
         mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
 
-        // Set the dimensions of the sign-in button.
+        // Use the WIDE button and LIGHT theme for the Google button
         SignInButton signInButton = findViewById(R.id.sign_in_button);
         signInButton.setSize(SignInButton.SIZE_WIDE);
         signInButton.setColorScheme(SignInButton.COLOR_LIGHT);
 
-        // Initialize firebase authorization
+        // Initialize firebase authorization and firestore instance
         mFirebaseAuth = FirebaseAuth.getInstance();
         mFirebaseFirestore = FirebaseFirestore.getInstance();
     }
 
+    /**
+     * Method to check if a Google Sign In account is already signed in, and
+     * updates the UI accordingly.
+     */
     @Override
     public void onStart() {
         super.onStart();
@@ -128,6 +139,43 @@ public class SignInActivity extends AppCompatActivity {
         updateUI(currentUser);
     }
 
+    /**
+     * Sign the user in.
+     * Called by clicking the Google Sign In button.
+     */
+    private void signIn() {
+        // Get sign in intent from the Google Client and start activity for
+        // the result code
+        Intent signInIntent = mGoogleSignInClient.getSignInIntent();
+        startActivityForResult(signInIntent, RC_SIGN_IN);
+    }
+
+    /**
+     * Sign the user out of the firebase project and the Google Sign In Client.
+     */
+    private void signOut() {
+        // Sign the user out of both firebase and the Google Client
+        mFirebaseAuth.signOut();
+        mGoogleSignInClient.signOut()
+                .addOnCompleteListener(this,
+                        new OnCompleteListener<Void>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Void> task) {
+                                // update the UI to not signed in
+                                updateUI(null);
+                            }
+                        });
+    }
+
+    /**
+     * Receive result from signIn() method.
+     * @param requestCode
+     *  Integer request code from StartActivityForResult(...) in signIn()
+     * @param resultCode
+     *  Result code returned by child activity
+     * @param data
+     *  Intent from the signIn() method
+     */
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -141,7 +189,8 @@ public class SignInActivity extends AppCompatActivity {
                     GoogleSignIn.getSignedInAccountFromIntent(data);
             try {
                 GoogleSignInAccount account = task.getResult(ApiException.class);
-                firebaseAuthWithGoogle(account); // signs into firebase with google info
+                // Sign into firebase with google info
+                firebaseAuthWithGoogle(account);
             } catch (ApiException e) {
                 Log.w(TAG, "Sign in failed", e);
                 updateUI(null);
@@ -149,21 +198,36 @@ public class SignInActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Authorize the Google Sign In account with the app firebase project.
+     * If account is authorized, the method will qeury the users firestore
+     * database to look for the account email to shekc if the user has completed
+     * registration.
+     * If the document is not found, they will be directed to
+     * finish the sign up process.
+     * If the document exsits, the user will be directed to their user type map
+     * view.
+     * @param account
+     *  GoogleSignInAccount from the onActivityResult() method
+     */
     private void firebaseAuthWithGoogle(final GoogleSignInAccount account) {
         Log.d(TAG, "firebaseAuthWithGoogle:" + account.getId());
 
+        // Get credentials from Google account
         AuthCredential credential = GoogleAuthProvider.getCredential(
                 account.getIdToken(), null);
 
+        // Try to authorize user in firebase
         mFirebaseAuth.signInWithCredential(credential)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
+                            // If successful, get user details (email, name)
                             Log.d(TAG, "signInWithCredential: success");
                             FirebaseUser user = mFirebaseAuth.getCurrentUser();
 
-                            // query users db for account
+                            // query firetstore 'users' db for account email
                             DocumentReference docRef = mFirebaseFirestore.collection("users").document(account.getEmail());
                             docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                                 @Override
@@ -171,10 +235,14 @@ public class SignInActivity extends AppCompatActivity {
                                     if (task.isSuccessful()) {
                                         DocumentSnapshot doc = task.getResult();
                                         if (doc.exists()) {
+                                            // if email doc exists, user is regiestered as driver/rider and can be directed to next activity
                                             Log.d("ACCNT", "Document exists, sending user to map screen");
                                         } else {
+                                            // if email doc not found, user may be authorized, but is still ont registered to use the app
+                                            // fragment will be displayed allowing them to select user type, and finish signing up
                                             Log.d("ACCNT", "Document does not exist, sending user to sign up");
                                             Bundle bundle = new Bundle();
+                                            // pass account info into fragment to auto-pop some details in registration form
                                             bundle.putString("email", account.getEmail());
                                             bundle.putString("firstName", account.getGivenName());
                                             bundle.putString("lastName", account.getFamilyName());
@@ -197,23 +265,12 @@ public class SignInActivity extends AppCompatActivity {
                 });
     }
 
-    private void signIn() {
-        Intent signInIntent = mGoogleSignInClient.getSignInIntent();
-        startActivityForResult(signInIntent, RC_SIGN_IN);
-    }
 
-    private void signOut() {
-        mFirebaseAuth.signOut();
-        mGoogleSignInClient.signOut()
-                .addOnCompleteListener(this,
-                        new OnCompleteListener<Void>() {
-                            @Override
-                            public void onComplete(@NonNull Task<Void> task) {
-                                updateUI(null);
-                            }
-                        });
-    }
-
+    /**
+     * Update the UI depending on whether user is Null or not.
+     * @param user
+     *  The authorized Firebase user that is logged into the app, or null
+     */
     private void updateUI(FirebaseUser user) {
         if (user != null) {
             mStatusTextView.setText(getString(R.string.signed_in_fmt,
