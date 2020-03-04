@@ -38,6 +38,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.AuthCredential;
@@ -45,6 +46,11 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 /**
  * Activity to demonstrate basic retrieval of the Google user's ID, email
@@ -58,6 +64,7 @@ public class SignInActivity extends AppCompatActivity {
 
     // Declare firebase authorization
     private FirebaseAuth mFirebaseAuth;
+    private FirebaseFirestore mFirebaseFirestore;
 
     private GoogleSignInClient mGoogleSignInClient;
     private TextView mStatusTextView;
@@ -109,6 +116,7 @@ public class SignInActivity extends AppCompatActivity {
 
         // Initialize firebase authorization
         mFirebaseAuth = FirebaseAuth.getInstance();
+        mFirebaseFirestore = FirebaseFirestore.getInstance();
     }
 
     @Override
@@ -133,7 +141,7 @@ public class SignInActivity extends AppCompatActivity {
                     GoogleSignIn.getSignedInAccountFromIntent(data);
             try {
                 GoogleSignInAccount account = task.getResult(ApiException.class);
-                firebaseAuthWithGoogle(account);
+                firebaseAuthWithGoogle(account); // signs into firebase with google info
             } catch (ApiException e) {
                 Log.w(TAG, "Sign in failed", e);
                 updateUI(null);
@@ -141,11 +149,12 @@ public class SignInActivity extends AppCompatActivity {
         }
     }
 
-    private void firebaseAuthWithGoogle(GoogleSignInAccount account) {
+    private void firebaseAuthWithGoogle(final GoogleSignInAccount account) {
         Log.d(TAG, "firebaseAuthWithGoogle:" + account.getId());
 
         AuthCredential credential = GoogleAuthProvider.getCredential(
                 account.getIdToken(), null);
+
         mFirebaseAuth.signInWithCredential(credential)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
@@ -153,6 +162,23 @@ public class SignInActivity extends AppCompatActivity {
                         if (task.isSuccessful()) {
                             Log.d(TAG, "signInWithCredential: success");
                             FirebaseUser user = mFirebaseAuth.getCurrentUser();
+
+                            // query users db for account
+                            DocumentReference docRef = mFirebaseFirestore.collection("users").document(account.getEmail());
+                            docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                                @Override
+                                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                                    if (task.isSuccessful()) {
+                                        DocumentSnapshot doc = task.getResult();
+                                        if (doc.exists()) {
+                                            Log.d("ACCNT", "Document exists");
+                                        } else {
+                                            Log.d("ACCNT", "Document does not exist, sending user to sign up");
+                                            new UserTypeFragment().show(getSupportFragmentManager(), "USER_TYPE");
+                                        }
+                                    }
+                                }
+                            });
                             updateUI(user);
                         } else {
                             Log.w(TAG, "signInWithCredential: failure");

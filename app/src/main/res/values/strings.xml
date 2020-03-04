@@ -1,14 +1,16 @@
 <resources>
     <string name="app_name">GufyGuber</string>
-    <string name="prompt_email">Email/Username</string>
+    <string name="prompt_email">Email</string>
     <string name="prompt_password">Password</string>
     <string name="sign_in">Sign In</string>
     <string name="register">Register</string>
-    <string name="register_hint">Don\'t have an account? Click here!</string>
     <string name="user_type_message">Would you like to create an account as a RIDER or DRIVER?</string>
     <string name="user_type_fragment_title">CREATE USER</string>
     <string name="rider_tag">Rider</string>
     <string name="driver_tag">Driver</string>
+    <string name="first_name">First name</string>
+    <string name="last_name">Last name</string>
+    <string name="phone_number">Phone number</string>
 
     <string name="signed_out">Signed out</string>
     <string name="signed_in_fmt">Signed in as: %s</string>

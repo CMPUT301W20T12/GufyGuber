@@ -79,7 +79,6 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
         android:clickable="true"
-        android:text="@string/register_hint"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.497"
         app:layout_constraintStart_toStartOf="parent"

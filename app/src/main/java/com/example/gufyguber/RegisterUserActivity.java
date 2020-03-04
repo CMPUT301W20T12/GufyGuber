@@ -30,6 +30,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -60,13 +61,10 @@ import java.util.Map;
  */
 public class RegisterUserActivity extends AppCompatActivity {
     private static final String TAG = "EmailPassword";
-    private EditText username;
-    private EditText email;
+    private TextView email;
     private EditText firstName;
     private EditText lastName;
     private EditText phoneNumber;
-    private EditText password;
-    private EditText confirmPassword;
     private EditText make;
     private EditText model;
     private EditText plateNumber;
@@ -100,13 +98,11 @@ public class RegisterUserActivity extends AppCompatActivity {
 
         }
 
-        username = findViewById(R.id.user_name);
         email = findViewById(R.id.email);
         firstName = findViewById(R.id.first_name);
         lastName = findViewById(R.id.last_name);
         phoneNumber = findViewById(R.id.phone);
-        password = findViewById(R.id.password);
-        confirmPassword = findViewById(R.id.confirm_password);
+
         register = findViewById(R.id.register);
 
         register.setOnClickListener(new View.OnClickListener() {
@@ -114,19 +110,19 @@ public class RegisterUserActivity extends AppCompatActivity {
             public void onClick(View v) {
                 if(validateForm()) {
                     if(userType.equals("Rider")) {
-                        newUser = new Rider(username.getText().toString().toLowerCase(),
-                                email.getText().toString().toLowerCase(),
-                                firstName.getText().toString().toLowerCase(),
-                                lastName.getText().toString().toLowerCase(),
-                                phoneNumber.getText().toString());
-                    }else{
-                        newUser = new Driver(username.getText().toString().toLowerCase(),
-                                email.getText().toString().toLowerCase(),
-                                firstName.getText().toString().toLowerCase(),
-                                lastName.getText().toString().toLowerCase(),
-                                phoneNumber.getText().toString());
-                    }
-                    createAccount(newUser, password.getText().toString(), userType, db);
+//                        newUser = new Rider(username.getText().toString().toLowerCase(),
+//                                email.getText().toString().toLowerCase(),
+//                                firstName.getText().toString().toLowerCase(),
+//                                lastName.getText().toString().toLowerCase(),
+//                                phoneNumber.getText().toString());
+//                    }else{
+//                        newUser = new Driver(username.getText().toString().toLowerCase(),
+//                                email.getText().toString().toLowerCase(),
+//                                firstName.getText().toString().toLowerCase(),
+//                                lastName.getText().toString().toLowerCase(),
+//                                phoneNumber.getText().toString());
+//                    }
+//                    createAccount(newUser, password.getText().toString(), userType, db);
 
                 }
 
@@ -233,7 +229,7 @@ public class RegisterUserActivity extends AppCompatActivity {
                 confirmPassword.setText("");
             }
         }
-        
+
 
         if (validCounter == 8) {
             /* if all 8 checks pass, the register form is valid */
