@@ -11,7 +11,8 @@
     <string name="first_name">First name</string>
     <string name="last_name">Last name</string>
     <string name="phone_number">Phone number</string>
-
+    <string name="register_message">Almost there! We just need to confirm the last details of your user profile.
+        You can change these at any time.</string>
     <string name="signed_out">Signed out</string>
     <string name="signed_in_fmt">Signed in as: %s</string>
     <string name="signed_in">Signed in</string>

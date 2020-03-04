@@ -35,8 +35,6 @@ public class Rider extends User {
     /**
      * This is the constructor method that sets the riders attributes by calling the superclass
      * constructor method
-     * @param username
-     *  The unique username of the rider
      * @param email
      *  The email address associated with the rider's account
      * @param firstName
@@ -46,8 +44,8 @@ public class Rider extends User {
      * @param phoneNumber
      *  The rider's phone number
      */
-    public Rider(String username, String email, String firstName, String lastName,
+    public Rider(String email, String firstName, String lastName,
                  String phoneNumber) {
-        super(username, email, firstName, lastName, phoneNumber);
+        super(email, firstName, lastName, phoneNumber);
     }
 }

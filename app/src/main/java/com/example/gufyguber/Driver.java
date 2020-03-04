@@ -33,8 +33,20 @@ public class Driver extends User{
     //TODO: reference to a Vehicle
     //TODO: reference to a Rating
 
-    public Driver(String username, String email, String firstName, String lastName,
+    /**
+     * This is the constructor method that sets the drivers attributes by calling the superclass
+     * constructor method
+     * @param email
+     *  The email address associated with the rider's account
+     * @param firstName
+     *  The rider's first name
+     * @param lastName
+     * The riders' last name
+     * @param phoneNumber
+     *  The rider's phone number
+     */
+    public Driver( String email, String firstName, String lastName,
                   String phoneNumber) {
-        super(username, email, firstName, lastName, phoneNumber);
+        super(email, firstName, lastName, phoneNumber);
     }
 }

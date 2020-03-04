@@ -15,16 +15,15 @@
  *
  * RegisterUserActivity.java
  *
- * Last edit: dalton, 26/02/20 12:40 PM
+ * Last edit: dalton, 03/03/20 8:56 PM
  *
- * Version
+ * Version 2
  */
 
 package com.example.gufyguber;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.PersistableBundle;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -44,15 +43,11 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
-import java.lang.ref.Reference;
-import java.lang.reflect.Field;
-import java.util.ArrayList;
+
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 /**
@@ -81,8 +76,6 @@ public class RegisterUserActivity extends AppCompatActivity {
         // Initialize Firebase Auth
         mAuth = FirebaseAuth.getInstance();
         final FirebaseFirestore db = FirebaseFirestore.getInstance();
-//        final CollectionReference users = db.collection("users");
-//        final CollectionReference usernames = db.collection("usernames");
 
         Intent intent = getIntent();
         final String userType = intent.getStringExtra("userType");
@@ -95,83 +88,46 @@ public class RegisterUserActivity extends AppCompatActivity {
             model = findViewById(R.id.model);
             plateNumber = findViewById(R.id.plate_number);
             seatNumber = findViewById(R.id.seat_number);
-
         }
-
         email = findViewById(R.id.email);
+        email.setText(intent.getStringExtra("email"));
         firstName = findViewById(R.id.first_name);
+        firstName.setText(intent.getStringExtra("firstName"));
         lastName = findViewById(R.id.last_name);
-        phoneNumber = findViewById(R.id.phone);
-
+        lastName.setText(intent.getStringExtra("lastName"));
+        phoneNumber = findViewById(R.id.phone_number);
         register = findViewById(R.id.register);
-
         register.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if(validateForm()) {
                     if(userType.equals("Rider")) {
-//                        newUser = new Rider(username.getText().toString().toLowerCase(),
-//                                email.getText().toString().toLowerCase(),
-//                                firstName.getText().toString().toLowerCase(),
-//                                lastName.getText().toString().toLowerCase(),
-//                                phoneNumber.getText().toString());
-//                    }else{
-//                        newUser = new Driver(username.getText().toString().toLowerCase(),
-//                                email.getText().toString().toLowerCase(),
-//                                firstName.getText().toString().toLowerCase(),
-//                                lastName.getText().toString().toLowerCase(),
-//                                phoneNumber.getText().toString());
-//                    }
-//                    createAccount(newUser, password.getText().toString(), userType, db);
-
+                        newUser = new Rider(email.getText().toString().toLowerCase(),
+                                firstName.getText().toString().toLowerCase(),
+                                lastName.getText().toString().toLowerCase(),
+                                phoneNumber.getText().toString());
+                    }else{
+                        newUser = new Driver(email.getText().toString().toLowerCase(),
+                                firstName.getText().toString().toLowerCase(),
+                                lastName.getText().toString().toLowerCase(),
+                                phoneNumber.getText().toString());
+                    }
+                    createAccount(newUser, userType, db);
                 }
-
             }
         });
     }
 
-    private void createAccount(User newUser, String passwordString, String userType, FirebaseFirestore db) {
+    private void createAccount(User newUser, String userType, FirebaseFirestore db) {
         final CollectionReference users = db.collection("users");
-        final CollectionReference usernames = db.collection("usernames");
 
         Log.d(TAG, "createAccount:" + newUser.getEmail());
-
-        mAuth.createUserWithEmailAndPassword(newUser.getEmail(), passwordString)
-                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if (task.isSuccessful()) {
-                            Log.d(TAG, "createUserWithEmail:success");
-                            FirebaseUser user = mAuth.getCurrentUser();
-                        } else {
-                            Log.w(TAG, "createUserWithEmail:failure", task.getException());
-                            Toast.makeText(RegisterUserActivity.this, "Authentication failed.",
-                                    Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                });
 
         HashMap<String, String> data = new HashMap<>();
         data.put("email", newUser.getEmail());
 
-       /* usernames.document(newUser.getUsername())
-                .set(data)
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        Log.d(TAG, "Username addition successful");
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.d(TAG, "Username addition failed" + e.toString());
-                    }
-                }); */
-
         HashMap<String, String> userData = new HashMap<>();
 
-        userData.put("username", newUser.getUsername());
         userData.put("first_name", newUser.getFirstName());
         userData.put("last_name", newUser.getLastName());
         userData.put("phone", newUser.getPhoneNumber());
@@ -200,13 +156,9 @@ public class RegisterUserActivity extends AppCompatActivity {
         HashMap<EditText, String> fields = new HashMap<>();
 
         /* populate HashMap of fields with EditText and user inputted values */
-        fields.put(username, username.getText().toString());
-        fields.put(email, email.getText().toString());
         fields.put(firstName, firstName.getText().toString());
         fields.put(lastName, lastName.getText().toString());
         fields.put(phoneNumber, phoneNumber.getText().toString());
-        fields.put(password, password.getText().toString());
-        fields.put(confirmPassword, confirmPassword.getText().toString());
 
         for (Map.Entry field : fields.entrySet()) {
             /* iterate over Map and check all fields are filled in*/
@@ -217,21 +169,7 @@ public class RegisterUserActivity extends AppCompatActivity {
                 validCounter++;                                     /* else, update counter */
             }
         }
-
-        if (validCounter == 7) {
-            /* if counter is 7, all fields filled in; check if password confirmed */
-            if (fields.get(password).equals(fields.get(confirmPassword))) {
-                validCounter++;         /* if fields are the same, password is OK */
-            } else {                    /* otherwise, notify user */
-                password.setError("Passwords do not match.");
-                confirmPassword.setError("Passwords do not match.");
-                password.setText("");
-                confirmPassword.setText("");
-            }
-        }
-
-
-        if (validCounter == 8) {
+        if (validCounter == 3) {
             /* if all 8 checks pass, the register form is valid */
             valid = true;
         }

@@ -37,9 +37,9 @@ import androidx.fragment.app.DialogFragment;
 
 /**
  * Builds a DialogFragment with two buttons for user to choose what type of account to create:
- * RIDER or DRIVER. Fragment is displayed on top of the LoginActivity.java screen.
+ * RIDER or DRIVER. Fragment is displayed on top of the SignInActivity.java screen.
  *
- * @see LoginActivity
+ * @see SignInActivity
  */
 public class UserTypeFragment extends DialogFragment {
 
@@ -55,6 +55,11 @@ public class UserTypeFragment extends DialogFragment {
     @NonNull
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
+        Bundle bundle = getArguments();
+        final String email = bundle.getString("email");
+        final String firstName = bundle.getString("firstName");
+        final String lastName = bundle.getString("lastName");
+
 
         View view = LayoutInflater.from(getActivity()).inflate(R.layout.user_type_fragment,
                 null);
@@ -66,7 +71,12 @@ public class UserTypeFragment extends DialogFragment {
             public void onClick(View v){
                 userType = "Rider";
                 Intent intent  = new Intent(getActivity(), RegisterUserActivity.class);
-                intent.putExtra("userType", userType);
+                Bundle bundle = new Bundle();
+                bundle.putString("userType", userType);
+                bundle.putString("email", email);
+                bundle.putString("firstName", firstName);
+                bundle.putString("lastName", lastName);
+                intent.putExtras(bundle);
                 startActivity(intent);
                 dismiss();
             }

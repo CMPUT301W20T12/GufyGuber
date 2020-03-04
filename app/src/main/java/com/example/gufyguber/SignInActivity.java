@@ -171,10 +171,16 @@ public class SignInActivity extends AppCompatActivity {
                                     if (task.isSuccessful()) {
                                         DocumentSnapshot doc = task.getResult();
                                         if (doc.exists()) {
-                                            Log.d("ACCNT", "Document exists");
+                                            Log.d("ACCNT", "Document exists, sending user to map screen");
                                         } else {
                                             Log.d("ACCNT", "Document does not exist, sending user to sign up");
-                                            new UserTypeFragment().show(getSupportFragmentManager(), "USER_TYPE");
+                                            Bundle bundle = new Bundle();
+                                            bundle.putString("email", account.getEmail());
+                                            bundle.putString("firstName", account.getGivenName());
+                                            bundle.putString("lastName", account.getFamilyName());
+                                            UserTypeFragment mUserTypeFragment = new UserTypeFragment();
+                                            mUserTypeFragment.setArguments(bundle);
+                                            mUserTypeFragment.show(getSupportFragmentManager(), "USER_TYPE");
                                         }
                                     }
                                 }
