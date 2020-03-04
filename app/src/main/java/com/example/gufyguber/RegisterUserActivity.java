@@ -66,6 +66,7 @@ public class RegisterUserActivity extends AppCompatActivity {
     private EditText seatNumber;
     private Button register;
     private User newUser;
+    private Vehicle newVehicle;
 
     private FirebaseAuth mAuth;
 
@@ -108,11 +109,15 @@ public class RegisterUserActivity extends AppCompatActivity {
                                 phoneNumber.getText().toString());
                     }else{
                         if(validateVehicleInfo()) {
+                            newVehicle = new Vehicle(model.getText().toString(),
+                                    make.getText().toString(),
+                                    plateNumber.getText().toString(),
+                                    Integer.parseInt(seatNumber.getText().toString()));
                             newUser = new Driver(email.getText().toString().toLowerCase(),
                                     firstName.getText().toString().toLowerCase(),
                                     lastName.getText().toString().toLowerCase(),
-                                    phoneNumber.getText().toString());
-
+                                    phoneNumber.getText().toString(),
+                                    newVehicle);
                         }
                     }
                     createAccount(newUser, userType, db);

@@ -15,7 +15,7 @@
  *
  * Driver.java
  *
- * Last edit: dalton, 26/02/20 12:40 PM
+ * Last edit: dalton, 04/03/20 1:40 PM
  *
  * Version
  */
@@ -30,7 +30,6 @@ package com.example.gufyguber;
  */
 public class Driver extends User{
     //TODO: reference to a RideRequest
-    //TODO: reference to a Vehicle
     //TODO: reference to a Rating
 
     private Vehicle vehicle;
@@ -48,7 +47,16 @@ public class Driver extends User{
      *  The rider's phone number
      */
     public Driver( String email, String firstName, String lastName,
-                  String phoneNumber) {
+                  String phoneNumber, Vehicle vehicle) {
         super(email, firstName, lastName, phoneNumber);
+        this.setVehicle(vehicle);
+    }
+
+    public void setVehicle(Vehicle vehicle) {
+        this.vehicle = vehicle;
+    }
+
+    public Vehicle getVehicle() {
+        return vehicle;
     }
 }

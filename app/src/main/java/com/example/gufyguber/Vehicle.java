@@ -43,22 +43,16 @@ public class Vehicle {
      *  This is the model of the vehicle being registered
      * @param make
      *  This is the make of the vehicle being registered
-     * @param year
-     *  This is the year of the vehicle being registered
      * @param plateNumber
      *  This is the license plate number of the vehicle being registered
      * @param seatNumber
      *  This is the number of seats available for Riders to sit
-     * @param colour
-     *  This is the colour of the vehicle being registered
      */
-    public Vehicle(String model, String make, String year, String plateNumber, int seatNumber, String colour) {
+    public Vehicle(String model, String make, String plateNumber, int seatNumber) {
         this.setModel(model);
         this.setMake(make);
-        this.setYear(year);
         this.setPlateNumber(plateNumber);
         this.setSeatNumber(seatNumber);
-        this.setColour(colour);
     }
 
     /**
@@ -80,30 +74,12 @@ public class Vehicle {
     }
 
     /**
-     * This sets the objects year attribute
-     * @param year
-     *  The year of the vehicle being registered
-     */
-    public void setYear(String year) {
-        this.year = year;
-    }
-
-    /**
      * This sets the objects plateNumber attribute
      * @param plateNumber
      *  The license plate number of the vehicle being registered
      */
     public void setPlateNumber(String plateNumber) {
         this.plateNumber = plateNumber;
-    }
-
-    /**
-     * This sets the colour make attribute
-     * @param colour
-     *  The colour of the vehicle being registered
-     */
-    public void setColour(String colour) {
-        this.colour = colour;
     }
 
     /**
@@ -134,15 +110,6 @@ public class Vehicle {
     }
 
     /**
-     * This returns the year of the Driver's vehicle
-     * @return
-     *  Return the vehicle year
-     */
-    public String getYear() {
-        return year;
-    }
-
-    /**
      * This returns the license plate number of the Driver's vehicle
      * @return
      *  Return the vehicle's license plate number
@@ -159,14 +126,4 @@ public class Vehicle {
     public int getSeatNumber() {
         return seatNumber;
     }
-
-    /**
-     * This returns the colour of the Driver's vehicle
-     * @return
-     *  Return the vehicle colour
-     */
-    public String getColour() {
-        return colour;
-    }
-
 }
