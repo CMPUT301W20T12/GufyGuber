@@ -13,8 +13,13 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 
+import com.google.type.LatLng;
+
+import java.util.Date;
+
 /**
  * This creates the dialog fragment that pop's up when a user would like to view their current ride status.
+ * TextViews are populated from rideRequest and timeInfo classes.
  */
 
 public class CurrentRideFragment extends DialogFragment {
@@ -27,6 +32,13 @@ public class CurrentRideFragment extends DialogFragment {
 
     private Button backBtn;
     private Button cancelBtn;
+
+    private String riderUID;
+    private float offeredFare;
+    private LatLng pickupLocation;
+    private LatLng dropoffLocation;
+    private Date pickupTime;
+    private Date dropoffTime;
 
 
     @Override
@@ -46,6 +58,26 @@ public class CurrentRideFragment extends DialogFragment {
         userDropoffLocation = view.findViewById(R.id.user_dropoff_location);
         backBtn = view.findViewById(R.id.back_btn);
         cancelBtn = view.findViewById(R.id.cancel_btn);
+
+
+        pickupLocation = LatLng.newBuilder().setLatitude(13).setLongitude(13).build();
+        dropoffLocation = LatLng.newBuilder().setLatitude(15).setLongitude(20).build();
+
+        RideRequest rideRequest = new RideRequest(riderUID, offeredFare, pickupLocation, dropoffLocation);
+        TimeInfo timeInfo = rideRequest.getTimeInfo();
+
+        timeInfo.setRequestAcceptedTime();
+        timeInfo.setRequestCompletedTime();
+
+
+        userPickupLocation.setText(pickupLocation.toString());
+        userDropoffLocation.setText(dropoffLocation.toString());
+        userDestination.setText(dropoffLocation.toString());
+
+        userPickupTime.setText(timeInfo.getRequestAcceptedTime().toString());
+        userArrivalTime.setText(timeInfo.getRequestCompletedTime().toString());
+
+
 
 
         backBtn.setOnClickListener(new View.OnClickListener() {

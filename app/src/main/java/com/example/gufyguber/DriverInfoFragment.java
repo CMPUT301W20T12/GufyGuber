@@ -26,11 +26,11 @@ public class DriverInfoFragment extends DialogFragment {
     private TextView driverEmail;
     private TextView driverRating;
 
-    private String username;
-    private String email;
-    private String firstName;
-    private String lastName;
-    private String phoneNumber;
+    private String username = "woldegio";
+    private String email = "woldegio@ualberta.ca";
+    private String firstName = "Nahome";
+    private String lastName = "Wolde-Giorgis";
+    private String phoneNumber = "7809938581";
 
     @Override
     public void onAttach(Context context){
@@ -52,11 +52,14 @@ public class DriverInfoFragment extends DialogFragment {
 
         Driver driver = new Driver(username, email, firstName, lastName, phoneNumber);
 
+        /*
         username = driver.getUsername();
         email = driver.getEmail();
         firstName = driver.getFirstName();
         lastName = driver.getLastName();
         phoneNumber = driver.getPhoneNumber();
+
+         */
 
         driverName.setText(firstName + ' ' + lastName);
         driverPhone.setText(phoneNumber);
