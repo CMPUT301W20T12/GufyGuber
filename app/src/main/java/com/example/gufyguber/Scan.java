@@ -34,7 +34,6 @@ import com.google.android.gms.vision.barcode.Barcode;
 import com.google.android.gms.vision.barcode.BarcodeDetector;
 
 import java.io.IOException;
-import java.util.ArrayList;
 
 public class Scan extends AppCompatActivity {
     SurfaceView cameraView;
@@ -98,14 +97,9 @@ public class Scan extends AppCompatActivity {
             @Override
             public void receiveDetections(Detector.Detections<Barcode> detections) {
                 final SparseArray<Barcode> barcodes = detections.getDetectedItems();
-                ArrayList<String> barcodeResult = new ArrayList<>();
-
-                if(barcodes.size() > 0) {
+                if (barcodes.size() > 0) {
                     Intent intent = new Intent();
-                    for (int word = 0; word < barcodes.size(); word++) {
-                        barcodeResult.add(barcodes.valueAt(word).rawValue);
-                    }
-                    intent.putExtra("barcode", barcodeResult);
+                    intent.putExtra("barcode", barcodes.valueAt(0));
                     setResult(RESULT_OK, intent);
                     finish();
                 }
