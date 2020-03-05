@@ -16,6 +16,7 @@ package com.example.gufyguber;
 import androidx.fragment.app.FragmentActivity;
 
 import android.os.Bundle;
+import android.view.View;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -23,6 +24,8 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.snackbar.Snackbar;
 
 /**
  * This class creates a map fragment. This should be available after the user is logged in.
@@ -41,6 +44,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+        // makes a button for us to create ride requests (RIDER) from navigation drawer activity default
+
+        FloatingActionButton fab = findViewById(R.id.request_ride_button);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Snackbar.make(view, "Put request fragment here", Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show();
+            }
+        });
     }
 
 
@@ -57,9 +71,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
-        // Add a marker in Sydney and move the camera
+        // Add a marker in Edmonton and move the camera
         LatLng edmonton = new LatLng(53.5461, -113.4938);
         mMap.addMarker(new MarkerOptions().position(edmonton).title("Marker in Edmonton"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(edmonton));
+        //mMap.moveCamera(CameraUpdateFactory.newLatLng(edmonton));
+
+        float zoomLevel = 16.0f; //This goes up to 21
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(edmonton, zoomLevel));
     }
 }
