@@ -141,6 +141,10 @@ public class RegisterUserActivity extends AppCompatActivity {
         userData.put("phone", newUser.getPhoneNumber());
         userData.put("userType", userType);
 
+        if(userType.equals("Driver")){
+            uploadVehicleInfo(db);
+        }
+
         users.document(newUser.getEmail())
                 .set(userData)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
@@ -210,5 +214,39 @@ public class RegisterUserActivity extends AppCompatActivity {
         }
         return valid;
 
+    }
+
+
+    /**
+     * This method adds the drivers vehicle information to the "Vehicles" table
+     * in the Firestore database
+     * @param db
+     *  The database to add the vehicle to
+     */
+    private void uploadVehicleInfo(FirebaseFirestore db){
+        final CollectionReference vehicles = db.collection("vehicles");
+        HashMap<String, String> vehicleData = new HashMap<>();
+
+        vehicleData.put("make", ((Driver)newUser).getVehicle().getMake());
+        vehicleData.put("model", ((Driver)newUser).getVehicle().getModel());
+        vehicleData.put("seat_number", Integer.toString(((Driver)newUser).getVehicle().getSeatNumber()));
+        vehicleData.put("plate_number", ((Driver)newUser).getVehicle().getPlateNumber());
+        vehicles.document(newUser.getEmail())
+                .set(vehicleData)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Log.d(TAG, "Vehicle addition successful");
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.d(TAG, "Vehicle addition failed" + e.toString());
+                    }
+                });
+
+
+        return;
     }
 }
