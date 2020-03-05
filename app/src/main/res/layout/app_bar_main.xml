@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ app_bar_main.xml
+  ~
+  ~ Version
+  ~
+  ~ Last edit: mai-thyle, 05/03/20 1:02 AM
+  ~
+  ~ Copyright (c) CMPUT301W20T12 2020. All Rights Reserved.
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0).
+  ~
+  -->
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+</LinearLayout>
