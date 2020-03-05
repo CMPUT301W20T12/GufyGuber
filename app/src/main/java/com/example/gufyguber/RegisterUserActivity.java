@@ -107,7 +107,8 @@ public class RegisterUserActivity extends AppCompatActivity {
                                 firstName.getText().toString().toLowerCase(),
                                 lastName.getText().toString().toLowerCase(),
                                 phoneNumber.getText().toString());
-                    }else{
+                        createAccount(newUser, userType, db);
+                    }else
                         if(validateVehicleInfo()) {
                             newVehicle = new Vehicle(model.getText().toString(),
                                     make.getText().toString(),
@@ -118,9 +119,8 @@ public class RegisterUserActivity extends AppCompatActivity {
                                     lastName.getText().toString().toLowerCase(),
                                     phoneNumber.getText().toString(),
                                     newVehicle);
-                        }
+                            createAccount(newUser, userType, db);
                     }
-                    createAccount(newUser, userType, db);
                 }
             }
         });
@@ -221,7 +221,7 @@ public class RegisterUserActivity extends AppCompatActivity {
      * This method adds the drivers vehicle information to the "Vehicles" table
      * in the Firestore database
      * @param db
-     *  The database to add the vehicle to
+     *  Reference to the database
      */
     private void uploadVehicleInfo(FirebaseFirestore db){
         final CollectionReference vehicles = db.collection("vehicles");
@@ -245,8 +245,6 @@ public class RegisterUserActivity extends AppCompatActivity {
                         Log.d(TAG, "Vehicle addition failed" + e.toString());
                     }
                 });
-
-
         return;
     }
 }
