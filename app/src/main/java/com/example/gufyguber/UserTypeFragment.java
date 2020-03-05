@@ -1,14 +1,23 @@
 /*
+ * Copyright (c) 2020  GufyGuber. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
  * UserTypeFragment.java
  *
- * Version
+ * Last edit: dalton, 26/02/20 12:39 PM
  *
- * Last edit: dalton, 24/02/20 3:12 PM
- *
- * Copyright (c) CMPUT301W20T12 2020. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0).
- *
+ * Version 1.0
  */
 
 package com.example.gufyguber;
@@ -28,9 +37,9 @@ import androidx.fragment.app.DialogFragment;
 
 /**
  * Builds a DialogFragment with two buttons for user to choose what type of account to create:
- * RIDER or DRIVER. Fragment is displayed on top of the LoginActivity.java screen.
+ * RIDER or DRIVER. Fragment is displayed on top of the SignInActivity.java screen.
  *
- * @see LoginActivity
+ * @see SignInActivity
  */
 public class UserTypeFragment extends DialogFragment {
 
@@ -47,6 +56,13 @@ public class UserTypeFragment extends DialogFragment {
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
 
+        // Get user details from bundle
+        Bundle bundle = getArguments();
+        final String email = bundle.getString("email");
+        final String firstName = bundle.getString("firstName");
+        final String lastName = bundle.getString("lastName");
+
+
         View view = LayoutInflater.from(getActivity()).inflate(R.layout.user_type_fragment,
                 null);
         riderButton = view.findViewById(R.id.rider_button);
@@ -57,7 +73,13 @@ public class UserTypeFragment extends DialogFragment {
             public void onClick(View v){
                 userType = "Rider";
                 Intent intent  = new Intent(getActivity(), RegisterUserActivity.class);
-                intent.putExtra("userType", userType);
+                // pass account info into fragment to auto-pop some details in registration form
+                Bundle bundle = new Bundle();
+                bundle.putString("userType", userType);
+                bundle.putString("email", email);
+                bundle.putString("firstName", firstName);
+                bundle.putString("lastName", lastName);
+                intent.putExtras(bundle);
                 startActivity(intent);
                 dismiss();
             }
@@ -68,7 +90,12 @@ public class UserTypeFragment extends DialogFragment {
             public void onClick(View v){
                 userType = "Driver";
                 Intent intent  = new Intent(getActivity(), RegisterUserActivity.class);
-                intent.putExtra("userType", userType);
+                Bundle bundle = new Bundle();
+                bundle.putString("userType", userType);
+                bundle.putString("email", email);
+                bundle.putString("firstName", firstName);
+                bundle.putString("lastName", lastName);
+                intent.putExtras(bundle);
                 startActivity(intent);
                 dismiss();
             }
