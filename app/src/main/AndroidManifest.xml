@@ -41,12 +41,6 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyCc00eAPUQZI2VghOGY9GybhOOj5vfO42M" />
 
-        <activity
-            android:name=".MapsActivity"
-            android:label="@string/title_activity_maps">
-
-        </activity>
-
 
         <activity android:name=".LoginActivity">
             <intent-filter>

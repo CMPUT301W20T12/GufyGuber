@@ -1,5 +1,5 @@
 /*
- * ToolsViewModel.java
+ * CurrentRequestViewModel.java
  *
  * Version
  *
@@ -11,19 +11,19 @@
  *
  */
 
-package com.example.gufyguber.ui.tools;
+package com.example.gufyguber.ui.CurrentRequest;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-public class ToolsViewModel extends ViewModel {
+public class CurrentRequestViewModel extends ViewModel {
 
     private MutableLiveData<String> mText;
 
-    public ToolsViewModel() {
+    public CurrentRequestViewModel() {
         mText = new MutableLiveData<>();
-        mText.setValue("This is tools fragment");
+        mText.setValue("This is Current Requests fragment");
     }
 
     public LiveData<String> getText() {

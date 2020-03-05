@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  ~ fragment_tools.xml
+  ~ fragment_current_requests.xmlrequests.xml
   ~
   ~ Version
   ~
@@ -18,7 +18,7 @@
     android:layout_height="match_parent">
 
     <TextView
-        android:id="@+id/text_tools"
+        android:id="@+id/text_current_requests"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
