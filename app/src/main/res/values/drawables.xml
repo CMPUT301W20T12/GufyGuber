@@ -1,0 +1,23 @@
+<!--
+  ~ drawables.xml
+  ~
+  ~ Version
+  ~
+  ~ Last edit: mai-thyle, 04/03/20 11:21 PM
+  ~
+  ~ Copyright (c) CMPUT301W20T12 2020. All Rights Reserved.
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0).
+  ~
+  -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+    <item name="ic_menu_camera" type="drawable">@android:drawable/ic_menu_camera</item>
+    <item name="ic_menu_gallery" type="drawable">@android:drawable/ic_menu_gallery</item>
+    <item name="ic_menu_slideshow" type="drawable">@android:drawable/ic_menu_slideshow</item>
+    <item name="ic_menu_manage" type="drawable">@android:drawable/ic_menu_manage</item>
+    <item name="ic_menu_share" type="drawable">@android:drawable/ic_menu_share</item>
+    <item name="ic_menu_send" type="drawable">@android:drawable/ic_menu_send</item>
+    <item name="ic_input_add" type="drawable">@android:drawable/ic_input_add</item>
+    <item name="ic_dialog_map" type="drawable">@android:drawable/ic_dialog_map</item>
+</resources>
