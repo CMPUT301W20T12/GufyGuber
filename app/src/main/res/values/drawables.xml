@@ -1,0 +1,19 @@
+<!--
+  ~ drawables.xml
+  ~
+  ~ Version
+  ~
+  ~ Last edit: mai-thyle, 04/03/20 11:21 PM
+  ~
+  ~ Copyright (c) CMPUT301W20T12 2020. All Rights Reserved.
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0).
+  ~
+  -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+    <item name="ic_input_add" type="drawable">@android:drawable/ic_input_add</item>
+    <item name="ic_dialog_map" type="drawable">@android:drawable/ic_dialog_map</item>
+    <item name="ic_menu_profile" type="drawable">@android:drawable/ic_menu_gallery</item>
+    <item name="ic_menu_agenda" type="drawable">@android:drawable/ic_menu_agenda</item>
+</resources>
