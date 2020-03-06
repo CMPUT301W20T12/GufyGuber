@@ -279,6 +279,9 @@ public class SignInActivity extends AppCompatActivity {
             findViewById(R.id.sign_in_button).setVisibility(View.GONE);
             findViewById(R.id.sign_out_and_disconnect).setVisibility(
                     View.VISIBLE);
+
+            Intent openNavigation = new Intent(this, NavigationActivity.class);
+            startActivity(openNavigation);
         } else {
             mStatusTextView.setText(R.string.signed_out);
 
