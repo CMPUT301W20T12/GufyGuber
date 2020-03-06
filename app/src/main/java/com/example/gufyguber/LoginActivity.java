@@ -51,11 +51,6 @@ public class LoginActivity extends AppCompatActivity {
         loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Opens map first
-                //Intent openMap = new Intent(LoginActivity.this,MapsActivity.class);
-                //startActivity(openMap);
-
-
                 //Or Use the Navigation activity as base, and the navigation menu to select map fragment.
                 Intent openNavigation = new Intent(LoginActivity.this,NavigationActivity.class);
                 startActivity(openNavigation);
