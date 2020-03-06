@@ -31,14 +31,17 @@ import java.util.Date;
 public class TimeInfo {
     private Date requestOpenTime;
     public void setRequestOpenTime() { requestAcceptedTime = new Date(); }
+    public void setRequestOpenTime(Date requestOpenTime) { this.requestOpenTime = requestOpenTime; }
     public Date getRequestOpenTime() { return requestOpenTime; }
 
     private Date requestAcceptedTime;
     public void setRequestAcceptedTime() { requestAcceptedTime = new Date(); }
+    public void setRequestAcceptedTime(Date requestAcceptedTime) { this.requestAcceptedTime = requestAcceptedTime; }
     public Date getRequestAcceptedTime() { return requestAcceptedTime; }
 
     private Date requestCompletedTime;
     public void setRequestCompletedTime() { requestCompletedTime = new Date(); }
+    public void setRequestCompletedTime(Date requestCompletedTime) { this.requestCompletedTime = requestCompletedTime; }
     public Date getRequestCompletedTime() { return requestCompletedTime; }
 
     /**

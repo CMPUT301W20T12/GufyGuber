@@ -54,6 +54,10 @@ public class CreateRideRequestFragment extends DialogFragment {
     private CreateRideRequestListener onCreatedListener;
 
     private EditText fareEditText;
+    private EditText startLocationEditText;
+    private EditText endLocationEditText;
+
+    private LocationInfo tempLocationInfo;
 
     @Override
     public void onAttach(Context context)  {
@@ -81,7 +85,7 @@ public class CreateRideRequestFragment extends DialogFragment {
                         if (validateEntries()) {
                             LatLng testPickup = LatLng.newBuilder().setLatitude(13).setLongitude(13).build();
                             LatLng testDropoff = LatLng.newBuilder().setLatitude(31).setLongitude(31).build();
-                            RideRequest newRequest = new RideRequest("TestRiderUID", Float.parseFloat(fareEditText.getText().toString()), testPickup, testDropoff);
+                            RideRequest newRequest = new RideRequest("TestRiderUID", Float.parseFloat(fareEditText.getText().toString()), new LocationInfo(testPickup, testDropoff));
                             if (onCreatedListener != null) {
                                 onCreatedListener.onRideRequestCreated(newRequest);
                             }
@@ -90,6 +94,21 @@ public class CreateRideRequestFragment extends DialogFragment {
                         }
                     }
                 });
+
+        startLocationEditText.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        });
+
+        endLocationEditText.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        });
+
         return builder.create();
     }
 

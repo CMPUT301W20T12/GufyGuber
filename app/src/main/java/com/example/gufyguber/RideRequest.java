@@ -100,15 +100,14 @@ public class RideRequest {
      * Constructor for the RideRequest class
      * @param riderUID The UID of the rider user that's creating the request
      * @param offeredFare The price offered for the ride, in QR-Bucks
-     * @param pickup The coordinates of the pickup location
-     * @param dropoff The coordinates of the destination
+     * @param locationInfo Contains the coordinates of the pickup and dropoff locations
      */
-    public RideRequest (String riderUID, float offeredFare, LatLng pickup, LatLng dropoff) {
+    public RideRequest (String riderUID, float offeredFare, LocationInfo locationInfo) {
         setRiderUID(riderUID);
         setDriverUID(null);
         setStatus(Status.PENDING);
         setOfferedFare(offeredFare);
-        locationInfo = new LocationInfo(pickup, dropoff);
+        this.locationInfo = locationInfo;
         timeInfo = new TimeInfo();
     }
 
