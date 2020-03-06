@@ -35,4 +35,5 @@
         android:name="com.example.gufyguber.ui.CurrentRequest.CurrentRequestFragment"
         android:label="Current Requests"
         tools:layout="@layout/fragment_current_requests" />
+
 </navigation>
