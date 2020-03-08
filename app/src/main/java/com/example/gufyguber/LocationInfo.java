@@ -19,8 +19,6 @@
 // Date: Feb.29.2020
 // Purpose: To collect location information for a Ride Request
 
-// Last Updated: Mar.01.2020 by Robert MacGillivray
-
 package com.example.gufyguber;
 
 import com.google.type.LatLng;

@@ -19,13 +19,7 @@
 // Date: Feb.24.2020
 // Purpose: To model user ride requests for the Gufy Guber app
 
-// Last Updated: Mar.01.2020 by Robert MacGillivray
-
 package com.example.gufyguber;
-
-import android.location.Location;
-
-import com.google.type.LatLng;
 
 /**
  * Model class for Gufy Guber ride requests
@@ -53,6 +47,10 @@ public class RideRequest {
             public String toString() {
                 return "Completed";
             }
+        },
+        CANCELLED {
+            @Override
+            public String toString() { return "Cancelled"; }
         }
     }
 
@@ -97,6 +95,13 @@ public class RideRequest {
     public TimeInfo getTimeInfo() { return timeInfo; }
 
     /**
+     * Always references the current, active ride request for this user, or null
+     */
+    private static RideRequest currentRideRequest;
+    public static RideRequest getCurrentRideRequest() { return currentRideRequest; }
+    public static void setCurrentRideRequest(RideRequest request) { currentRideRequest = request; }
+
+    /**
      * Constructor for the RideRequest class
      * @param riderUID The UID of the rider user that's creating the request
      * @param offeredFare The price offered for the ride, in QR-Bucks
@@ -131,6 +136,9 @@ public class RideRequest {
      * Cancels this ride request and initiates related cleanup
      */
     public void cancelRideRequest() {
-        //TODO: Handle canceling and cleaning up after a ride request
+        setStatus(Status.CANCELLED);
+        RideRequest.setCurrentRideRequest(null);
+
+        //TODO: Probably update Firebase to notify any relevant parties that the request is cancelled
     }
 }

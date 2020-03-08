@@ -19,8 +19,6 @@
 // Date: Feb.25.2020
 // Purpose: To model data related to the time of Ride Requests and provide some associated static helper functions
 
-// Last Updated: Feb.25.2020 by Robert MacGillivray
-
 package com.example.gufyguber;
 
 import java.util.Date;

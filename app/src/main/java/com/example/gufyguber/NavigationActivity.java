@@ -19,6 +19,7 @@ import com.example.gufyguber.ui.Map.MapFragment;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 
@@ -41,7 +42,7 @@ import android.view.Menu;
 
 import static com.example.gufyguber.R.id.nav_host_fragment;
 
-public class NavigationActivity extends AppCompatActivity {
+public class NavigationActivity extends AppCompatActivity implements CreateRideRequestFragment.CreateRideRequestListener {
 
     private AppBarConfiguration mAppBarConfiguration;
 
@@ -58,10 +59,13 @@ public class NavigationActivity extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                // Start Test Code
                 LatLng testPickup = LatLng.newBuilder().setLatitude(13).setLongitude(13).build();
                 LatLng testDropoff = LatLng.newBuilder().setLatitude(31).setLongitude(31).build();
                 LocationInfo testLocation = new LocationInfo(testPickup, testDropoff);
                 new CreateRideRequestFragment(13f, testLocation).show(getSupportFragmentManager(), "create_ride_request");
+                // End Test Code
+                // new CreateRideRequestFragment().show(getSupportFragmentManager(), "create_ride_request");
             }
         });
 
@@ -105,5 +109,13 @@ public class NavigationActivity extends AppCompatActivity {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    /**
+     * Automatically called when the CreateRideRequestFragment builds a new RideRequest
+     * @param newRequest The request created by the dialog fragment
+     */
+    public void onRideRequestCreated(RideRequest newRequest) {
+        RideRequest.setCurrentRideRequest(newRequest);
     }
 }
