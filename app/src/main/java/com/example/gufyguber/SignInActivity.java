@@ -78,7 +78,7 @@ public class SignInActivity extends AppCompatActivity {
     private TextView mStatusTextView;
     private SignInButton signInButton;
     private Button signOutButton;
-    private FirebaseManager firebaseManager;
+    private FirebaseManager firebaseManager = FirebaseManager.getReference();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -228,31 +228,25 @@ public class SignInActivity extends AppCompatActivity {
                             Log.d(TAG, "signInWithCredential: success");
                             final FirebaseUser user = mFirebaseAuth.getCurrentUser();
 
-                            // query firestore 'users' db for account email
-                            DocumentReference docRef = mFirebaseFirestore.collection("users").document(user.getUid());
-                            docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                            // use firebasemanager to check if user is registered
+                            firebaseManager.checkUser(user.getUid(), new FirebaseManager.ReturnValueListener<Boolean>() {
                                 @Override
-                                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                                    if (task.isSuccessful()) {
-                                        DocumentSnapshot doc = task.getResult();
-                                        if (doc.exists()) {
-                                            // if email doc exists, user is regiestered as driver/rider and can be directed to next activity
-                                            Log.d("ACCNT", "Document exists, sending user to map screen");
-                                            updateUI(user);
-                                        } else {
-                                            // if email doc not found, user may be authorized, but is still ont registered to use the app
-                                            // fragment will be displayed allowing them to select user type, and finish signing up
-                                            Log.d("ACCNT", "Document does not exist, sending user to sign up");
-                                            Bundle bundle = new Bundle();
-                                            // pass account info into fragment to auto-pop some details in registration form
-                                            bundle.putString("UID", user.getUid());
-                                            bundle.putString("email", account.getEmail());
-                                            bundle.putString("firstName", account.getGivenName());
-                                            bundle.putString("lastName", account.getFamilyName());
-                                            UserTypeFragment mUserTypeFragment = new UserTypeFragment();
-                                            mUserTypeFragment.setArguments(bundle);
-                                            mUserTypeFragment.show(getSupportFragmentManager(), "USER_TYPE");
-                                        }
+                                public void returnValue(Boolean value) {
+                                    boolean userExists = value.booleanValue();
+                                    if (userExists){
+                                        Log.d("ACCNT", "Sending user to map screen");
+                                        updateUI(user);
+                                    } else {
+                                        Log.d("ACCNT", "Sending user to sign up");
+                                        Bundle bundle = new Bundle();
+                                        // pass account info into fragment to auto-pop some details in registration form
+                                        bundle.putString("UID", user.getUid());
+                                        bundle.putString("email", account.getEmail());
+                                        bundle.putString("firstName", account.getGivenName());
+                                        bundle.putString("lastName", account.getFamilyName());
+                                        UserTypeFragment mUserTypeFragment = new UserTypeFragment();
+                                        mUserTypeFragment.setArguments(bundle);
+                                        mUserTypeFragment.show(getSupportFragmentManager(), "USER_TYPE");
                                     }
                                 }
                             });

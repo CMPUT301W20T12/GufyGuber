@@ -36,7 +36,6 @@ import androidx.annotation.NonNull;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -182,5 +181,28 @@ public class FirebaseManager {
         //TODO: Decide what constitutes a key for getting vehicle info (especially if drivers have > 1 vehicle
         //TODO: Fetch information about a vehicle
         returnFunction.returnValue(null);
+    }
+
+    public void checkUser(String UID, final ReturnValueListener<Boolean> returnFunction) {
+
+        final DocumentReference userDoc = FirebaseFirestore.getInstance().collection("users").document(UID);
+        userDoc.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.isSuccessful()) {
+                    DocumentSnapshot doc = task.getResult();
+                    if (doc.exists()) {
+                        // if email doc exists, user is registered as driver/rider and can be directed to next activity
+                        Log.d(TAG, "Document exists");
+                        returnFunction.returnValue(Boolean.TRUE);
+                    } else {
+                        // if email doc not found, user may be authorized, but is still ont registered to use the app
+                        // fragment will be displayed allowing them to select user type, and finish signing up
+                        Log.d(TAG, "Document does not exist");
+                        returnFunction.returnValue(Boolean.FALSE);
+                    }
+                }
+            }
+        });
     }
 }
