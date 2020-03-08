@@ -17,6 +17,7 @@ import androidx.fragment.app.DialogFragment;
 import com.example.gufyguber.LoginActivity;
 import com.example.gufyguber.NavigationActivity;
 import com.example.gufyguber.R;
+import com.example.gufyguber.RideRequest;
 
 /**
  * Builds a DialogFragment with two buttons for  user to confirm that they would like to cancel
@@ -55,6 +56,10 @@ public class CancelRequestFragment extends DialogFragment {
             public void onClick(View v) {
                 new com.example.gufyguber.ui.CurrentRequest.CancelFragment().show(getFragmentManager(), "cancel_fragment");
                 getFragmentManager().beginTransaction().remove(CancelRequestFragment.this).commit();
+                RideRequest currentRequest = RideRequest.getCurrentRideRequest();
+                if (currentRequest != null) {
+                    currentRequest.cancelRideRequest();
+                }
             }
         });
         final AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
