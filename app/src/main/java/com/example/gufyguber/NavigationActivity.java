@@ -57,8 +57,7 @@ public class NavigationActivity extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Put request fragment here", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+                new CreateRideRequestFragment().show(getSupportFragmentManager(), "create_ride_request");
             }
         });
 

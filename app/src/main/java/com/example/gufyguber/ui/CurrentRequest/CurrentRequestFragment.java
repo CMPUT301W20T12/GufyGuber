@@ -42,7 +42,7 @@ public class CurrentRequestFragment extends Fragment {
                 ViewModelProviders.of(this).get(CurrentRequestViewModel.class);
         View root = inflater.inflate(R.layout.fragment_current_requests, container, false);
         //final TextView textView = root.findViewById(R.id.text_current_requests);
-        currentRequestViewModel.getText().observe(this, new Observer<String>() {
+        currentRequestViewModel.getText().observe(getViewLifecycleOwner(), new Observer<String>() {
             @Override
             public void onChanged(@Nullable String s) {
                 //textView.setText(s);

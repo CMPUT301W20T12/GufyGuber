@@ -20,6 +20,38 @@
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Pickup Location">
+        <EditText
+            android:id="@+id/start_location_EditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:clickable="true"
+            android:longClickable="false"
+            android:inputType="none"
+            android:focusable="false"
+            android:ems="10">
+        </EditText>
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Drop-off Location">
+        <EditText
+            android:id="@+id/end_location_EditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:clickable="true"
+            android:longClickable="false"
+            android:inputType="none"
+            android:focusable="false"
+            android:ems="10">
+        </EditText>
+    </com.google.android.material.textfield.TextInputLayout>
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

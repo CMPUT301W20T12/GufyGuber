@@ -37,6 +37,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
+import androidx.fragment.app.FragmentManager;
 
 import com.google.type.LatLng;
 
@@ -74,26 +75,35 @@ public class CreateRideRequestFragment extends DialogFragment {
     public Dialog onCreateDialog(@Nullable Bundle ssavedInstanceState) {
         final View view = LayoutInflater.from(getActivity()).inflate(R.layout.create_ride_request_layout, null);
         fareEditText = view.findViewById(R.id.fare_EditText);
+        startLocationEditText = view.findViewById(R.id.start_location_EditText);
+        endLocationEditText = view.findViewById(R.id.end_location_EditText);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext())
                 .setView(view)
                 .setTitle("Create Ride Request")
                 .setNegativeButton("Cancel", null)
-                .setPositiveButton("Send Request", new DialogInterface.OnClickListener(){
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        if (validateEntries()) {
-                            LatLng testPickup = LatLng.newBuilder().setLatitude(13).setLongitude(13).build();
-                            LatLng testDropoff = LatLng.newBuilder().setLatitude(31).setLongitude(31).build();
-                            RideRequest newRequest = new RideRequest("TestRiderUID", Float.parseFloat(fareEditText.getText().toString()), new LocationInfo(testPickup, testDropoff));
-                            if (onCreatedListener != null) {
-                                onCreatedListener.onRideRequestCreated(newRequest);
-                            }
-                        } else {
-                            Toast.makeText(getContext(), "Missing Required Info", Toast.LENGTH_SHORT).show();
-                        }
+                .setPositiveButton("Send Request", null);
+
+        // Need to set the onClick here instead of in the builder because normal AlertDialog onClicks
+        // automatically close the dialog
+        final AlertDialog dialog = builder.create();
+        dialog.show();
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (validateEntries()) {
+                    LatLng testPickup = LatLng.newBuilder().setLatitude(13).setLongitude(13).build();
+                    LatLng testDropoff = LatLng.newBuilder().setLatitude(31).setLongitude(31).build();
+                    RideRequest newRequest = new RideRequest("TestRiderUID", Float.parseFloat(fareEditText.getText().toString()), new LocationInfo(testPickup, testDropoff));
+                    if (onCreatedListener != null) {
+                        onCreatedListener.onRideRequestCreated(newRequest);
                     }
-                });
+                    dialog.dismiss();
+                } else {
+                    Toast.makeText(getContext(), "Missing Required Info", Toast.LENGTH_LONG).show();
+                }
+            }
+        });
 
         startLocationEditText.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -109,7 +119,7 @@ public class CreateRideRequestFragment extends DialogFragment {
             }
         });
 
-        return builder.create();
+        return dialog;
     }
 
     /**
