@@ -34,12 +34,24 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.List;
+import java.util.Map;
 
 public class FirebaseManager {
+    /**
+     * Interface that allows us to return values asynchronously when loaded from our cloud Firestore
+     * @param <T> The return type of the value you're trying to fetch
+     */
+    public interface ReturnValueListener<T>{
+        public void returnValue(T value);
+    }
 
     // Singleton Pattern for this manager
     private static FirebaseManager reference;
@@ -53,6 +65,11 @@ public class FirebaseManager {
 
     // Tag for logging purposes
     private static final String TAG = "FirebaseManager";
+
+    // Firestore keys
+    public static final String FIRST_NAME_KEY = "first_name";
+    public static final String LAST_NAME_KEY = "last_name";
+    public static final String PHONE_NUMBER_KEY = "phone";
 
     /**
      * FireBaseManager's construction should be private since it's supposed to be a singleton
@@ -83,20 +100,20 @@ public class FirebaseManager {
     /**
      * Retrieves a RideRequest from our cloud Firestore
      * @param riderUID The user ID of the rider who created the RideRequest
-     * @return A RideRequest, or null if no RideRequest was found
+     * @param returnFunction The callback to use once we've finished retrieving a Vehicle
      */
-    public RideRequest fetchRideRequest(String riderUID) {
+    public void fetchRideRequest(final String riderUID, final ReturnValueListener<RideRequest> returnFunction) {
         //TODO: Retrieve a RideRequest from Firebase based on the requester's UID
-        return null;
+        returnFunction.returnValue(null);
     }
 
     /**
      * Gets all pending ride requests (requests without an assigned driver) from our cloud Firestore
-     * @return A collection of all pending ride requests from our cloud Firestore
+     * @param returnFunction The callback to use once we've finished retrieving a Vehicle
      */
-    public List<RideRequest> fetchPendingRideRequests() {
+    public void fetchPendingRideRequests(final ReturnValueListener<List<RideRequest>> returnFunction) {
         //TODO: Retrieve all pending ride requests from Firebase
-        return null;
+        returnFunction.returnValue(null);
     }
 
     /**
@@ -110,11 +127,29 @@ public class FirebaseManager {
     /**
      * Retrieves Rider information from our cloud Firestore
      * @param riderUID The user ID of the rider to retrieve a profile for
-     * @return A Rider, or null if no rider with that UID was found.
+     * @param returnFunction The callback to use once we've finished retrieving a Vehicle
      */
-    public Rider fetchRiderInfo(String riderUID) {
-        //TODO: Fetch information about a rider using their UID
-        return null;
+    public void fetchRiderInfo(final String riderUID, final ReturnValueListener<Rider> returnFunction) {
+        //TODO: Fetch information about a rider using their UID instead of their email
+        DocumentReference riderDoc = FirebaseFirestore.getInstance().collection("users").document(riderUID);
+        riderDoc.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.isSuccessful()) {
+                    DocumentSnapshot snapshot = task.getResult();
+                    if (snapshot.exists()) {
+                        Map<String, Object> docData = snapshot.getData();
+                        String email = riderUID;
+                        String firstName= String.valueOf(docData.get(FIRST_NAME_KEY));
+                        String lastName = String.valueOf(docData.get(LAST_NAME_KEY));
+                        String phoneNumber = String.valueOf(docData.get(PHONE_NUMBER_KEY));
+                        returnFunction.returnValue(new Rider(email, firstName, lastName, phoneNumber));
+                    }
+                }
+                Log.e("TAG", "Fetching rider info failed.");
+                returnFunction.returnValue(null);
+            }
+        });
     }
 
     /**
@@ -128,11 +163,11 @@ public class FirebaseManager {
     /**
      * Retrieves Driver information from our cloud Firestore
      * @param driverUID The user ID of the driver to retrieve a profile for
-     * @return A Driver, or null if no driver with that UID was found
+     * @param returnFunction The callback to use once we've finished retrieving a Vehicle
      */
-    public Driver fetchDriverInfo(String driverUID) {
+    public void fetchDriverInfo(final String driverUID, ReturnValueListener<Driver> returnFunction) {
         //TODO: Fetch information about a driver using their UID
-        return null;
+        returnFunction.returnValue(null);
     }
 
     public void storeVehicleInfo(Vehicle vehicle) {
@@ -141,12 +176,11 @@ public class FirebaseManager {
 
     /**
      * Retrieves Vehicle information from our cloud Firestore
-     * @param some param here
-     * @return A Vehicle, or null of no vehicle was found
+     * @param returnFunction The callback to use once we've finished retrieving a Vehicle
      */
-    public Vehicle fetchVehicleInfo() {
+    public void fetchVehicleInfo(ReturnValueListener<Vehicle> returnFunction) {
         //TODO: Decide what constitutes a key for getting vehicle info (especially if drivers have > 1 vehicle
         //TODO: Fetch information about a vehicle
-        return null;
+        returnFunction.returnValue(null);
     }
 }

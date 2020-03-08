@@ -25,17 +25,24 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 
+import com.example.gufyguber.FirebaseManager;
 import com.example.gufyguber.R;
+import com.example.gufyguber.Rider;
+import com.google.firebase.auth.FirebaseAuth;
+
+import org.w3c.dom.Text;
 
 public class ProfileFragment extends Fragment {
 
     private ProfileViewModel profileViewModel;
+    private TextView nameText;
+    private TextView phoneText;
+    private TextView emailText;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         profileViewModel = ViewModelProviders.of(this).get(ProfileViewModel.class);
         View root = inflater.inflate(R.layout.fragment_profile, container, false);
-
 
         //final TextView textView = root.findViewById(R.id.text_profile);
         profileViewModel.getText().observe(this, new Observer<String>() {
@@ -46,5 +53,23 @@ public class ProfileFragment extends Fragment {
             }
         });
         return root;
+    }
+
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        nameText = view.findViewById(R.id.rider_name);
+        emailText = view.findViewById(R.id.rider_email);
+        phoneText = view.findViewById(R.id.rider_phone);
+
+        FirebaseManager.getReference().fetchRiderInfo(FirebaseAuth.getInstance().getCurrentUser().getEmail(), new FirebaseManager.ReturnValueListener<Rider>() {
+            @Override
+            public void returnValue(Rider value) {
+                nameText.setText(String.format("%s %s", value.getFirstName(), value.getLastName()));
+                emailText.setText(value.getEmail());
+                phoneText.setText(value.getPhoneNumber());
+            }
+        });
     }
 }
