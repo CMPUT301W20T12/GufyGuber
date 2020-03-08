@@ -58,7 +58,32 @@ public class CreateRideRequestFragment extends DialogFragment {
     private EditText startLocationEditText;
     private EditText endLocationEditText;
 
+    private float tempFare;
     private LocationInfo tempLocationInfo;
+
+    public CreateRideRequestFragment() {
+
+    }
+
+    public CreateRideRequestFragment(float initialFare, LocationInfo initialLocationInfo) {
+        tempFare = initialFare;
+        tempLocationInfo = initialLocationInfo;
+    }
+
+    private void initUIElements() {
+        if (tempFare >= 0) {
+            fareEditText.setText(String.format("%.2f", tempFare));
+        }
+
+        if (tempLocationInfo != null) {
+            if (tempLocationInfo.getPickup() != null) {
+                startLocationEditText.setText(LocationInfo.latlngToString(tempLocationInfo.getPickup()));
+            }
+            if (tempLocationInfo.getDropoff() != null) {
+                endLocationEditText.setText(LocationInfo.latlngToString(tempLocationInfo.getDropoff()));
+            }
+        }
+    }
 
     @Override
     public void onAttach(Context context)  {
@@ -72,11 +97,12 @@ public class CreateRideRequestFragment extends DialogFragment {
 
     @NonNull
     @Override
-    public Dialog onCreateDialog(@Nullable Bundle ssavedInstanceState) {
+    public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
         final View view = LayoutInflater.from(getActivity()).inflate(R.layout.create_ride_request_layout, null);
         fareEditText = view.findViewById(R.id.fare_EditText);
         startLocationEditText = view.findViewById(R.id.start_location_EditText);
         endLocationEditText = view.findViewById(R.id.end_location_EditText);
+        initUIElements();
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext())
                 .setView(view)
@@ -127,7 +153,8 @@ public class CreateRideRequestFragment extends DialogFragment {
      * @return True if all required information has been entered in the fragment, false otherwise
      */
     private boolean validateEntries() {
-        //TODO: Probably have more to validate
-        return (!TextUtils.isEmpty(fareEditText.getText().toString()));
+        return (!TextUtils.isEmpty(fareEditText.getText().toString()) &&
+                !TextUtils.isEmpty(startLocationEditText.getText().toString()) &&
+                !TextUtils.isEmpty(endLocationEditText.getText().toString()));
     }
 }

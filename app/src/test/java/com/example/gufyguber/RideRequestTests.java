@@ -36,9 +36,7 @@ public class RideRequestTests {
 
     @Before
     public void testInit() {
-        LatLng testPickup = LatLng.newBuilder().setLatitude(13).setLongitude(13).build();
-        LatLng testDropoff = LatLng.newBuilder().setLatitude(31).setLongitude(31).build();
-        testRideRequest = new RideRequest("123456789", 13.13f, testPickup, testDropoff);
+        testRideRequest = GenerateTestRequest();
     }
 
     @Test
@@ -66,5 +64,10 @@ public class RideRequestTests {
         assertEquals(RideRequest.Status.COMPLETED, testRideRequest.getStatus());
     }
 
-
+  public static RideRequest GenerateTestRequest() {
+      LatLng testPickup = LatLng.newBuilder().setLatitude(13).setLongitude(13).build();
+      LatLng testDropoff = LatLng.newBuilder().setLatitude(31).setLongitude(31).build();
+      LocationInfo testLocation = new LocationInfo(testPickup, testDropoff);
+      return new RideRequest("123456789", 13.13f, testLocation);
+  }
 }

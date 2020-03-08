@@ -30,6 +30,7 @@ import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
 import com.google.android.material.navigation.NavigationView;
+import com.google.type.LatLng;
 
 import androidx.drawerlayout.widget.DrawerLayout;
 
@@ -57,7 +58,10 @@ public class NavigationActivity extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                new CreateRideRequestFragment().show(getSupportFragmentManager(), "create_ride_request");
+                LatLng testPickup = LatLng.newBuilder().setLatitude(13).setLongitude(13).build();
+                LatLng testDropoff = LatLng.newBuilder().setLatitude(31).setLongitude(31).build();
+                LocationInfo testLocation = new LocationInfo(testPickup, testDropoff);
+                new CreateRideRequestFragment(13f, testLocation).show(getSupportFragmentManager(), "create_ride_request");
             }
         });
 

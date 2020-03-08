@@ -44,6 +44,10 @@ public class LocationInfo {
         setCurrent(pickup);
     }
 
+    public static String latlngToString(LatLng latlng) {
+        return String.format("(%f, %f)", latlng.getLatitude(), latlng.getLongitude());
+    }
+
     /**
      * Calculates the distance between current and dropoff
      * @return The distance between current and dropoff in meters
