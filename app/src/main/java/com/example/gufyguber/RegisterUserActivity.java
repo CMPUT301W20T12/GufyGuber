@@ -67,6 +67,7 @@ public class RegisterUserActivity extends AppCompatActivity {
     private Button register;
     private User newUser;
     private Vehicle newVehicle;
+    private String UID;
 
     private FirebaseAuth mAuth;
 
@@ -90,6 +91,7 @@ public class RegisterUserActivity extends AppCompatActivity {
             plateNumber = findViewById(R.id.plate_number);
             seatNumber = findViewById(R.id.seat_number);
         }
+        UID = intent.getStringExtra("UID");
         email = findViewById(R.id.email);
         email.setText(intent.getStringExtra("email"));
         firstName = findViewById(R.id.first_name);
@@ -103,7 +105,7 @@ public class RegisterUserActivity extends AppCompatActivity {
             public void onClick(View v) {
                 if(validateForm()) {
                     if(userType.equals("Rider")) {
-                        newUser = new Rider(email.getText().toString().toLowerCase(),
+                        newUser = new Rider(UID, email.getText().toString().toLowerCase(),
                                 firstName.getText().toString().toLowerCase(),
                                 lastName.getText().toString().toLowerCase(),
                                 phoneNumber.getText().toString());
@@ -114,7 +116,7 @@ public class RegisterUserActivity extends AppCompatActivity {
                                     make.getText().toString(),
                                     plateNumber.getText().toString(),
                                     Integer.parseInt(seatNumber.getText().toString()));
-                            newUser = new Driver(email.getText().toString().toLowerCase(),
+                            newUser = new Driver(UID, email.getText().toString().toLowerCase(),
                                     firstName.getText().toString().toLowerCase(),
                                     lastName.getText().toString().toLowerCase(),
                                     phoneNumber.getText().toString(),
@@ -129,13 +131,14 @@ public class RegisterUserActivity extends AppCompatActivity {
     private void createAccount(User newUser, String userType, FirebaseFirestore db) {
         final CollectionReference users = db.collection("users");
 
-        Log.d(TAG, "createAccount:" + newUser.getEmail());
+        Log.d(TAG, "createAccount:" + newUser.getUID() + " - " + newUser.getEmail());
 
         HashMap<String, String> data = new HashMap<>();
-        data.put("email", newUser.getEmail());
+        data.put("UID", newUser.getUID());
 
         HashMap<String, String> userData = new HashMap<>();
 
+        userData.put("email", newUser.getEmail());
         userData.put("first_name", newUser.getFirstName());
         userData.put("last_name", newUser.getLastName());
         userData.put("phone", newUser.getPhoneNumber());
@@ -145,7 +148,7 @@ public class RegisterUserActivity extends AppCompatActivity {
             uploadVehicleInfo(db);
         }
 
-        users.document(newUser.getEmail())
+        users.document(newUser.getUID())
                 .set(userData)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
@@ -231,7 +234,7 @@ public class RegisterUserActivity extends AppCompatActivity {
         vehicleData.put("model", ((Driver)newUser).getVehicle().getModel());
         vehicleData.put("seat_number", Integer.toString(((Driver)newUser).getVehicle().getSeatNumber()));
         vehicleData.put("plate_number", ((Driver)newUser).getVehicle().getPlateNumber());
-        vehicles.document(newUser.getEmail())
+        vehicles.document(newUser.getUID())
                 .set(vehicleData)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override

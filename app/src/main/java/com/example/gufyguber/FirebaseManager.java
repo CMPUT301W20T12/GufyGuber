@@ -143,7 +143,7 @@ public class FirebaseManager {
                         String firstName= String.valueOf(docData.get(FIRST_NAME_KEY));
                         String lastName = String.valueOf(docData.get(LAST_NAME_KEY));
                         String phoneNumber = String.valueOf(docData.get(PHONE_NUMBER_KEY));
-                        returnFunction.returnValue(new Rider(email, firstName, lastName, phoneNumber));
+                        returnFunction.returnValue(new Rider(riderUID, email, firstName, lastName, phoneNumber));
                     }
                 }
                 Log.e("TAG", "Fetching rider info failed.");

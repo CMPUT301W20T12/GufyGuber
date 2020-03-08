@@ -78,6 +78,7 @@ public class SignInActivity extends AppCompatActivity {
     private TextView mStatusTextView;
     private SignInButton signInButton;
     private Button signOutButton;
+    private FirebaseManager firebaseManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -225,10 +226,10 @@ public class SignInActivity extends AppCompatActivity {
                         if (task.isSuccessful()) {
                             // If successful, get user details (email, name)
                             Log.d(TAG, "signInWithCredential: success");
-                            FirebaseUser user = mFirebaseAuth.getCurrentUser();
+                            final FirebaseUser user = mFirebaseAuth.getCurrentUser();
 
-                            // query firetstore 'users' db for account email
-                            DocumentReference docRef = mFirebaseFirestore.collection("users").document(account.getEmail());
+                            // query firestore 'users' db for account email
+                            DocumentReference docRef = mFirebaseFirestore.collection("users").document(user.getUid());
                             docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                                 @Override
                                 public void onComplete(@NonNull Task<DocumentSnapshot> task) {
@@ -237,12 +238,14 @@ public class SignInActivity extends AppCompatActivity {
                                         if (doc.exists()) {
                                             // if email doc exists, user is regiestered as driver/rider and can be directed to next activity
                                             Log.d("ACCNT", "Document exists, sending user to map screen");
+                                            updateUI(user);
                                         } else {
                                             // if email doc not found, user may be authorized, but is still ont registered to use the app
                                             // fragment will be displayed allowing them to select user type, and finish signing up
                                             Log.d("ACCNT", "Document does not exist, sending user to sign up");
                                             Bundle bundle = new Bundle();
                                             // pass account info into fragment to auto-pop some details in registration form
+                                            bundle.putString("UID", user.getUid());
                                             bundle.putString("email", account.getEmail());
                                             bundle.putString("firstName", account.getGivenName());
                                             bundle.putString("lastName", account.getFamilyName());
@@ -253,7 +256,6 @@ public class SignInActivity extends AppCompatActivity {
                                     }
                                 }
                             });
-                            updateUI(user);
                         } else {
                             Log.w(TAG, "signInWithCredential: failure");
                             Snackbar.make(findViewById(R.id.main_layout),
