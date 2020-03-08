@@ -134,4 +134,19 @@ public class FirebaseManager {
         //TODO: Fetch information about a driver using their UID
         return null;
     }
+
+    public void storeVehicleInfo(Vehicle vehicle) {
+        //TODO: Store a new Vehicle in Firebase, or update an existing vehicle
+    }
+
+    /**
+     * Retrieves Vehicle information from our cloud Firestore
+     * @param some param here
+     * @return A Vehicle, or null of no vehicle was found
+     */
+    public Vehicle fetchVehicleInfo() {
+        //TODO: Decide what constitutes a key for getting vehicle info (especially if drivers have > 1 vehicle
+        //TODO: Fetch information about a vehicle
+        return null;
+    }
 }
