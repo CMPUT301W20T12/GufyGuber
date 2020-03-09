@@ -19,8 +19,6 @@
 // Date: Feb.29.2020
 // Purpose: To collect location information for a Ride Request
 
-// Last Updated: Mar.01.2020 by Robert MacGillivray
-
 package com.example.gufyguber;
 
 import com.google.type.LatLng;
@@ -42,6 +40,10 @@ public class LocationInfo {
         setPickup(pickup);
         setDropoff(dropoff);
         setCurrent(pickup);
+    }
+
+    public static String latlngToString(LatLng latlng) {
+        return String.format("(%f, %f)", latlng.getLatitude(), latlng.getLongitude());
     }
 
     /**

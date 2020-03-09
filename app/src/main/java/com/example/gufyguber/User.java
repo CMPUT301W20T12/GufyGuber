@@ -31,7 +31,6 @@ package com.example.gufyguber;
  * @see Driver
  */
 public abstract class User {
-    private String username;
     private String email;
     private String firstName;
     private String lastName;
@@ -40,8 +39,6 @@ public abstract class User {
 
     /**
      * This is the constructor method that sets the users attributes
-     * @param username
-     *  The unique username of the user
      * @param email
      *  The email address associated with the account
      * @param firstName
@@ -51,22 +48,12 @@ public abstract class User {
      * @param phoneNumber
      *  The users phone number
      */
-    public User(String username, String email, String firstName, String lastName,
+    public User(String email, String firstName, String lastName,
                 String phoneNumber) {
-        this.setUsername(username);
         this.setEmail(email);
         this.setFirstName(firstName);
         this.setLastName(lastName);
         this.setPhoneNumber(phoneNumber);
-    }
-
-    /**
-     * This returns the user's username
-     * @return
-     *  Return the username string
-     */
-    public String getUsername() {
-        return username;
     }
 
     /**
@@ -103,15 +90,6 @@ public abstract class User {
      */
     public String getPhoneNumber() {
         return phoneNumber;
-    }
-
-    /**
-     * This sets the account's username if it is unique
-     * @param username
-     *  This is a candidate username to set for the user
-     */
-    public void setUsername(String username) {
-        this.username = username;
     }
 
     /**
