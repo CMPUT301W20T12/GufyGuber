@@ -20,6 +20,7 @@
         import com.example.gufyguber.LoginActivity;
         import com.example.gufyguber.NavigationActivity;
         import com.example.gufyguber.R;
+        import com.example.gufyguber.RideRequest;
         import com.example.gufyguber.ui.CurrentRequest.CancelRequestFragment;
 
         /**
@@ -47,8 +48,6 @@ public class CancelFragment extends DialogFragment {
             public void onClick(View v) {
                 getFragmentManager().beginTransaction().remove(CancelFragment.this).commit();
                 getActivity().onBackPressed();
-
-
             }
         });
 

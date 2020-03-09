@@ -19,8 +19,6 @@
 // Date: Feb.25.2020
 // Purpose: To model data related to the time of Ride Requests and provide some associated static helper functions
 
-// Last Updated: Feb.25.2020 by Robert MacGillivray
-
 package com.example.gufyguber;
 
 import java.util.Date;
@@ -31,14 +29,17 @@ import java.util.Date;
 public class TimeInfo {
     private Date requestOpenTime;
     public void setRequestOpenTime() { requestAcceptedTime = new Date(); }
+    public void setRequestOpenTime(Date requestOpenTime) { this.requestOpenTime = requestOpenTime; }
     public Date getRequestOpenTime() { return requestOpenTime; }
 
     private Date requestAcceptedTime;
     public void setRequestAcceptedTime() { requestAcceptedTime = new Date(); }
+    public void setRequestAcceptedTime(Date requestAcceptedTime) { this.requestAcceptedTime = requestAcceptedTime; }
     public Date getRequestAcceptedTime() { return requestAcceptedTime; }
 
     private Date requestCompletedTime;
     public void setRequestCompletedTime() { requestCompletedTime = new Date(); }
+    public void setRequestCompletedTime(Date requestCompletedTime) { this.requestCompletedTime = requestCompletedTime; }
     public Date getRequestCompletedTime() { return requestCompletedTime; }
 
     /**

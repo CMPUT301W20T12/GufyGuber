@@ -34,5 +34,9 @@
     <string name="menu_map">Map</string>
     <string name="menu_current_requests">Current Requests</string>
     <string name="menu_profile">Profile</string>
+    <string name="menu_contact">Contact</string>
+    <string name="fare_edittext_hint">Proposed Fare</string>
+    <string name="fair_fair_default_hint">Fair Fare(TM): $13</string>
+
 
 </resources>
