@@ -25,7 +25,10 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import com.example.gufyguber.CreateRideRequestFragment;
+import com.example.gufyguber.LocationInfo;
 import com.example.gufyguber.R;
+import com.example.gufyguber.RideRequest;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -34,11 +37,15 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
-public class MapFragment extends Fragment implements OnMapReadyCallback {
+public class MapFragment extends Fragment implements OnMapReadyCallback, CreateRideRequestFragment.CreateRideRequestListener, CreateRideRequestFragment.CancelCreateRideRequestListener {
 
     private GoogleMap mMap;
-    private Marker myMarker;
+    private Marker pickupMarker;
+    private Marker dropoffMarker;
+    private CreateRideRequestFragment requestDialog;
+
     public MapFragment() {
 
     }
@@ -47,6 +54,19 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
         View v = inflater.inflate(R.layout.fragment_map, container, false);
+
+        // makes a button for us to create ride requests (RIDER) from navigation drawer activity default
+
+        FloatingActionButton fab = v.findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (requestDialog == null) {
+                    requestDialog = new CreateRideRequestFragment();
+                }
+                requestDialog.show(getChildFragmentManager(), "create_ride_request");
+            }
+        });
 
         return v;
     }
@@ -59,7 +79,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         mapFragment.getMapAsync(this);
 
     }
-
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
@@ -80,12 +99,63 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
             @Override
             public void onMapClick(LatLng latLng) {
-                MarkerInfo newMarker = new MarkerInfo();
-                newMarker.makeMarker(latLng, mMap);
+                if (requestDialog != null) {
+                    boolean dirty = false;
+                    if (requestDialog.settingStart) {
+                        requestDialog.setNewPickup(latLng);
+                        if (pickupMarker != null) {
+                            pickupMarker.remove();
+                        }
+                        MarkerInfo newMarker = new MarkerInfo();
+                        pickupMarker = newMarker.makeMarker("Pickup", true, latLng, mMap);
+                        dirty = true;
+                    }
+
+                    if (requestDialog.settingEnd) {
+                        requestDialog.setNewDropoff(latLng);
+                        if (dropoffMarker != null) {
+                            dropoffMarker.remove();
+                        }
+                        MarkerInfo newMarker = new MarkerInfo();
+                        dropoffMarker = newMarker.makeMarker("Dropoff", false, latLng, mMap);
+                        dirty = true;
+                    }
+
+                    if (dirty) {
+                        requestDialog.show(getChildFragmentManager(), "create_ride_request");
+                        dirty = false;
+                    }
+                }
             }
         });
-
     }
 
+    /**
+     * Automatically called when the CreateRideRequestFragment builds a new RideRequest
+     * @param newRequest The request created by the dialog fragment
+     */
+    public void onRideRequestCreated(RideRequest newRequest) {
+        RideRequest.setCurrentRideRequest(newRequest);
+        if (pickupMarker != null) {
+            pickupMarker.remove();
+        }
+        if (dropoffMarker != null) {
+            dropoffMarker.remove();
+        }
+        pickupMarker = null;
+        dropoffMarker = null;
+        requestDialog = null;
+    }
 
+    public void onRideRequestCreationCancelled() {
+        if (pickupMarker != null) {
+            pickupMarker.remove();
+        }
+        if (dropoffMarker != null) {
+            dropoffMarker.remove();
+        }
+        pickupMarker = null;
+        dropoffMarker = null;
+        requestDialog = null;
+    }
 }

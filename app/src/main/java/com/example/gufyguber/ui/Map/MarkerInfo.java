@@ -25,24 +25,24 @@ public class MarkerInfo extends MapFragment implements OnMapReadyCallback {
 
     private Marker marker;
 
-    public void makeMarker(LatLng point, GoogleMap mMap) {
+    public Marker makeMarker(String title, boolean startPoint, LatLng point, GoogleMap mMap) {
 
                 // creates a maker and zooms to it. Get coordinates.
                 marker = mMap.addMarker(new MarkerOptions()
                         .position(point)
-                        .title("Start Point??")
+                        .title(title)
                         .snippet(point.toString())
-                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE))
+                        .icon(BitmapDescriptorFactory.defaultMarker(startPoint ? BitmapDescriptorFactory.HUE_AZURE : BitmapDescriptorFactory.HUE_ROSE))
                 );
 
                 //zoom
                 marker.setPosition(point);
                 mMap.animateCamera(CameraUpdateFactory.newLatLng(point));
 
-                float zoomLevel = 18.0f; //max is 21
+                float zoomLevel = 16.0f; //max is 21
                 mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(point, zoomLevel));
 
-
+                return marker;
             }
 
 

@@ -21,20 +21,24 @@
 
 package com.example.gufyguber;
 
-import com.google.type.LatLng;
+import com.google.android.gms.maps.model.LatLng;
 
 public class LocationInfo {
     private LatLng pickup;
-    private void setPickup(LatLng pickup) { this.pickup = pickup; }
+    public void setPickup(LatLng pickup) { this.pickup = pickup; }
     public LatLng getPickup() { return pickup; }
 
     private LatLng dropoff;
-    private void setDropoff(LatLng dropoff) { this.dropoff = dropoff; }
+    public void setDropoff(LatLng dropoff) { this.dropoff = dropoff; }
     public LatLng getDropoff() { return this.dropoff; }
 
     public LatLng current;
-    private void setCurrent(LatLng current) { this.current = current; }
+    public void setCurrent(LatLng current) { this.current = current; }
     public LatLng getCurrent() { return current; }
+
+    public LocationInfo () {
+
+    }
 
     public LocationInfo(LatLng pickup, LatLng dropoff) {
         setPickup(pickup);
@@ -43,7 +47,7 @@ public class LocationInfo {
     }
 
     public static String latlngToString(LatLng latlng) {
-        return String.format("(%f, %f)", latlng.getLatitude(), latlng.getLongitude());
+        return String.format("(%f, %f)", latlng.latitude, latlng.longitude);
     }
 
     /**
