@@ -11,22 +11,9 @@
     tools:context=".MainActivity">
 
     <Button
-        android:id="@+id/press"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="SCAN"
-        android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true"/>
-
-    <TextView
-        android:id="@+id/result"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/press"
-        android:layout_marginTop="5dp"
-        android:layout_centerHorizontal="true"
-        android:textSize="25sp"
-        android:padding="5dp"
-        android:gravity="center_horizontal"/>
+        android:id="@+id/begin"
+        android:text="BEGIN"/>
 
 </RelativeLayout>
