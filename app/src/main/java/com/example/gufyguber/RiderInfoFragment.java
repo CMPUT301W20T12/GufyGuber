@@ -22,12 +22,19 @@ import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 
+import org.w3c.dom.Text;
+
 public class RiderInfoFragment extends DialogFragment {
+
+    TextView riderName;
+    TextView riderPhoneNumber;
+    TextView riderEmail;
 
     @Override
     public void onAttach(Context context) { super.onAttach((context)); }
