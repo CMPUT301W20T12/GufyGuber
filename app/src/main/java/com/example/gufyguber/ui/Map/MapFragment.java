@@ -26,6 +26,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.example.gufyguber.CreateRideRequestFragment;
+import com.example.gufyguber.FirebaseManager;
 import com.example.gufyguber.LocationInfo;
 import com.example.gufyguber.R;
 import com.example.gufyguber.RideRequest;
@@ -135,7 +136,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
      * @param newRequest The request created by the dialog fragment
      */
     public void onRideRequestCreated(RideRequest newRequest) {
-        RideRequest.setCurrentRideRequest(newRequest);
+        FirebaseManager.getReference().storeRideRequest(newRequest);
         if (pickupMarker != null) {
             pickupMarker.remove();
         }

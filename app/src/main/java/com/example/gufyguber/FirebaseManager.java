@@ -38,11 +38,15 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.GeoPoint;
 
+import java.sql.Time;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -70,10 +74,23 @@ public class FirebaseManager {
     private static final String TAG = "FirebaseManager";
 
     // Firestore keys
+
+    // User Keys
     public static final String EMAIL_KEY = "email";
     public static final String FIRST_NAME_KEY = "first_name";
     public static final String LAST_NAME_KEY = "last_name";
     public static final String PHONE_NUMBER_KEY = "phone";
+
+    // Ride Request Keys
+    public static final String RIDE_REQUEST_COLLECTION = "ride_requests";
+    public static final String STATUS_KEY = "status";
+    public static final String DRIVER_KEY = "driver_uid";
+    public static final String FARE_KEY = "fare";
+    public static final String PICKUP_KEY = "pickup";
+    public static final String DROPOFF_KEY = "dropoff";
+    public static final String REQUEST_OPEN_TIME_KEY = "request_start";
+    public static final String REQUEST_ACCEPTED_TIME_KEY = "request_accepted";
+    public static final String REQUEST_CLOSED_TIME_KEY = "request_closed";
 
     /**
      * FireBaseManager's construction should be private since it's supposed to be a singleton
@@ -95,10 +112,37 @@ public class FirebaseManager {
 
     /**
      * Stores a RideRequest in our cloud Firestore
-     * @param rideRequest The RideRequest object to store using Firebase
+     * @param rideRequest The valid RideRequest object to store using Firebase
      */
     public void storeRideRequest(RideRequest rideRequest) {
-        //TODO: Store a rideRequest on Firebase, or update the details of an existing request
+        CollectionReference requestDoc = FirebaseFirestore.getInstance().collection(RIDE_REQUEST_COLLECTION);
+
+        Log.d(TAG, String.format("Storing Ride Request for user [%s]", rideRequest.getRiderUID()));
+
+        HashMap<String, Object> data = new HashMap<>();
+        data.put(DRIVER_KEY, rideRequest.getDriverUID());
+        data.put(STATUS_KEY, rideRequest.getStatus().name());
+        data.put(FARE_KEY, rideRequest.getOfferedFare());
+        data.put(PICKUP_KEY, rideRequest.getLocationInfo().pickupToGeoPoint());
+        data.put(DROPOFF_KEY, rideRequest.getLocationInfo().dropoffToGeoPoint());
+        data.put(REQUEST_OPEN_TIME_KEY, rideRequest.getTimeInfo().getRequestOpenTime());
+        data.put(REQUEST_ACCEPTED_TIME_KEY, rideRequest.getTimeInfo().getRequestAcceptedTime());
+        data.put(REQUEST_CLOSED_TIME_KEY, rideRequest.getTimeInfo().getRequestClosedTime());
+
+        requestDoc.document(rideRequest.getRiderUID())
+                .set(data)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Log.d(TAG, "Ride request addition successful");
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.d(TAG, "Ride request addition failed" + e.toString());
+                    }
+                });
     }
 
     /**
@@ -107,8 +151,45 @@ public class FirebaseManager {
      * @param returnFunction The callback to use once we've finished retrieving a Vehicle
      */
     public void fetchRideRequest(final String riderUID, final ReturnValueListener<RideRequest> returnFunction) {
-        //TODO: Retrieve a RideRequest from Firebase based on the requester's UID
+        DocumentReference requestDoc = FirebaseFirestore.getInstance().collection(RIDE_REQUEST_COLLECTION).document(riderUID);
+        requestDoc.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.isSuccessful()) {
+                    DocumentSnapshot snapshot = task.getResult();
+                    if (snapshot.exists()) {
+
+                        String driverUID = snapshot.getString(DRIVER_KEY);
+                        RideRequest.Status rideStatus = RideRequest.Status.valueOf(snapshot.getString(STATUS_KEY));
+                        float fare = snapshot.getDouble(FARE_KEY).floatValue();
+                        GeoPoint pickup = snapshot.getGeoPoint(PICKUP_KEY);
+                        GeoPoint dropoff = snapshot.getGeoPoint(DROPOFF_KEY);
+                        LocationInfo locationInfo = new LocationInfo(pickup, dropoff);
+                        Timestamp requestOpenTime = snapshot.getTimestamp(REQUEST_OPEN_TIME_KEY);
+                        Date requestOpenDate = requestOpenTime == null ? null : requestOpenTime.toDate();
+                        Timestamp requestAcceptedTime = snapshot.getTimestamp(REQUEST_ACCEPTED_TIME_KEY);
+                        Date requestAcceptedDate = requestAcceptedTime == null ? null : requestAcceptedTime.toDate();
+                        Timestamp requestClosedTime = snapshot.getTimestamp(REQUEST_CLOSED_TIME_KEY);
+                        Date requestClosedDate = requestClosedTime == null ? null : requestClosedTime.toDate();
+                        TimeInfo timeInfo = new TimeInfo(requestOpenDate, requestAcceptedDate, requestClosedDate);
+
+                        returnFunction.returnValue(new RideRequest(riderUID, driverUID, rideStatus, fare, locationInfo, timeInfo));
+                    } else {
+                        Log.e(TAG, String.format("Ride request info for [%s] not found on Firestore.", riderUID));
+                        returnFunction.returnValue(null);
+                    }
+                } else {
+                    Log.e(TAG, "Fetching ride request info failed. Issue communicating with Firestore.");
+                    returnFunction.returnValue(null);
+                }
+            }
+        });
         returnFunction.returnValue(null);
+    }
+
+    public void deleteRideRequest(final String riderUID) {
+        DocumentReference requestDoc = FirebaseFirestore.getInstance().collection(RIDE_REQUEST_COLLECTION).document(riderUID);
+        requestDoc.delete();
     }
 
     /**
@@ -125,7 +206,6 @@ public class FirebaseManager {
      * @param rider The Rider to store in our cloud Firestore
      */
     public void storeRiderInfo(Rider rider) {
-        //TODO: Store a new Rider in Firebase, or update an existing Rider
         CollectionReference usersDoc = FirebaseFirestore.getInstance().collection("users");
 
         Log.d(TAG, "createAccount:" + rider.getUID() + " - " + rider.getEmail());
@@ -160,7 +240,6 @@ public class FirebaseManager {
      * @param returnFunction The callback to use once we've finished retrieving a Vehicle
      */
     public void fetchRiderInfo(final String riderUID, final ReturnValueListener<Rider> returnFunction) {
-        //TODO: Fetch information about a rider using their UID instead of their email
         DocumentReference riderDoc = FirebaseFirestore.getInstance().collection("users").document(riderUID);
         riderDoc.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
@@ -175,7 +254,7 @@ public class FirebaseManager {
                         String phoneNumber = String.valueOf(docData.get(PHONE_NUMBER_KEY));
                         returnFunction.returnValue(new Rider(riderUID, email, firstName, lastName, phoneNumber));
                     } else {
-                        Log.e(TAG, String.format("Rider info for %s not found on Firestore.", riderUID));
+                        Log.w(TAG, String.format("Rider info for %s not found on Firestore.", riderUID));
                         returnFunction.returnValue(null);
                     }
                 } else {

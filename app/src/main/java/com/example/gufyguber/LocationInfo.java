@@ -22,6 +22,7 @@
 package com.example.gufyguber;
 
 import com.google.android.gms.maps.model.LatLng;
+import com.google.firebase.firestore.GeoPoint;
 
 public class LocationInfo {
     private LatLng pickup;
@@ -44,6 +45,30 @@ public class LocationInfo {
         setPickup(pickup);
         setDropoff(dropoff);
         setCurrent(pickup);
+    }
+
+    public LocationInfo(GeoPoint pickup, GeoPoint dropoff) {
+        if (pickup != null) {
+            setPickup(new LatLng(pickup.getLatitude(), pickup.getLongitude()));
+        } else {
+            setPickup(null);
+        }
+
+        if (dropoff != null) {
+            setDropoff(new LatLng(dropoff.getLatitude(), dropoff.getLongitude()));
+        } else {
+            setDropoff(null);
+        }
+
+        setCurrent(getPickup());
+    }
+
+    public GeoPoint pickupToGeoPoint() {
+        return new GeoPoint(getPickup().latitude, getPickup().longitude);
+    }
+
+    public GeoPoint dropoffToGeoPoint() {
+        return new GeoPoint(getPickup().latitude, getPickup().longitude);
     }
 
     public static String latlngToString(LatLng latlng) {

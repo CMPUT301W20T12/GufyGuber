@@ -28,9 +28,11 @@ import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 
+import com.example.gufyguber.FirebaseManager;
 import com.example.gufyguber.LocationInfo;
 import com.example.gufyguber.R;
 import com.example.gufyguber.RideRequest;
+import com.google.firebase.auth.FirebaseAuth;
 
 public class CurrentRequestFragment extends Fragment {
 
@@ -78,10 +80,15 @@ public class CurrentRequestFragment extends Fragment {
                 }
             });
 
-        RideRequest request = RideRequest.getCurrentRideRequest();
-        if (request != null) {
-            pickupLocationText.setText(LocationInfo.latlngToString(request.getLocationInfo().getPickup()));
-            dropoffLocationText.setText(LocationInfo.latlngToString(request.getLocationInfo().getDropoff()));
-        }
+        FirebaseManager.getReference().fetchRideRequest(FirebaseAuth.getInstance().getCurrentUser().getUid(), new FirebaseManager.ReturnValueListener<RideRequest>() {
+            @Override
+            public void returnValue(RideRequest value) {
+                if (value != null) {
+                    pickupLocationText.setText(LocationInfo.latlngToString(value.getLocationInfo().getPickup()));
+                    dropoffLocationText.setText(LocationInfo.latlngToString(value.getLocationInfo().getDropoff()));
+                }
+            }
+        });
+
     }
 }
