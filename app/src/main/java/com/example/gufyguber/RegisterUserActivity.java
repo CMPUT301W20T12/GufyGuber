@@ -109,7 +109,8 @@ public class RegisterUserActivity extends AppCompatActivity {
                                 firstName.getText().toString().toLowerCase(),
                                 lastName.getText().toString().toLowerCase(),
                                 phoneNumber.getText().toString());
-                        createAccount(newUser, userType, db);
+                        FirebaseManager.getReference().storeRiderInfo((Rider) newUser);
+                        finish();
                     }else
                         if(validateVehicleInfo()) {
                             newVehicle = new Vehicle(model.getText().toString(),
@@ -121,48 +122,13 @@ public class RegisterUserActivity extends AppCompatActivity {
                                     lastName.getText().toString().toLowerCase(),
                                     phoneNumber.getText().toString(),
                                     newVehicle);
-                            createAccount(newUser, userType, db);
+                            FirebaseManager.getReference().storeDriverInfo((Driver) newUser);
+                            FirebaseManager.getReference().storeVehicleInfo((Driver) newUser);
+                            finish();
                     }
                 }
             }
         });
-    }
-
-    private void createAccount(User newUser, String userType, FirebaseFirestore db) {
-        final CollectionReference users = db.collection("users");
-
-        Log.d(TAG, "createAccount:" + newUser.getUID() + " - " + newUser.getEmail());
-
-        HashMap<String, String> data = new HashMap<>();
-        data.put("UID", newUser.getUID());
-
-        HashMap<String, String> userData = new HashMap<>();
-
-        userData.put("email", newUser.getEmail());
-        userData.put("first_name", newUser.getFirstName());
-        userData.put("last_name", newUser.getLastName());
-        userData.put("phone", newUser.getPhoneNumber());
-        userData.put("userType", userType);
-
-        if(userType.equals("Driver")){
-            uploadVehicleInfo(db);
-        }
-
-        users.document(newUser.getUID())
-                .set(userData)
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        Log.d(TAG, "User addition successful");
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.d(TAG, "User addition failed" + e.toString());
-                    }
-                });
-        finish();
     }
 
     private boolean validateForm() {
@@ -217,37 +183,5 @@ public class RegisterUserActivity extends AppCompatActivity {
         }
         return valid;
 
-    }
-
-
-    /**
-     * This method adds the drivers vehicle information to the "Vehicles" table
-     * in the Firestore database
-     * @param db
-     *  Reference to the database
-     */
-    private void uploadVehicleInfo(FirebaseFirestore db){
-        final CollectionReference vehicles = db.collection("vehicles");
-        HashMap<String, String> vehicleData = new HashMap<>();
-
-        vehicleData.put("make", ((Driver)newUser).getVehicle().getMake());
-        vehicleData.put("model", ((Driver)newUser).getVehicle().getModel());
-        vehicleData.put("seat_number", Integer.toString(((Driver)newUser).getVehicle().getSeatNumber()));
-        vehicleData.put("plate_number", ((Driver)newUser).getVehicle().getPlateNumber());
-        vehicles.document(newUser.getUID())
-                .set(vehicleData)
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        Log.d(TAG, "Vehicle addition successful");
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.d(TAG, "Vehicle addition failed" + e.toString());
-                    }
-                });
-        return;
     }
 }

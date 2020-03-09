@@ -35,11 +35,15 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -121,6 +125,32 @@ public class FirebaseManager {
      */
     public void storeRiderInfo(Rider rider) {
         //TODO: Store a new Rider in Firebase, or update an existing Rider
+        CollectionReference usersDoc = FirebaseFirestore.getInstance().collection("users");
+
+        Log.d(TAG, "createAccount:" + rider.getUID() + " - " + rider.getEmail());
+        HashMap<String, String> data = new HashMap<>();
+        data.put("UID", rider.getUID());
+        HashMap<String, String> userData = new HashMap<>();
+        userData.put("email", rider.getEmail());
+        userData.put("first_name", rider.getFirstName());
+        userData.put("last_name", rider.getLastName());
+        userData.put("phone", rider.getPhoneNumber());
+        userData.put("userType", "rider");
+
+        usersDoc.document(rider.getUID())
+                .set(userData)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Log.d(TAG, "User addition successful");
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.d(TAG, "User addition failed" + e.toString());
+                    }
+                });
     }
 
     /**
@@ -156,7 +186,32 @@ public class FirebaseManager {
      * @param driver The Driver to store in our cloud Firestore.
      */
     public void storeDriverInfo(Driver driver) {
-        //TODO: Store a new Driver in Firebase, or update an existing Driver
+        CollectionReference usersDoc = FirebaseFirestore.getInstance().collection("users");
+
+        Log.d(TAG, "createAccount:" + driver.getUID() + " - " + driver.getEmail());
+        HashMap<String, String> data = new HashMap<>();
+        data.put("UID", driver.getUID());
+        HashMap<String, String> userData = new HashMap<>();
+        userData.put("email", driver.getEmail());
+        userData.put("first_name", driver.getFirstName());
+        userData.put("last_name", driver.getLastName());
+        userData.put("phone", driver.getPhoneNumber());
+        userData.put("userType", "driver");
+
+        usersDoc.document(driver.getUID())
+                .set(userData)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Log.d(TAG, "User addition successful");
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.d(TAG, "User addition failed" + e.toString());
+                    }
+                });
     }
 
     /**
@@ -169,8 +224,33 @@ public class FirebaseManager {
         returnFunction.returnValue(null);
     }
 
-    public void storeVehicleInfo(Vehicle vehicle) {
-        //TODO: Store a new Vehicle in Firebase, or update an existing vehicle
+    /**
+     * Adds or updates a Driver's vehicle in our cloud Firestore
+     * @param driver
+     *  This is the driver who is registering the vehicle
+     */
+    public void storeVehicleInfo(Driver driver) {
+        CollectionReference vehicles = FirebaseFirestore.getInstance().collection("vehicles");
+        HashMap<String, String> vehicleData = new HashMap<>();
+
+        vehicleData.put("make", driver.getVehicle().getMake());
+        vehicleData.put("model", driver.getVehicle().getModel());
+        vehicleData.put("seat_number", Integer.toString(driver.getVehicle().getSeatNumber()));
+        vehicleData.put("plate_number", driver.getVehicle().getPlateNumber());
+        vehicles.document(driver.getUID())
+                .set(vehicleData)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Log.d(TAG, "Vehicle addition successful");
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.d(TAG, "Vehicle addition failed" + e.toString());
+                    }
+                });
     }
 
     /**

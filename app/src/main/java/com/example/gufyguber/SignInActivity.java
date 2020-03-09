@@ -228,7 +228,7 @@ public class SignInActivity extends AppCompatActivity {
                             Log.d(TAG, "signInWithCredential: success");
                             final FirebaseUser user = mFirebaseAuth.getCurrentUser();
 
-                            // use firebasemanager to check if user is registered
+                            // use FireBaseManager to check if user is registered
                             firebaseManager.checkUser(user.getUid(), new FirebaseManager.ReturnValueListener<Boolean>() {
                                 @Override
                                 public void returnValue(Boolean value) {
@@ -260,7 +260,6 @@ public class SignInActivity extends AppCompatActivity {
                     }
                 });
     }
-
 
     /**
      * Update the UI depending on whether user is Null or not.
