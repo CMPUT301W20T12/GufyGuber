@@ -13,13 +13,16 @@
 
 package com.example.gufyguber.ui.Map;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
-import androidx.annotation.Nullable;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.example.gufyguber.R;
@@ -27,14 +30,16 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 public class MapFragment extends Fragment implements OnMapReadyCallback {
 
     private GoogleMap mMap;
-
-    public MapFragment(){
+    private Marker myMarker;
+    public MapFragment() {
 
     }
 
@@ -53,16 +58,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.mapTest);
         mapFragment.getMapAsync(this);
 
-//        // makes a button for us to create ride requests (RIDER) from navigation drawer activity default
-//
-//        FloatingActionButton fab = findViewById(R.id.map);
-//        fab.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                Snackbar.make(view, "Put request fragment here", Snackbar.LENGTH_LONG)
-//                        .setAction("Action", null).show();
-//            }
-//        });
     }
 
 
@@ -70,13 +65,27 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
-        // Add a marker in Edmonton and move the camera
-        LatLng edmonton = new LatLng(53.5461, -113.4938);
-        mMap.addMarker(new MarkerOptions().position(edmonton).title("Marker in Edmonton"));
-        //mMap.moveCamera(CameraUpdateFactory.newLatLng(edmonton));
 
-        float zoomLevel = 16.0f;
+        // zoom to Edmonton and move the camera UNTIL CURRENT LOCATION WORKS
+        LatLng edmonton = new LatLng(53.5461, -113.4938);
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(edmonton));
+
+        float zoomLevel = 16.0f; //max is 21
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(edmonton, zoomLevel));
+
+
+        //______________________________________________________________________________
+
+        mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+
+            @Override
+            public void onMapClick(LatLng latLng) {
+                MarkerInfo newMarker = new MarkerInfo();
+                newMarker.makeMarker(latLng, mMap);
+            }
+        });
+
     }
+
 
 }
