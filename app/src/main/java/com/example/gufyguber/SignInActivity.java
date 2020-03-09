@@ -139,14 +139,16 @@ public class SignInActivity extends AppCompatActivity {
         FirebaseUser currentUser = mFirebaseAuth.getCurrentUser();
         updateUI(currentUser);
 
-        FirebaseManager.getReference().checkUser(currentUser.getUid(), new FirebaseManager.ReturnValueListener<Boolean>() {
-            @Override
-            public void returnValue(Boolean value) {
-                if (value) {
-                    goToMapView();
+        if (currentUser != null) {
+            FirebaseManager.getReference().checkUser(currentUser.getUid(), new FirebaseManager.ReturnValueListener<Boolean>() {
+                @Override
+                public void returnValue(Boolean value) {
+                    if (value) {
+                        goToMapView();
+                    }
                 }
-            }
-        });
+            });
+        }
     }
 
     /**
