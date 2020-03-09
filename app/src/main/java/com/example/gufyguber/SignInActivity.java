@@ -138,6 +138,15 @@ public class SignInActivity extends AppCompatActivity {
         // signed in the GoogleSignInAccount will be non-null.
         FirebaseUser currentUser = mFirebaseAuth.getCurrentUser();
         updateUI(currentUser);
+
+        FirebaseManager.getReference().checkUser(currentUser.getUid(), new FirebaseManager.ReturnValueListener<Boolean>() {
+            @Override
+            public void returnValue(Boolean value) {
+                if (value) {
+                    goToMapView();
+                }
+            }
+        });
     }
 
     /**
@@ -236,6 +245,7 @@ public class SignInActivity extends AppCompatActivity {
                                     if (userExists){
                                         Log.d("ACCNT", "Sending user to map screen");
                                         updateUI(user);
+                                        goToMapView();
                                     } else {
                                         Log.d("ACCNT", "Sending user to sign up");
                                         Bundle bundle = new Bundle();
@@ -274,14 +284,19 @@ public class SignInActivity extends AppCompatActivity {
             findViewById(R.id.sign_in_button).setVisibility(View.GONE);
             findViewById(R.id.sign_out_and_disconnect).setVisibility(
                     View.VISIBLE);
-
-            Intent openNavigation = new Intent(this, NavigationActivity.class);
-            startActivity(openNavigation);
         } else {
             mStatusTextView.setText(R.string.signed_out);
 
             findViewById(R.id.sign_in_button).setVisibility(View.VISIBLE);
             findViewById(R.id.sign_out_and_disconnect).setVisibility(View.GONE);
         }
+    }
+
+    /**
+     * Goes to the app's main view
+     */
+    private void goToMapView() {
+        Intent openNavigation = new Intent(this, NavigationActivity.class);
+        startActivity(openNavigation);
     }
 }

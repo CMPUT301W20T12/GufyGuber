@@ -14,6 +14,7 @@
 package com.example.gufyguber.ui.Profile;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -33,6 +34,8 @@ import com.google.firebase.auth.FirebaseAuth;
 import org.w3c.dom.Text;
 
 public class ProfileFragment extends Fragment {
+
+    private static final String TAG = "ProfileFragment";
 
     private ProfileViewModel profileViewModel;
     private TextView nameText;
@@ -63,12 +66,16 @@ public class ProfileFragment extends Fragment {
         emailText = view.findViewById(R.id.rider_email);
         phoneText = view.findViewById(R.id.rider_phone);
 
-        FirebaseManager.getReference().fetchRiderInfo(FirebaseAuth.getInstance().getCurrentUser().getEmail(), new FirebaseManager.ReturnValueListener<Rider>() {
+        FirebaseManager.getReference().fetchRiderInfo(FirebaseAuth.getInstance().getCurrentUser().getUid(), new FirebaseManager.ReturnValueListener<Rider>() {
             @Override
             public void returnValue(Rider value) {
-                nameText.setText(String.format("%s %s", value.getFirstName(), value.getLastName()));
-                emailText.setText(value.getEmail());
-                phoneText.setText(value.getPhoneNumber());
+                if (value != null) {
+                    nameText.setText(String.format("%s %s", value.getFirstName(), value.getLastName()));
+                    emailText.setText(value.getEmail());
+                    phoneText.setText(value.getPhoneNumber());
+                } else {
+                    Log.e(TAG, "Null rider passed to Profile Fragment.");
+                }
             }
         });
     }

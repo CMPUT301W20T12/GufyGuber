@@ -70,6 +70,7 @@ public class FirebaseManager {
     private static final String TAG = "FirebaseManager";
 
     // Firestore keys
+    public static final String EMAIL_KEY = "email";
     public static final String FIRST_NAME_KEY = "first_name";
     public static final String LAST_NAME_KEY = "last_name";
     public static final String PHONE_NUMBER_KEY = "phone";
@@ -168,15 +169,19 @@ public class FirebaseManager {
                     DocumentSnapshot snapshot = task.getResult();
                     if (snapshot.exists()) {
                         Map<String, Object> docData = snapshot.getData();
-                        String email = riderUID;
+                        String email = String.valueOf(docData.get(EMAIL_KEY));
                         String firstName= String.valueOf(docData.get(FIRST_NAME_KEY));
                         String lastName = String.valueOf(docData.get(LAST_NAME_KEY));
                         String phoneNumber = String.valueOf(docData.get(PHONE_NUMBER_KEY));
                         returnFunction.returnValue(new Rider(riderUID, email, firstName, lastName, phoneNumber));
+                    } else {
+                        Log.e(TAG, String.format("Rider info for %s not found on Firestore.", riderUID));
+                        returnFunction.returnValue(null);
                     }
+                } else {
+                    Log.e(TAG, "Fetching rider info failed. Issue communicating with Firestore.");
+                    returnFunction.returnValue(null);
                 }
-                Log.e("TAG", "Fetching rider info failed.");
-                returnFunction.returnValue(null);
             }
         });
     }
