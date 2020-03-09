@@ -145,7 +145,7 @@ public class CreateRideRequestFragment extends DialogFragment {
                     }
                     dialog.dismiss();
                 } else {
-                    Toast.makeText(getContext(), "Missing Required Info", Toast.LENGTH_LONG).show();
+                    Toast.makeText(getContext(), "Missing Required Info", Toast.LENGTH_SHORT).show();
                 }
             }
         });
