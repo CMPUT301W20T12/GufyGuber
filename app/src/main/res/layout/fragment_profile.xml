@@ -14,6 +14,7 @@
 
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -32,25 +33,15 @@
 <!--    </TextView>-->
 
     <LinearLayout
+        android:id="@+id/linearLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:background="@color/colorPrimaryDark"
-            android:gravity="center_vertical"
-            android:paddingLeft="10dp"
-            android:paddingRight="10dp"
-            android:text="Rider Information"
-            android:textColor="#fff"
-            android:textSize="15sp"
-            android:textStyle="bold" />
-
         <ImageView
-            android:layout_width="70dp"
-            android:layout_height="70dp"
+            android:id="@+id/user_image"
+            android:layout_width="204dp"
+            android:layout_height="187dp"
             android:layout_gravity="center"
             android:layout_margin="20sp"
             android:src="@drawable/ic_menu_profile" />
@@ -58,74 +49,104 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="10dp"
+            android:layout_margin="25dp"
             android:orientation="horizontal">
 
             <TextView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Name" />
+                android:text="Name"
+                android:textSize="25sp" />
 
-            <TextView
+            <EditText
                 android:id="@+id/rider_name"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Rider's Name" />
+                android:enabled="false"
+                android:text="Rider's Name"
+                android:textSize="25sp" />
 
         </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="10dp"
+            android:layout_margin="25dp"
             android:orientation="horizontal">
 
             <TextView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Phone Number" />
+                android:text="Phone Number"
+                android:textSize="25sp" />
 
-            <TextView
+            <EditText
                 android:id="@+id/rider_phone"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Rider's Phone Number" />
+                android:enabled="false"
+                android:text="Phone Number"
+                android:textSize="25sp" />
 
         </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="10dp"
-            android:orientation="horizontal">
+            android:layout_margin="25dp"
+            android:orientation="horizontal"
+            android:paddingBottom="120dp">
 
             <TextView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Email" />
+                android:text="Email"
+                android:textSize="25sp" />
 
-            <TextView
+            <EditText
                 android:id="@+id/rider_email"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Rider's Email" />
+                android:enabled="false"
+                android:text="Rider's Email"
+                android:textSize="25sp" />
 
         </LinearLayout>
 
-<!--        <Button-->
-<!--            android:id="@+id/user_info_button"-->
-<!--            android:layout_width="wrap_content"-->
-<!--            android:layout_height="match_parent"-->
-<!--            android:layout_gravity="center"-->
-<!--            android:layout_marginBottom="10dp"-->
-<!--            android:background="@color/colorPrimaryDark"-->
-<!--            android:text="Done" />-->
+        <RelativeLayout
+            android:layout_width="fill_parent"
+            android:layout_height="@dimen/activity_horizontal_margin"
+            android:layout_weight="1"
+            android:background="@color/colorPrimaryDark"
+            app:layout_constraintTop_toTopOf="parent"
+            android:paddingLeft="16dp"
+            android:paddingRight="16dp">
+
+            <Button
+                android:id="@+id/edit_profile_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:text="@string/edit_profile"
+                android:textAllCaps="false"
+                android:theme="@style/ThemeOverlay.LightButton" />
+
+            <Button
+                android:id="@+id/save_profile_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:text="@string/save_profile"
+                android:textAllCaps="false"
+                android:visibility="gone"
+                android:theme="@style/ThemeOverlay.LightButton" />
+        </RelativeLayout>
 
     </LinearLayout>
 

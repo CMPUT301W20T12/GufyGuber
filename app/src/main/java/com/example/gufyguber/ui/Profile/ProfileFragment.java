@@ -18,6 +18,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
@@ -41,6 +43,8 @@ public class ProfileFragment extends Fragment {
     private TextView nameText;
     private TextView phoneText;
     private TextView emailText;
+    private Button editProfile;
+    private Button saveProfile;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -65,6 +69,8 @@ public class ProfileFragment extends Fragment {
         nameText = view.findViewById(R.id.rider_name);
         emailText = view.findViewById(R.id.rider_email);
         phoneText = view.findViewById(R.id.rider_phone);
+        editProfile = view.findViewById(R.id.edit_profile_button);
+        saveProfile = view.findViewById(R.id.save_profile_button);
 
         FirebaseManager.getReference().fetchRiderInfo(FirebaseAuth.getInstance().getCurrentUser().getUid(), new FirebaseManager.ReturnValueListener<Rider>() {
             @Override
@@ -76,6 +82,29 @@ public class ProfileFragment extends Fragment {
                 } else {
                     Log.e(TAG, "Null rider passed to Profile Fragment.");
                 }
+            }
+        });
+
+        editProfile.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                nameText.setEnabled(true);
+                emailText.setEnabled(true);
+                phoneText.setEnabled(true);
+                editProfile.setVisibility(View.GONE);
+                saveProfile.setVisibility(View.VISIBLE);
+            }
+        });
+
+        saveProfile.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FirebaseManager.getReference().storeRiderInfo(new
+                        Rider(FirebaseAuth.getInstance().getCurrentUser().getUid(),
+                        emailText.getText().toString(),
+                        nameText.getText().toString().split(" ")[0],
+                        nameText.getText().toString().split(" ")[1],
+                        phoneText.getText().toString()));
             }
         });
     }
