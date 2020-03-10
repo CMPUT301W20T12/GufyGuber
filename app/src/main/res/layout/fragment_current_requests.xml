@@ -43,7 +43,7 @@
             android:paddingLeft="10dp"
             android:paddingRight="10dp"
             android:textColor="#fff"
-            android:textSize="15sp"
+            android:textSize="20sp"
             android:textStyle="bold"
             android:background="@color/colorPrimary"/>
 
