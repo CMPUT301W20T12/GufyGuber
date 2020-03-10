@@ -76,10 +76,19 @@ public class FirebaseManager {
     // Firestore keys
 
     // User Keys
+    public static final String USER_COLLECTION = "users";
     public static final String EMAIL_KEY = "email";
     public static final String FIRST_NAME_KEY = "first_name";
     public static final String LAST_NAME_KEY = "last_name";
     public static final String PHONE_NUMBER_KEY = "phone";
+    public static final String USER_TYPE_KEY = "userType";
+
+    // Vehicle Keys
+    public static final String VEHICLE_COLLECTION = "vehicles";
+    public static final String MAKE_KEY = "make";
+    public static final String MODEL_KEY = "model";
+    public static final String SEAT_NUMBER_KEY = "seat_number";
+    public static final String PLATE_NUMBER_KEY = "plate_number";
 
     // Ride Request Keys
     public static final String RIDE_REQUEST_COLLECTION = "ride_requests";
@@ -148,7 +157,7 @@ public class FirebaseManager {
     /**
      * Retrieves a RideRequest from our cloud Firestore
      * @param riderUID The user ID of the rider who created the RideRequest
-     * @param returnFunction The callback to use once we've finished retrieving a Vehicle
+     * @param returnFunction The callback to use once we've finished retrieving a RideRequest
      */
     public void fetchRideRequest(final String riderUID, final ReturnValueListener<RideRequest> returnFunction) {
         DocumentReference requestDoc = FirebaseFirestore.getInstance().collection(RIDE_REQUEST_COLLECTION).document(riderUID);
@@ -165,12 +174,9 @@ public class FirebaseManager {
                         GeoPoint pickup = snapshot.getGeoPoint(PICKUP_KEY);
                         GeoPoint dropoff = snapshot.getGeoPoint(DROPOFF_KEY);
                         LocationInfo locationInfo = new LocationInfo(pickup, dropoff);
-                        Timestamp requestOpenTime = snapshot.getTimestamp(REQUEST_OPEN_TIME_KEY);
-                        Date requestOpenDate = requestOpenTime == null ? null : requestOpenTime.toDate();
-                        Timestamp requestAcceptedTime = snapshot.getTimestamp(REQUEST_ACCEPTED_TIME_KEY);
-                        Date requestAcceptedDate = requestAcceptedTime == null ? null : requestAcceptedTime.toDate();
-                        Timestamp requestClosedTime = snapshot.getTimestamp(REQUEST_CLOSED_TIME_KEY);
-                        Date requestClosedDate = requestClosedTime == null ? null : requestClosedTime.toDate();
+                        Date requestOpenDate = snapshot.getDate(REQUEST_OPEN_TIME_KEY);
+                        Date requestAcceptedDate = snapshot.getDate(REQUEST_ACCEPTED_TIME_KEY);
+                        Date requestClosedDate = snapshot.getDate(REQUEST_CLOSED_TIME_KEY);
                         TimeInfo timeInfo = new TimeInfo(requestOpenDate, requestAcceptedDate, requestClosedDate);
 
                         returnFunction.returnValue(new RideRequest(riderUID, driverUID, rideStatus, fare, locationInfo, timeInfo));
@@ -187,6 +193,10 @@ public class FirebaseManager {
         returnFunction.returnValue(null);
     }
 
+    /**
+     * Deletes a Ride Request record from our cloud Firestore
+     * @param riderUID The Rider UID associated with the ride request to be deleted
+     */
     public void deleteRideRequest(final String riderUID) {
         DocumentReference requestDoc = FirebaseFirestore.getInstance().collection(RIDE_REQUEST_COLLECTION).document(riderUID);
         requestDoc.delete();
@@ -206,17 +216,16 @@ public class FirebaseManager {
      * @param rider The Rider to store in our cloud Firestore
      */
     public void storeRiderInfo(Rider rider) {
-        CollectionReference usersDoc = FirebaseFirestore.getInstance().collection("users");
+        CollectionReference usersDoc = FirebaseFirestore.getInstance().collection(USER_COLLECTION);
 
         Log.d(TAG, "createAccount:" + rider.getUID() + " - " + rider.getEmail());
-        HashMap<String, String> data = new HashMap<>();
-        data.put("UID", rider.getUID());
+
         HashMap<String, String> userData = new HashMap<>();
-        userData.put("email", rider.getEmail());
-        userData.put("first_name", rider.getFirstName());
-        userData.put("last_name", rider.getLastName());
-        userData.put("phone", rider.getPhoneNumber());
-        userData.put("userType", "rider");
+        userData.put(EMAIL_KEY, rider.getEmail());
+        userData.put(FIRST_NAME_KEY, rider.getFirstName());
+        userData.put(LAST_NAME_KEY, rider.getLastName());
+        userData.put(PHONE_NUMBER_KEY, rider.getPhoneNumber());
+        userData.put(USER_TYPE_KEY, "rider");
 
         usersDoc.document(rider.getUID())
                 .set(userData)
@@ -237,10 +246,10 @@ public class FirebaseManager {
     /**
      * Retrieves Rider information from our cloud Firestore
      * @param riderUID The user ID of the rider to retrieve a profile for
-     * @param returnFunction The callback to use once we've finished retrieving a Vehicle
+     * @param returnFunction The callback to use once we've finished retrieving a Rider
      */
     public void fetchRiderInfo(final String riderUID, final ReturnValueListener<Rider> returnFunction) {
-        DocumentReference riderDoc = FirebaseFirestore.getInstance().collection("users").document(riderUID);
+        DocumentReference riderDoc = FirebaseFirestore.getInstance().collection(USER_COLLECTION).document(riderUID);
         riderDoc.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
@@ -266,21 +275,30 @@ public class FirebaseManager {
     }
 
     /**
+     * Deletes a user record from our cloud Firestore
+     * @param riderUID The UID associated with the rider record to be deleted
+     */
+    public void deleteRiderInfo(final String riderUID) {
+        // TODO: If we delete a rider, what should we delete that's associated with them? Just their personal info?
+        DocumentReference riderDoc = FirebaseFirestore.getInstance().collection(USER_COLLECTION).document(riderUID);
+        riderDoc.delete();
+    }
+
+    /**
      * Adds or updates a Driver record in our cloud Firestore
      * @param driver The Driver to store in our cloud Firestore.
      */
     public void storeDriverInfo(Driver driver) {
-        CollectionReference usersDoc = FirebaseFirestore.getInstance().collection("users");
+        CollectionReference usersDoc = FirebaseFirestore.getInstance().collection(USER_COLLECTION);
 
         Log.d(TAG, "createAccount:" + driver.getUID() + " - " + driver.getEmail());
-        HashMap<String, String> data = new HashMap<>();
-        data.put("UID", driver.getUID());
+
         HashMap<String, String> userData = new HashMap<>();
-        userData.put("email", driver.getEmail());
-        userData.put("first_name", driver.getFirstName());
-        userData.put("last_name", driver.getLastName());
-        userData.put("phone", driver.getPhoneNumber());
-        userData.put("userType", "driver");
+        userData.put(EMAIL_KEY, driver.getEmail());
+        userData.put(FIRST_NAME_KEY, driver.getFirstName());
+        userData.put(LAST_NAME_KEY, driver.getLastName());
+        userData.put(PHONE_NUMBER_KEY, driver.getPhoneNumber());
+        userData.put(USER_TYPE_KEY, "driver");
 
         usersDoc.document(driver.getUID())
                 .set(userData)
@@ -301,27 +319,68 @@ public class FirebaseManager {
     /**
      * Retrieves Driver information from our cloud Firestore
      * @param driverUID The user ID of the driver to retrieve a profile for
-     * @param returnFunction The callback to use once we've finished retrieving a Vehicle
+     * @param returnFunction The callback to use once we've finished retrieving a driver (and their vehicle)
      */
-    public void fetchDriverInfo(final String driverUID, ReturnValueListener<Driver> returnFunction) {
-        //TODO: Fetch information about a driver using their UID
-        returnFunction.returnValue(null);
+    public void fetchDriverInfo(final String driverUID, final ReturnValueListener<Driver> returnFunction) {
+        DocumentReference driverDoc = FirebaseFirestore.getInstance().collection(USER_COLLECTION).document(driverUID);
+        driverDoc.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.isSuccessful()) {
+                    DocumentSnapshot snapshot = task.getResult();
+                    if (snapshot.exists()) {
+                        Map<String, Object> docData = snapshot.getData();
+                        final String email = String.valueOf(docData.get(EMAIL_KEY));
+                        final String firstName= String.valueOf(docData.get(FIRST_NAME_KEY));
+                        final String lastName = String.valueOf(docData.get(LAST_NAME_KEY));
+                        final String phoneNumber = String.valueOf(docData.get(PHONE_NUMBER_KEY));
+                        fetchVehicleInfo(driverUID, new ReturnValueListener<Vehicle>() {
+                            @Override
+                            public void returnValue(Vehicle value) {
+                                if (value != null) {
+                                    returnFunction.returnValue(new Driver(driverUID, email, firstName, lastName, phoneNumber, value));
+                                } else {
+                                    Log.w(TAG, String.format("Failed to fetch vehicle for driver [%s]", driverUID));
+                                    returnFunction.returnValue(null);
+                                }
+                            }
+                        });
+                    } else {
+                        Log.w(TAG, String.format("Driver info for [%s] not found on Firestore.", driverUID));
+                        returnFunction.returnValue(null);
+                    }
+                } else {
+                    Log.e(TAG, "Fetching driver info failed. Issue communicating with Firestore.");
+                    returnFunction.returnValue(null);
+                }
+            }
+        });
+    }
+
+    /**
+     * Deletes a user record from our cloud Firestore
+     * @param driverUID The UID associated with the driver record to be deleted
+     */
+    public void deleteDriverInfo(final String driverUID) {
+        // TODO: If we delete a driver, what should we delete that's associated with them? Just their personal info?
+        DocumentReference driverDoc = FirebaseFirestore.getInstance().collection(USER_COLLECTION).document(driverUID);
+        driverDoc.delete();
     }
 
     /**
      * Adds or updates a Driver's vehicle in our cloud Firestore
-     * @param driver
-     *  This is the driver who is registering the vehicle
+     * @param driverUID This is the driver who is registering the vehicle
+     * @param vehicle The vehicle that is being registered
      */
-    public void storeVehicleInfo(Driver driver) {
-        CollectionReference vehicles = FirebaseFirestore.getInstance().collection("vehicles");
-        HashMap<String, String> vehicleData = new HashMap<>();
+    public void storeVehicleInfo(String driverUID, Vehicle vehicle) {
+        CollectionReference vehicles = FirebaseFirestore.getInstance().collection(VEHICLE_COLLECTION);
+        HashMap<String, Object> vehicleData = new HashMap<>();
 
-        vehicleData.put("make", driver.getVehicle().getMake());
-        vehicleData.put("model", driver.getVehicle().getModel());
-        vehicleData.put("seat_number", Integer.toString(driver.getVehicle().getSeatNumber()));
-        vehicleData.put("plate_number", driver.getVehicle().getPlateNumber());
-        vehicles.document(driver.getUID())
+        vehicleData.put(MAKE_KEY, vehicle.getMake());
+        vehicleData.put(MODEL_KEY, vehicle.getModel());
+        vehicleData.put(SEAT_NUMBER_KEY, vehicle.getSeatNumber());
+        vehicleData.put(PLATE_NUMBER_KEY, vehicle.getPlateNumber());
+        vehicles.document(driverUID)
                 .set(vehicleData)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
@@ -339,14 +398,50 @@ public class FirebaseManager {
 
     /**
      * Retrieves Vehicle information from our cloud Firestore
+     * @param driverUID The UID of the driver who owns the vehicle
      * @param returnFunction The callback to use once we've finished retrieving a Vehicle
      */
-    public void fetchVehicleInfo(ReturnValueListener<Vehicle> returnFunction) {
-        //TODO: Decide what constitutes a key for getting vehicle info (especially if drivers have > 1 vehicle
+    public void fetchVehicleInfo(final String driverUID, final ReturnValueListener<Vehicle> returnFunction) {
+        //TODO: Decide what constitutes a key for getting vehicle info if drivers have > 1 vehicle
         //TODO: Fetch information about a vehicle
-        returnFunction.returnValue(null);
+        DocumentReference vehicleDoc = FirebaseFirestore.getInstance().collection(VEHICLE_COLLECTION).document(driverUID);
+        vehicleDoc.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.isSuccessful()) {
+                    DocumentSnapshot snapshot = task.getResult();
+                    if (snapshot.exists()) {
+                        String model = snapshot.getString(MODEL_KEY);
+                        String make = snapshot.getString(MAKE_KEY);
+                        String plateNumber = snapshot.getString(PLATE_NUMBER_KEY);
+                        int seatNumber = snapshot.getLong(SEAT_NUMBER_KEY).intValue();
+                        returnFunction.returnValue(new Vehicle(model, make, plateNumber, seatNumber));
+                    } else {
+                        Log.w(TAG, String.format("Vehicle info for driver [%s] not found on Firestore.", driverUID));
+                        returnFunction.returnValue(null);
+                    }
+                } else {
+                    Log.e(TAG, "Fetching vehicle info failed. Issue communicating with Firestore.");
+                    returnFunction.returnValue(null);
+                }
+            }
+        });
     }
 
+    /**
+     * Deletes a vehicle record from our cloud Firestore
+     * @param driverUID The UID associated with the driver who owns the vehicle
+     */
+    public void deleteVehicleInfo(final String driverUID) {
+        DocumentReference vehicleDoc = FirebaseFirestore.getInstance().collection(VEHICLE_COLLECTION).document(driverUID);
+        vehicleDoc.delete();
+    }
+
+    /**
+     * Used to determine whether or not a record exists for a user in our cloud Firestore
+     * @param UID The UID of the user we're looking for
+     * @param returnFunction Asynchronously returns true if the user exists in our cloud Firestore, false otherwise
+     */
     public void checkUser(String UID, final ReturnValueListener<Boolean> returnFunction) {
 
         final DocumentReference userDoc = FirebaseFirestore.getInstance().collection("users").document(UID);

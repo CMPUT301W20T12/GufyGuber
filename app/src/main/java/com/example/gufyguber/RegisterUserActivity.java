@@ -123,7 +123,7 @@ public class RegisterUserActivity extends AppCompatActivity {
                                     phoneNumber.getText().toString(),
                                     newVehicle);
                             FirebaseManager.getReference().storeDriverInfo((Driver) newUser);
-                            FirebaseManager.getReference().storeVehicleInfo((Driver) newUser);
+                            FirebaseManager.getReference().storeVehicleInfo(newUser.getUID(), newVehicle);
                             finish();
                     }
                 }

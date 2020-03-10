@@ -40,7 +40,7 @@ public class RideRequestTests {
     }
 
     @Test
-    public void TestStatusEnum() {
+    public void testStatusEnum() {
         // Test PENDING enum for incorrect overrides
         assertEquals(0, RideRequest.Status.PENDING.ordinal());
         assertEquals("Pending", RideRequest.Status.PENDING.toString());
@@ -73,7 +73,7 @@ public class RideRequestTests {
         assertEquals(RideRequest.Status.COMPLETED, testRideRequest.getStatus());
     }
 
-  public static RideRequest GenerateTestRequest() {
+  public static RideRequest generateTestRequest() {
       LocationInfo testLocation = new LocationInfo(new LatLng(13, 13), new LatLng(31,31));
       return new RideRequest("123456789", 13.13f, testLocation);
   }
