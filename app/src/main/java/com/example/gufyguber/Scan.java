@@ -35,6 +35,10 @@ import com.google.android.gms.vision.barcode.BarcodeDetector;
 
 import java.io.IOException;
 
+/**
+ * Builds camera and stores the data of the scanned QR code.
+ */
+
 public class Scan extends AppCompatActivity {
     SurfaceView cameraView;
     BarcodeDetector barcode;
@@ -94,6 +98,10 @@ public class Scan extends AppCompatActivity {
 
             }
 
+            /**
+             * Takes in detections and put the value into the original intent to be displayed.
+             * @param detections
+             */
             @Override
             public void receiveDetections(Detector.Detections<Barcode> detections) {
                 final SparseArray<Barcode> barcodes = detections.getDetectedItems();
