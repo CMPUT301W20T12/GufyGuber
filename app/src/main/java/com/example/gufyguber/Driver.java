@@ -46,9 +46,9 @@ public class Driver extends User{
      * @param phoneNumber
      *  The rider's phone number
      */
-    public Driver( String email, String firstName, String lastName,
+    public Driver(String UID, String email, String firstName, String lastName,
                   String phoneNumber, Vehicle vehicle) {
-        super(email, firstName, lastName, phoneNumber);
+        super(UID, email, firstName, lastName, phoneNumber);
         this.setVehicle(vehicle);
     }
 

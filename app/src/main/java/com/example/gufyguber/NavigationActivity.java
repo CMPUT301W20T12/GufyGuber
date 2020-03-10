@@ -40,7 +40,7 @@ import android.view.Menu;
 
 import static com.example.gufyguber.R.id.nav_host_fragment;
 
-public class NavigationActivity extends AppCompatActivity implements CreateRideRequestFragment.CreateRideRequestListener {
+public class NavigationActivity extends AppCompatActivity {
 
     private AppBarConfiguration mAppBarConfiguration;
 
@@ -50,22 +50,6 @@ public class NavigationActivity extends AppCompatActivity implements CreateRideR
         setContentView(R.layout.activity_navigation);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
-        // makes a button for us to create ride requests (RIDER) from navigation drawer activity default
-
-        FloatingActionButton fab = findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                // Start Test Code
-                LatLng testPickup = LatLng.newBuilder().setLatitude(13).setLongitude(13).build();
-                LatLng testDropoff = LatLng.newBuilder().setLatitude(31).setLongitude(31).build();
-                LocationInfo testLocation = new LocationInfo(testPickup, testDropoff);
-                new CreateRideRequestFragment(13f, testLocation).show(getSupportFragmentManager(), "create_ride_request");
-                // End Test Code
-                // new CreateRideRequestFragment().show(getSupportFragmentManager(), "create_ride_request");
-            }
-        });
 
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         NavigationView navigationView = findViewById(R.id.nav_view);
@@ -112,13 +96,5 @@ public class NavigationActivity extends AppCompatActivity implements CreateRideR
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
-    }
-
-    /**
-     * Automatically called when the CreateRideRequestFragment builds a new RideRequest
-     * @param newRequest The request created by the dialog fragment
-     */
-    public void onRideRequestCreated(RideRequest newRequest) {
-        RideRequest.setCurrentRideRequest(newRequest);
     }
 }

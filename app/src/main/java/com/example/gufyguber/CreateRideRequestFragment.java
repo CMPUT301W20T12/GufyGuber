@@ -28,10 +28,13 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.text.Editable;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -39,7 +42,8 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.FragmentManager;
 
-import com.google.type.LatLng;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.firebase.auth.FirebaseAuth;
 
 public class CreateRideRequestFragment extends DialogFragment {
 
@@ -47,18 +51,27 @@ public class CreateRideRequestFragment extends DialogFragment {
         void onRideRequestCreated (RideRequest newRideRequest);
     }
 
-    //TODO: I'm thinking about this and realizing that by the time the user gets here, they really
-    //      only need to enter their fair fare since we pull the rest from behind the scenes, and
-    //      should have selected the start and end points first. Perhaps we should go to the map from
-    //      this screen instead of going to this screen from the map?
+    public interface CancelCreateRideRequestListener {
+        void onRideRequestCreationCancelled();
+    }
+
+    //TODO: Looks a little clunky. Maybe create a custom fragment that covers the bottom 1/3 of the screen
+    //      with the three fields, and a positive and negative button. Can hide when start or end fields are touched
+    //      just like the alert dialog now.
 
     private CreateRideRequestListener onCreatedListener;
+    private CancelCreateRideRequestListener onCreationCancelledListener;
 
     private EditText fareEditText;
     private EditText startLocationEditText;
     private EditText endLocationEditText;
 
-    private float tempFare;
+    private TextView fairFareText;
+
+    public boolean settingStart = false;
+    public boolean settingEnd = false;
+
+    private float tempFare = -1f;
     private LocationInfo tempLocationInfo;
 
     public CreateRideRequestFragment() {
@@ -73,25 +86,47 @@ public class CreateRideRequestFragment extends DialogFragment {
     private void initUIElements() {
         if (tempFare >= 0) {
             fareEditText.setText(String.format("%.2f", tempFare));
+        } else {
+            fareEditText.setText("");
         }
 
         if (tempLocationInfo != null) {
             if (tempLocationInfo.getPickup() != null) {
                 startLocationEditText.setText(LocationInfo.latlngToString(tempLocationInfo.getPickup()));
+            } else {
+                startLocationEditText.setText("");
             }
             if (tempLocationInfo.getDropoff() != null) {
                 endLocationEditText.setText(LocationInfo.latlngToString(tempLocationInfo.getDropoff()));
+            } else {
+                endLocationEditText.setText("");
             }
+
+            float fairFare = RideRequest.fairFareEstimate(tempLocationInfo);
+            if (fairFare < 0) {
+                clearFairFare();
+            } else {
+                updateFairFare(fairFare);
+            }
+        } else {
+            clearFairFare();
         }
     }
 
     @Override
-    public void onAttach(Context context)  {
-        super.onAttach(context);
-        if (context instanceof CreateRideRequestListener) {
-            onCreatedListener = (CreateRideRequestListener)context;
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        if (getParentFragment() instanceof CreateRideRequestListener) {
+            onCreatedListener = (CreateRideRequestListener)getParentFragment();
         } else {
             onCreatedListener = null;
+        }
+
+        if (getParentFragment() instanceof CancelCreateRideRequestListener) {
+            onCreationCancelledListener = (CancelCreateRideRequestListener)getParentFragment();
+        } else {
+            onCreationCancelledListener = null;
         }
     }
 
@@ -102,6 +137,7 @@ public class CreateRideRequestFragment extends DialogFragment {
         fareEditText = view.findViewById(R.id.fare_EditText);
         startLocationEditText = view.findViewById(R.id.start_location_EditText);
         endLocationEditText = view.findViewById(R.id.end_location_EditText);
+        fairFareText = view.findViewById(R.id.fair_fare_textview);
         initUIElements();
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext())
@@ -118,34 +154,73 @@ public class CreateRideRequestFragment extends DialogFragment {
             @Override
             public void onClick(View view) {
                 if (validateEntries()) {
-                    LatLng testPickup = LatLng.newBuilder().setLatitude(13).setLongitude(13).build();
-                    LatLng testDropoff = LatLng.newBuilder().setLatitude(31).setLongitude(31).build();
-                    RideRequest newRequest = new RideRequest("TestRiderUID", Float.parseFloat(fareEditText.getText().toString()), new LocationInfo(testPickup, testDropoff));
+                    RideRequest newRequest = new RideRequest(FirebaseAuth.getInstance().getCurrentUser().getUid(), Float.parseFloat(fareEditText.getText().toString()), tempLocationInfo);
                     if (onCreatedListener != null) {
                         onCreatedListener.onRideRequestCreated(newRequest);
                     }
                     dialog.dismiss();
                 } else {
-                    Toast.makeText(getContext(), "Missing Required Info", Toast.LENGTH_LONG).show();
+                    Toast.makeText(getContext(), "Missing Required Info", Toast.LENGTH_SHORT).show();
                 }
+            }
+        });
+        dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (onCreationCancelledListener != null) {
+                    onCreationCancelledListener.onRideRequestCreationCancelled();
+                }
+                dialog.dismiss();
             }
         });
 
         startLocationEditText.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                settingStart = true;
+                dialog.dismiss();
             }
         });
 
         endLocationEditText.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                settingEnd = true;
+                dialog.dismiss();
             }
         });
 
         return dialog;
+    }
+
+    public void setNewPickup(LatLng pickup) {
+        if (tempLocationInfo == null) {
+            tempLocationInfo = new LocationInfo();
+        }
+
+        tempLocationInfo.setPickup(pickup);
+        settingStart = false;
+    }
+
+    public void setNewDropoff(LatLng dropoff) {
+        if (tempLocationInfo == null) {
+            tempLocationInfo = new LocationInfo();
+        }
+
+        tempLocationInfo.setDropoff(dropoff);
+        settingEnd = false;
+    }
+
+    private void updateFairFare(float fairFare) {
+        if (fairFareText != null) {
+            fairFareText.setText(String.format("Fair Fare(TM): $%.2f", fairFare));
+        }
+    }
+
+    private void clearFairFare() {
+        if (fairFareText != null) {
+            fairFareText.setText("Fair Fare(TM): --");
+        }
     }
 
     /**
