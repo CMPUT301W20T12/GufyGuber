@@ -37,7 +37,7 @@ public class CancelFragment extends DialogFragment {
     }
 
     @NonNull
-    @Overridegit add 
+    @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
         final View view = LayoutInflater.from(getActivity()).inflate(R.layout.cancelled_rider, null);
 
