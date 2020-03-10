@@ -31,6 +31,7 @@ package com.example.gufyguber;
  * @see Driver
  */
 public abstract class User {
+    private String UID;
     private String email;
     private String firstName;
     private String lastName;
@@ -48,12 +49,20 @@ public abstract class User {
      * @param phoneNumber
      *  The users phone number
      */
-    public User(String email, String firstName, String lastName,
+    public User(String UID, String email, String firstName, String lastName,
                 String phoneNumber) {
+        this.setUID(UID);
         this.setEmail(email);
         this.setFirstName(firstName);
         this.setLastName(lastName);
         this.setPhoneNumber(phoneNumber);
+    }
+
+    /**
+     * This gets the account's unique firebase UID
+     */
+    public String getUID() {
+        return UID;
     }
 
     /**
@@ -90,6 +99,15 @@ public abstract class User {
      */
     public String getPhoneNumber() {
         return phoneNumber;
+    }
+
+    /**
+     * This sets the user's UID to the unique firebase UID associated with the email
+     * @param UID
+     *  This is the candidate email address to set for the user
+     */
+    public void setUID(String UID) {
+        this.UID = UID;
     }
 
     /**

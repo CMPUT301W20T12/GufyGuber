@@ -80,6 +80,7 @@
         </com.google.android.material.textfield.TextInputLayout>
     </LinearLayout>
     <TextView
+        android:id="@+id/fair_fare_textview"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textSize="16dp"

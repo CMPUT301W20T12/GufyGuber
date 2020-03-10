@@ -28,7 +28,7 @@ import java.util.Date;
  */
 public class TimeInfo {
     private Date requestOpenTime;
-    public void setRequestOpenTime() { requestAcceptedTime = new Date(); }
+    public void setRequestOpenTime() { requestOpenTime = new Date(); }
     public void setRequestOpenTime(Date requestOpenTime) { this.requestOpenTime = requestOpenTime; }
     public Date getRequestOpenTime() { return requestOpenTime; }
 
@@ -37,16 +37,22 @@ public class TimeInfo {
     public void setRequestAcceptedTime(Date requestAcceptedTime) { this.requestAcceptedTime = requestAcceptedTime; }
     public Date getRequestAcceptedTime() { return requestAcceptedTime; }
 
-    private Date requestCompletedTime;
-    public void setRequestCompletedTime() { requestCompletedTime = new Date(); }
-    public void setRequestCompletedTime(Date requestCompletedTime) { this.requestCompletedTime = requestCompletedTime; }
-    public Date getRequestCompletedTime() { return requestCompletedTime; }
+    private Date requestClosedTime;
+    public void setRequestClosedTime() { requestClosedTime = new Date(); }
+    public void setRequestClosedTime(Date requestClosedTime) { this.requestClosedTime = requestClosedTime; }
+    public Date getRequestClosedTime() { return requestClosedTime; }
 
     /**
      * Creates new instance of TimeInfo with exact time of creation as the requestOpenTime
      */
     public TimeInfo() {
         setRequestOpenTime();
+    }
+
+    public TimeInfo(Date requestOpenTime, Date requestAcceptedTime, Date requestClosedTime) {
+        setRequestOpenTime(requestOpenTime);
+        setRequestAcceptedTime(requestAcceptedTime);
+        setRequestClosedTime(requestClosedTime);
     }
 
     //TODO: Should estimate time to travel between two coordinates

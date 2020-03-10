@@ -58,6 +58,7 @@ public class UserTypeFragment extends DialogFragment {
 
         // Get user details from bundle
         Bundle bundle = getArguments();
+        final String UID = bundle.getString("UID");
         final String email = bundle.getString("email");
         final String firstName = bundle.getString("firstName");
         final String lastName = bundle.getString("lastName");
@@ -76,6 +77,7 @@ public class UserTypeFragment extends DialogFragment {
                 // pass account info into fragment to auto-pop some details in registration form
                 Bundle bundle = new Bundle();
                 bundle.putString("userType", userType);
+                bundle.putString("UID", UID);
                 bundle.putString("email", email);
                 bundle.putString("firstName", firstName);
                 bundle.putString("lastName", lastName);
@@ -92,6 +94,7 @@ public class UserTypeFragment extends DialogFragment {
                 Intent intent  = new Intent(getActivity(), RegisterUserActivity.class);
                 Bundle bundle = new Bundle();
                 bundle.putString("userType", userType);
+                bundle.putString("UID", UID);
                 bundle.putString("email", email);
                 bundle.putString("firstName", firstName);
                 bundle.putString("lastName", lastName);

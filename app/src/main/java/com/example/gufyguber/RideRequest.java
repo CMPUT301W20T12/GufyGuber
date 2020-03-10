@@ -21,6 +21,10 @@
 
 package com.example.gufyguber;
 
+import android.location.Location;
+
+import java.sql.Time;
+
 /**
  * Model class for Gufy Guber ride requests
  */
@@ -53,6 +57,8 @@ public class RideRequest {
             public String toString() { return "Cancelled"; }
         }
     }
+
+    private static final float FAIR_FARE_PER_METRE = 0.01f;
 
     /**
      * Firebase UID of rider that initiated this ride request
@@ -95,13 +101,6 @@ public class RideRequest {
     public TimeInfo getTimeInfo() { return timeInfo; }
 
     /**
-     * Always references the current, active ride request for this user, or null
-     */
-    private static RideRequest currentRideRequest;
-    public static RideRequest getCurrentRideRequest() { return currentRideRequest; }
-    public static void setCurrentRideRequest(RideRequest request) { currentRideRequest = request; }
-
-    /**
      * Constructor for the RideRequest class
      * @param riderUID The UID of the rider user that's creating the request
      * @param offeredFare The price offered for the ride, in QR-Bucks
@@ -114,6 +113,15 @@ public class RideRequest {
         setOfferedFare(offeredFare);
         this.locationInfo = locationInfo;
         timeInfo = new TimeInfo();
+    }
+
+    public RideRequest(String riderUID, String driverUID, Status status, float offeredFare, LocationInfo locationInfo, TimeInfo timeInfo) {
+        setRiderUID(riderUID);
+        setDriverUID(driverUID);
+        setStatus(status);
+        setOfferedFare(offeredFare);
+        this.locationInfo = locationInfo;
+        this.timeInfo = timeInfo;
     }
 
     /**
@@ -137,8 +145,12 @@ public class RideRequest {
      */
     public void cancelRideRequest() {
         setStatus(Status.CANCELLED);
-        RideRequest.setCurrentRideRequest(null);
+        FirebaseManager.getReference().deleteRideRequest(getRiderUID());
 
-        //TODO: Probably update Firebase to notify any relevant parties that the request is cancelled
+        //TODO: Instead of deleting, modify status to notify drivers of cancelled requests
+    }
+
+    public static float fairFareEstimate(LocationInfo locationInfo) {
+        return locationInfo.getTotalDist() * FAIR_FARE_PER_METRE;
     }
 }

@@ -67,6 +67,7 @@ public class RegisterUserActivity extends AppCompatActivity {
     private Button register;
     private User newUser;
     private Vehicle newVehicle;
+    private String UID;
 
     private FirebaseAuth mAuth;
 
@@ -90,6 +91,7 @@ public class RegisterUserActivity extends AppCompatActivity {
             plateNumber = findViewById(R.id.plate_number);
             seatNumber = findViewById(R.id.seat_number);
         }
+        UID = intent.getStringExtra("UID");
         email = findViewById(R.id.email);
         email.setText(intent.getStringExtra("email"));
         firstName = findViewById(R.id.first_name);
@@ -103,63 +105,30 @@ public class RegisterUserActivity extends AppCompatActivity {
             public void onClick(View v) {
                 if(validateForm()) {
                     if(userType.equals("Rider")) {
-                        newUser = new Rider(email.getText().toString().toLowerCase(),
+                        newUser = new Rider(UID, email.getText().toString().toLowerCase(),
                                 firstName.getText().toString().toLowerCase(),
                                 lastName.getText().toString().toLowerCase(),
                                 phoneNumber.getText().toString());
-                        createAccount(newUser, userType, db);
+                        FirebaseManager.getReference().storeRiderInfo((Rider) newUser);
+                        finish();
                     }else
                         if(validateVehicleInfo()) {
                             newVehicle = new Vehicle(model.getText().toString(),
                                     make.getText().toString(),
                                     plateNumber.getText().toString(),
                                     Integer.parseInt(seatNumber.getText().toString()));
-                            newUser = new Driver(email.getText().toString().toLowerCase(),
+                            newUser = new Driver(UID, email.getText().toString().toLowerCase(),
                                     firstName.getText().toString().toLowerCase(),
                                     lastName.getText().toString().toLowerCase(),
                                     phoneNumber.getText().toString(),
                                     newVehicle);
-                            createAccount(newUser, userType, db);
+                            FirebaseManager.getReference().storeDriverInfo((Driver) newUser);
+                            FirebaseManager.getReference().storeVehicleInfo(newUser.getUID(), newVehicle);
+                            finish();
                     }
                 }
             }
         });
-    }
-
-    private void createAccount(User newUser, String userType, FirebaseFirestore db) {
-        final CollectionReference users = db.collection("users");
-
-        Log.d(TAG, "createAccount:" + newUser.getEmail());
-
-        HashMap<String, String> data = new HashMap<>();
-        data.put("email", newUser.getEmail());
-
-        HashMap<String, String> userData = new HashMap<>();
-
-        userData.put("first_name", newUser.getFirstName());
-        userData.put("last_name", newUser.getLastName());
-        userData.put("phone", newUser.getPhoneNumber());
-        userData.put("userType", userType);
-
-        if(userType.equals("Driver")){
-            uploadVehicleInfo(db);
-        }
-
-        users.document(newUser.getEmail())
-                .set(userData)
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        Log.d(TAG, "User addition successful");
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.d(TAG, "User addition failed" + e.toString());
-                    }
-                });
-        finish();
     }
 
     private boolean validateForm() {
@@ -214,37 +183,5 @@ public class RegisterUserActivity extends AppCompatActivity {
         }
         return valid;
 
-    }
-
-
-    /**
-     * This method adds the drivers vehicle information to the "Vehicles" table
-     * in the Firestore database
-     * @param db
-     *  Reference to the database
-     */
-    private void uploadVehicleInfo(FirebaseFirestore db){
-        final CollectionReference vehicles = db.collection("vehicles");
-        HashMap<String, String> vehicleData = new HashMap<>();
-
-        vehicleData.put("make", ((Driver)newUser).getVehicle().getMake());
-        vehicleData.put("model", ((Driver)newUser).getVehicle().getModel());
-        vehicleData.put("seat_number", Integer.toString(((Driver)newUser).getVehicle().getSeatNumber()));
-        vehicleData.put("plate_number", ((Driver)newUser).getVehicle().getPlateNumber());
-        vehicles.document(newUser.getEmail())
-                .set(vehicleData)
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        Log.d(TAG, "Vehicle addition successful");
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.d(TAG, "Vehicle addition failed" + e.toString());
-                    }
-                });
-        return;
     }
 }
