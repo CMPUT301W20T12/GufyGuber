@@ -23,7 +23,7 @@
 
 package com.example.gufyguber;
 
-import com.google.type.LatLng;
+import com.google.android.gms.maps.model.LatLng;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -36,25 +36,34 @@ public class RideRequestTests {
 
     @Before
     public void testInit() {
-        testRideRequest = GenerateTestRequest();
+        testRideRequest = generateTestRequest();
     }
 
     @Test
-    public void TestStatusEnum() {
+    public void testStatusEnum() {
         // Test PENDING enum for incorrect overrides
         assertEquals(0, RideRequest.Status.PENDING.ordinal());
         assertEquals("Pending", RideRequest.Status.PENDING.toString());
         assertEquals("PENDING", RideRequest.Status.PENDING.name());
+        assertEquals(RideRequest.Status.PENDING, RideRequest.Status.valueOf("PENDING"));
 
         // Test ACCEPTED enum for incorrect overrides
         assertEquals(1, RideRequest.Status.ACCEPTED.ordinal());
         assertEquals("Accepted", RideRequest.Status.ACCEPTED.toString());
         assertEquals("ACCEPTED", RideRequest.Status.ACCEPTED.name());
+        assertEquals(RideRequest.Status.ACCEPTED, RideRequest.Status.valueOf("ACCEPTED"));
 
         // Test COMPLETED enum for incorrect overrides
         assertEquals(2, RideRequest.Status.COMPLETED.ordinal());
         assertEquals("Completed", RideRequest.Status.COMPLETED.toString());
         assertEquals("COMPLETED", RideRequest.Status.COMPLETED.name());
+        assertEquals(RideRequest.Status.COMPLETED, RideRequest.Status.valueOf("COMPLETED"));
+
+        // Test CANCELLED enum for incorrect overrides
+        assertEquals(3, RideRequest.Status.CANCELLED.ordinal());
+        assertEquals("Cancelled", RideRequest.Status.CANCELLED.toString());
+        assertEquals("CANCELLED", RideRequest.Status.CANCELLED.name());
+        assertEquals(RideRequest.Status.CANCELLED, RideRequest.Status.valueOf("CANCELLED"));
 
         // Test some interactions with a RideRequest instance
         assertEquals(RideRequest.Status.PENDING, testRideRequest.getStatus());
@@ -64,10 +73,8 @@ public class RideRequestTests {
         assertEquals(RideRequest.Status.COMPLETED, testRideRequest.getStatus());
     }
 
-  public static RideRequest GenerateTestRequest() {
-      LatLng testPickup = LatLng.newBuilder().setLatitude(13).setLongitude(13).build();
-      LatLng testDropoff = LatLng.newBuilder().setLatitude(31).setLongitude(31).build();
-      LocationInfo testLocation = new LocationInfo(testPickup, testDropoff);
+  public static RideRequest generateTestRequest() {
+      LocationInfo testLocation = new LocationInfo(new LatLng(13, 13), new LatLng(31,31));
       return new RideRequest("123456789", 13.13f, testLocation);
   }
 }

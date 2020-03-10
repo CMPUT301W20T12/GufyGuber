@@ -44,8 +44,8 @@ public class Rider extends User {
      * @param phoneNumber
      *  The rider's phone number
      */
-    public Rider(String email, String firstName, String lastName,
+    public Rider(String UID, String email, String firstName, String lastName,
                  String phoneNumber) {
-        super(email, firstName, lastName, phoneNumber);
+        super(UID, email, firstName, lastName, phoneNumber);
     }
 }
