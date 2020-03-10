@@ -58,6 +58,8 @@ public class RideRequest {
         }
     }
 
+    private static final float FAIR_FARE_PER_METRE = 0.01f;
+
     /**
      * Firebase UID of rider that initiated this ride request
      */
@@ -146,5 +148,9 @@ public class RideRequest {
         FirebaseManager.getReference().deleteRideRequest(getRiderUID());
 
         //TODO: Instead of deleting, modify status to notify drivers of cancelled requests
+    }
+
+    public static float fairFareEstimate(LocationInfo locationInfo) {
+        return locationInfo.getTotalDist() * FAIR_FARE_PER_METRE;
     }
 }
