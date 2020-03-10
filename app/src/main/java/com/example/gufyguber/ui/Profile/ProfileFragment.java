@@ -33,6 +33,7 @@ import androidx.lifecycle.ViewModelProviders;
 import com.example.gufyguber.FirebaseManager;
 import com.example.gufyguber.R;
 import com.example.gufyguber.Rider;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -107,11 +108,11 @@ public class ProfileFragment extends Fragment {
                 if(validateForm()) {
                     FirebaseManager.getReference().storeRiderInfo(new
                             Rider(FirebaseAuth.getInstance().getCurrentUser().getUid(),
-                            emailText.getText().toString(),
-                            nameText.getText().toString().split(" ")[0],
-                            nameText.getText().toString().split(" ")[1],
+                            emailText.getText().toString().toLowerCase(),
+                            nameText.getText().toString().split(" ")[0].toLowerCase(),
+                            nameText.getText().toString().split(" ")[1].toLowerCase(),
                             phoneText.getText().toString()));
-                    FirebaseAuth.getInstance().getCurrentUser().updateEmail(emailText.getText().toString())
+                    FirebaseAuth.getInstance().getCurrentUser().updateEmail(emailText.getText().toString().toLowerCase())
                             .addOnCompleteListener(new OnCompleteListener<Void>() {
                                 @Override
                                 public void onComplete(@NonNull Task<Void> task) {
