@@ -73,7 +73,7 @@ public class LocationInfo {
     }
 
     public GeoPoint dropoffToGeoPoint() {
-        return new GeoPoint(getPickup().latitude, getPickup().longitude);
+        return new GeoPoint(getDropoff().latitude, getDropoff().longitude);
     }
 
     public static String latlngToString(LatLng latlng) {
