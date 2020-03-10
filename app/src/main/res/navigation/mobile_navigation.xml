@@ -36,4 +36,9 @@
         android:label="Current Requests"
         tools:layout="@layout/fragment_current_requests" />
 
+    <dialog
+        android:id="@+id/nav_scan"
+        android:name="com.example.gufyguber.ScanQrFragment"
+        android:label="Scan" />
+
 </navigation>

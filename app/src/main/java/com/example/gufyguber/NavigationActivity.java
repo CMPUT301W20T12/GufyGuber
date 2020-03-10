@@ -13,6 +13,7 @@
 
 package com.example.gufyguber;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import com.example.gufyguber.ui.Map.MapFragment;
@@ -74,7 +75,7 @@ public class NavigationActivity extends AppCompatActivity implements CreateRideR
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
         mAppBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.nav_map, R.id.nav_profile, R.id.nav_profile)
+                R.id.nav_map, R.id.nav_profile, R.id.nav_profile, R.id.nav_scan)
                 .setDrawerLayout(drawer)
                 .build();
         NavController navController = Navigation.findNavController(this, nav_host_fragment);
@@ -104,6 +105,12 @@ public class NavigationActivity extends AppCompatActivity implements CreateRideR
             MapFragment mapFragment = new MapFragment();
             FragmentManager manager = getSupportFragmentManager();
             manager.beginTransaction().replace(id, mapFragment).commit();
+        }
+
+        if(id == R.id.nav_scan){
+            ScanQrFragment scanFragment = new ScanQrFragment();
+            FragmentManager manager = getSupportFragmentManager();
+            manager.beginTransaction().replace(id, scanFragment).commit();
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
