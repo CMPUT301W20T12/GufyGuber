@@ -90,6 +90,7 @@
                 android:layout_weight="1"
                 android:enabled="false"
                 android:text="Phone Number"
+                android:inputType="phone"
                 android:textSize="25sp" />
 
         </LinearLayout>

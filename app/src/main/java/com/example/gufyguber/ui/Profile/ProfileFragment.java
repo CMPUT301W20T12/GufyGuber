@@ -14,6 +14,7 @@
 package com.example.gufyguber.ui.Profile;
 
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,6 +22,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.NonNull;
@@ -99,13 +101,25 @@ public class ProfileFragment extends Fragment {
         saveProfile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                FirebaseManager.getReference().storeRiderInfo(new
-                        Rider(FirebaseAuth.getInstance().getCurrentUser().getUid(),
-                        emailText.getText().toString(),
-                        nameText.getText().toString().split(" ")[0],
-                        nameText.getText().toString().split(" ")[1],
-                        phoneText.getText().toString()));
+                if(validateForm()) {
+                    FirebaseManager.getReference().storeRiderInfo(new
+                            Rider(FirebaseAuth.getInstance().getCurrentUser().getUid(),
+                            emailText.getText().toString(),
+                            nameText.getText().toString().split(" ")[0],
+                            nameText.getText().toString().split(" ")[1],
+                            phoneText.getText().toString()));
+                    Toast.makeText(getContext(), "Profile successfully updated", Toast.LENGTH_LONG).show();
+                    getActivity().onBackPressed();
+                } else {
+                    Toast.makeText(getContext(), "Missing Required Info", Toast.LENGTH_SHORT).show();
+                }
             }
         });
+    }
+
+    private boolean validateForm() {
+        return (!TextUtils.isEmpty(emailText.getText().toString()) &&
+                !TextUtils.isEmpty(nameText.getText().toString()) &&
+                !TextUtils.isEmpty(phoneText.getText().toString()));
     }
 }
