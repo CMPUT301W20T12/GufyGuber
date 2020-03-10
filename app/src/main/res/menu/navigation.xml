@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ navigation.xml
+  ~
+  ~ Version
+  ~
+  ~ Last edit: mai-thyle, 04/03/20 11:21 PM
+  ~
+  ~ Copyright (c) CMPUT301W20T12 2020. All Rights Reserved.
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0).
+  ~
+  -->
+
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/action_settings"
+        android:orderInCategory="100"
+        android:title="@string/action_settings"
+        app:showAsAction="never" />
+</menu>
