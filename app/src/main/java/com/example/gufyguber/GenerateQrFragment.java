@@ -33,7 +33,7 @@ import androidx.fragment.app.DialogFragment;
 
 /**
  * User fragment to alert the rider that the ride is over and prompt them to
- *      pay the driver. 
+ *      pay the driver.
  */
 
 public class GenerateQrFragment extends DialogFragment {
