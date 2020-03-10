@@ -3,7 +3,7 @@
  *
  * Version
  *
- * Last edit: mai-thyle, 04/03/20 11:21 PM
+ * Last edit: dalton, 10/03/20 12:12 AM
  *
  * Copyright (c) CMPUT301W20T12 2020. All Rights Reserved.
  *
@@ -14,11 +14,15 @@
 package com.example.gufyguber.ui.Profile;
 
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.NonNull;
@@ -29,7 +33,11 @@ import androidx.lifecycle.ViewModelProviders;
 import com.example.gufyguber.FirebaseManager;
 import com.example.gufyguber.R;
 import com.example.gufyguber.Rider;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 import org.w3c.dom.Text;
 
@@ -41,6 +49,8 @@ public class ProfileFragment extends Fragment {
     private TextView nameText;
     private TextView phoneText;
     private TextView emailText;
+    private Button editProfile;
+    private Button saveProfile;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -65,6 +75,8 @@ public class ProfileFragment extends Fragment {
         nameText = view.findViewById(R.id.rider_name);
         emailText = view.findViewById(R.id.rider_email);
         phoneText = view.findViewById(R.id.rider_phone);
+        editProfile = view.findViewById(R.id.edit_profile_button);
+        saveProfile = view.findViewById(R.id.save_profile_button);
 
         FirebaseManager.getReference().fetchRiderInfo(FirebaseAuth.getInstance().getCurrentUser().getUid(), new FirebaseManager.ReturnValueListener<Rider>() {
             @Override
@@ -78,5 +90,52 @@ public class ProfileFragment extends Fragment {
                 }
             }
         });
+
+        editProfile.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                nameText.setEnabled(true);
+                emailText.setEnabled(true);
+                phoneText.setEnabled(true);
+                editProfile.setVisibility(View.GONE);
+                saveProfile.setVisibility(View.VISIBLE);
+            }
+        });
+
+        saveProfile.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(validateForm()) {
+                    FirebaseManager.getReference().storeRiderInfo(new
+                            Rider(FirebaseAuth.getInstance().getCurrentUser().getUid(),
+                            emailText.getText().toString().toLowerCase(),
+                            nameText.getText().toString().split(" ")[0].toLowerCase(),
+                            nameText.getText().toString().split(" ")[1].toLowerCase(),
+                            phoneText.getText().toString()));
+                    FirebaseAuth.getInstance().getCurrentUser().updateEmail(emailText.getText().toString().toLowerCase())
+                            .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                @Override
+                                public void onComplete(@NonNull Task<Void> task) {
+                                    if (task.isSuccessful()) {
+                                        Log.d(TAG, "User email address updated.");
+                                    } else {
+                                        Log.d(TAG, "Failed to update user email address.");
+                                    }
+                                }
+                            });
+
+                    Toast.makeText(getContext(), "Profile successfully updated", Toast.LENGTH_LONG).show();
+                    getActivity().onBackPressed();
+                } else {
+                    Toast.makeText(getContext(), "Missing Required Info", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+    }
+
+    private boolean validateForm() {
+        return (!TextUtils.isEmpty(emailText.getText().toString()) &&
+                !TextUtils.isEmpty(nameText.getText().toString()) &&
+                !TextUtils.isEmpty(phoneText.getText().toString()));
     }
 }
