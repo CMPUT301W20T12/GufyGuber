@@ -36,7 +36,7 @@ public class RideRequestTests {
 
     @Before
     public void testInit() {
-        testRideRequest = GenerateTestRequest();
+        testRideRequest = generateTestRequest();
     }
 
     @Test
