@@ -3,7 +3,7 @@
  *
  * Version
  *
- * Last edit: mai-thyle, 04/03/20 11:21 PM
+ * Last edit: dalton, 10/03/20 12:12 AM
  *
  * Copyright (c) CMPUT301W20T12 2020. All Rights Reserved.
  *
@@ -34,6 +34,7 @@ import com.example.gufyguber.FirebaseManager;
 import com.example.gufyguber.R;
 import com.example.gufyguber.Rider;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 import org.w3c.dom.Text;
 
@@ -108,6 +109,7 @@ public class ProfileFragment extends Fragment {
                             nameText.getText().toString().split(" ")[0],
                             nameText.getText().toString().split(" ")[1],
                             phoneText.getText().toString()));
+                    FirebaseAuth.getInstance().getCurrentUser().updateEmail(emailText.getText().toString());
                     Toast.makeText(getContext(), "Profile successfully updated", Toast.LENGTH_LONG).show();
                     getActivity().onBackPressed();
                 } else {
