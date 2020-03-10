@@ -53,12 +53,9 @@
                 android:value=".SignInActivity"/>
         </activity>
 
-	<activity android:name=".GenerateQR"
-            android:parentActivityName=".MainActivity">
-            <!-- The meta-data tag is required if you support API level 15 and lower -->
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity" />
+	    <activity android:name=".GenerateQR"
+            android:label="Generate QR"
+            android:theme="@style/AppTheme.NoActionBar">
         </activity>
     </application>
 

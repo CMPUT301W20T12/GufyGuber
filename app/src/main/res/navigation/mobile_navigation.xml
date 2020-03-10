@@ -35,5 +35,9 @@
         android:name="com.example.gufyguber.ui.CurrentRequest.CurrentRequestFragment"
         android:label="Current Requests"
         tools:layout="@layout/fragment_current_requests" />
+    <dialog
+        android:id="@+id/nav_generateQR"
+        android:name="com.example.gufyguber.GenerateQrFragment"
+        android:label="Generate" />
 
 </navigation>
