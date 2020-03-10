@@ -33,6 +33,8 @@ import androidx.lifecycle.ViewModelProviders;
 import com.example.gufyguber.FirebaseManager;
 import com.example.gufyguber.R;
 import com.example.gufyguber.Rider;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
@@ -109,7 +111,18 @@ public class ProfileFragment extends Fragment {
                             nameText.getText().toString().split(" ")[0],
                             nameText.getText().toString().split(" ")[1],
                             phoneText.getText().toString()));
-                    FirebaseAuth.getInstance().getCurrentUser().updateEmail(emailText.getText().toString());
+                    FirebaseAuth.getInstance().getCurrentUser().updateEmail(emailText.getText().toString())
+                            .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                @Override
+                                public void onComplete(@NonNull Task<Void> task) {
+                                    if (task.isSuccessful()) {
+                                        Log.d(TAG, "User email address updated.");
+                                    } else {
+                                        Log.d(TAG, "Failed to update user email address.");
+                                    }
+                                }
+                            });
+
                     Toast.makeText(getContext(), "Profile successfully updated", Toast.LENGTH_LONG).show();
                     getActivity().onBackPressed();
                 } else {
