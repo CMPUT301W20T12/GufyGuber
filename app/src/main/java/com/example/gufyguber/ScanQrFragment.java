@@ -31,7 +31,9 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.DialogFragment;
 
-import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+/**
+ * This activity is the fragment for the end of the ride for the Driver.
+ */
 
 public class ScanQrFragment extends DialogFragment {
 

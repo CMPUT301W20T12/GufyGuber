@@ -60,11 +60,8 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".SignInActivity"/>
         </activity>
-
 	    <activity android:name=".startScanQR"
             android:label="Scan QR"
             android:theme="@style/AppTheme.NoActionBar" />
-
-    </application>
-
+        </application>
 </manifest>

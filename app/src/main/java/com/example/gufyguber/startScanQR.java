@@ -30,6 +30,11 @@ import androidx.core.content.ContextCompat;
 
 import com.google.android.gms.vision.barcode.Barcode;
 
+/**
+ * This activity includes accessing the camera to scan a QR code.
+ *  It also shows the result of the QR code scan.
+ */
+
 public class startScanQR extends AppCompatActivity {
     Button scan;
     TextView result;
@@ -58,6 +63,9 @@ public class startScanQR extends AppCompatActivity {
         });
     }
 
+    /**
+     * Once qr is scanned, this allows the result to be shown to the user.
+     */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
