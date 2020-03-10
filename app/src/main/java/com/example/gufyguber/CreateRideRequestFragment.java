@@ -28,10 +28,13 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.text.Editable;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -62,6 +65,8 @@ public class CreateRideRequestFragment extends DialogFragment {
     private EditText fareEditText;
     private EditText startLocationEditText;
     private EditText endLocationEditText;
+
+    private TextView fairFareText;
 
     public boolean settingStart = false;
     public boolean settingEnd = false;
@@ -96,6 +101,15 @@ public class CreateRideRequestFragment extends DialogFragment {
             } else {
                 endLocationEditText.setText("");
             }
+
+            float fairFare = RideRequest.fairFareEstimate(tempLocationInfo);
+            if (fairFare < 0) {
+                clearFairFare();
+            } else {
+                updateFairFare(fairFare);
+            }
+        } else {
+            clearFairFare();
         }
     }
 
@@ -123,6 +137,7 @@ public class CreateRideRequestFragment extends DialogFragment {
         fareEditText = view.findViewById(R.id.fare_EditText);
         startLocationEditText = view.findViewById(R.id.start_location_EditText);
         endLocationEditText = view.findViewById(R.id.end_location_EditText);
+        fairFareText = view.findViewById(R.id.fair_fare_textview);
         initUIElements();
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext())
@@ -194,6 +209,18 @@ public class CreateRideRequestFragment extends DialogFragment {
 
         tempLocationInfo.setDropoff(dropoff);
         settingEnd = false;
+    }
+
+    private void updateFairFare(float fairFare) {
+        if (fairFareText != null) {
+            fairFareText.setText(String.format("Fair Fare(TM): $%.2f", fairFare));
+        }
+    }
+
+    private void clearFairFare() {
+        if (fairFareText != null) {
+            fairFareText.setText("Fair Fare(TM): --");
+        }
     }
 
     /**

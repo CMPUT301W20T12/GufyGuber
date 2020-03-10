@@ -21,10 +21,15 @@
 
 package com.example.gufyguber;
 
+import android.location.Location;
+import android.util.Log;
+
 import com.google.android.gms.maps.model.LatLng;
 import com.google.firebase.firestore.GeoPoint;
 
 public class LocationInfo {
+    private static final String TAG = "LocationInfo";
+
     private LatLng pickup;
     public void setPickup(LatLng pickup) { this.pickup = pickup; }
     public LatLng getPickup() { return pickup; }
@@ -80,7 +85,28 @@ public class LocationInfo {
      * @return The distance between current and dropoff in meters
      */
     public float getRemainingDist() {
-        //TODO: Calculate distance between current and dropoff
-        return -1.0f;
+        if (getCurrent() == null || getDropoff() == null) {
+            Log.e(TAG, "LocationInfo.getRemainingDist called with a null current or dropoff.");
+            return -1.0f;
+        }
+        float[] results = new float[1];
+        Location.distanceBetween(getCurrent().latitude, getCurrent().longitude,
+                getDropoff().latitude, getDropoff().longitude, results);
+        return results[0];
+    }
+
+    /**
+     * Calculates the distance between pickup and dropoff
+     * @return The distance between the pickup and dropoff in meters
+     */
+    public float getTotalDist() {
+        if (getPickup() == null || getDropoff() == null) {
+            Log.e(TAG, "LocationInfo.getTotalDist() called with a null pickup or dropoff.");
+            return -1.0f;
+        }
+        float[] results = new float[1];
+        Location.distanceBetween(getPickup().latitude, getPickup().longitude,
+                getDropoff().latitude, getDropoff().longitude, results);
+        return results[0];
     }
 }
