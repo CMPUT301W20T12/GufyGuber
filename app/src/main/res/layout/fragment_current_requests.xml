@@ -36,6 +36,7 @@
 
 
         <TextView
+            android:id="@+id/ride_status"
             android:layout_width="match_parent"
             android:layout_height="50dp"
             android:text="Current Ride Status:"

@@ -44,6 +44,7 @@ public class CurrentRequestFragment extends Fragment {
     private TextView arrivalTimeText;
     private TextView pickupLocationText;
     private TextView dropoffLocationText;
+    private TextView rideStatus;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -71,6 +72,7 @@ public class CurrentRequestFragment extends Fragment {
         arrivalTimeText = view.findViewById(R.id.user_arrival_time);
         pickupLocationText = view.findViewById(R.id.user_pickup_location);
         dropoffLocationText = view.findViewById(R.id.user_dropoff_location);
+        rideStatus = view.findViewById(R.id.ride_status);
 
         cancelBtn.setOnClickListener(new View.OnClickListener() {
             @Override
