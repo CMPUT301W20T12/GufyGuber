@@ -59,7 +59,7 @@ public class NavigationActivity extends AppCompatActivity {
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
         mAppBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.nav_map, R.id.nav_profile, R.id.nav_profile, R.id.nav_scan)
+                R.id.nav_map, R.id.nav_profile, R.id.nav_profile, R.id.nav_generateQR, R.id.nav_scan)
                 .setDrawerLayout(drawer)
                 .build();
         NavController navController = Navigation.findNavController(this, nav_host_fragment);
@@ -89,6 +89,11 @@ public class NavigationActivity extends AppCompatActivity {
             MapFragment mapFragment = new MapFragment();
             FragmentManager manager = getSupportFragmentManager();
             manager.beginTransaction().replace(id, mapFragment).commit();
+        }
+        if(id == R.id.nav_generateQR){
+            GenerateQrFragment qrFragment = new GenerateQrFragment();
+            FragmentManager manager = getSupportFragmentManager();
+            manager.beginTransaction().replace(id, qrFragment).commit();
         }
 
         if(id == R.id.nav_scan){

@@ -26,6 +26,10 @@
             android:icon="@drawable/ic_menu_gallery"
             android:title="Profile" />
         <item
+            android:id="@+id/nav_generateQR"
+            android:icon="@drawable/ic_generate"
+            android:title="Generate QR (Test)"/>
+	<item
             android:id="@+id/nav_scan"
             android:icon="@drawable/ic_scan"
             android:title="Scan QR" />
@@ -37,7 +41,7 @@
             <item
                 android:id="@+id/nav_current_requests"
                 android:icon="@drawable/ic_menu_agenda"
-                android:title="Current Requests" />
+                android:title="Current Request" />
 
         </menu>
     </item>
