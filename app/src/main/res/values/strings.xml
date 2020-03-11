@@ -39,6 +39,7 @@
     <string name="fair_fair_default_hint">Fair Fare(TM): $13</string>
     <string name="edit_profile">Edit</string>
     <string name="save_profile">Save changes</string>
+    <string name="request_status">Current ride request: %s</string>
 
 
 </resources>

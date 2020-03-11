@@ -88,6 +88,9 @@ public class CurrentRequestFragment extends Fragment {
                 if (value != null) {
                     pickupLocationText.setText(LocationInfo.latlngToString(value.getLocationInfo().getPickup()));
                     dropoffLocationText.setText(LocationInfo.latlngToString(value.getLocationInfo().getDropoff()));
+                    rideStatus.setText(getResources().getString(R.string.request_status, value.getStatus().toString()));
+                } else {
+                    rideStatus.setText(getResources().getString(R.string.request_status, ' '));
                 }
             }
         });

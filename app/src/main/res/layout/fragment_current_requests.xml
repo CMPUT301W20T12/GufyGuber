@@ -39,7 +39,7 @@
             android:id="@+id/ride_status"
             android:layout_width="match_parent"
             android:layout_height="50dp"
-            android:text="Current Ride Status:"
+            android:text="@string/request_status"
             android:gravity="center_vertical"
             android:paddingLeft="10dp"
             android:paddingRight="10dp"
