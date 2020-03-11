@@ -25,6 +25,7 @@ package com.example.gufyguber;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -46,6 +47,7 @@ public class GenerateQR extends AppCompatActivity {
     Bitmap map;
     String codeMessage;
     ImageView qrCode;
+    TextView qrMessage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,9 +55,12 @@ public class GenerateQR extends AppCompatActivity {
         setContentView(R.layout.generate_qr);
 
         qrCode = findViewById(R.id.qrCode);
+        qrMessage = findViewById(R.id.showMessage);
 
         //code message will equal the user's email and the amount owed to the driver
         codeMessage = "Trial!!!";
+
+        qrMessage.setText(codeMessage);
 
         MultiFormatWriter multi = new MultiFormatWriter();
         try {
