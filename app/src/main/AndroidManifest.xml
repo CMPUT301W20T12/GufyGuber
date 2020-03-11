@@ -53,6 +53,10 @@
                 android:value=".SignInActivity"/>
         </activity>
 
+	    <activity android:name=".GenerateQR"
+            android:label="Generate QR"
+            android:theme="@style/AppTheme.NoActionBar">
+        </activity>
     </application>
 
 </manifest>

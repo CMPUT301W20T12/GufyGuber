@@ -17,9 +17,7 @@ import android.os.Bundle;
 
 import com.example.gufyguber.ui.Map.MapFragment;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.snackbar.Snackbar;
 
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 
@@ -58,7 +56,7 @@ public class NavigationActivity extends AppCompatActivity {
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
         mAppBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.nav_map, R.id.nav_profile, R.id.nav_profile)
+                R.id.nav_map, R.id.nav_profile, R.id.nav_profile, R.id.nav_generateQR)
                 .setDrawerLayout(drawer)
                 .build();
         NavController navController = Navigation.findNavController(this, nav_host_fragment);
@@ -88,6 +86,11 @@ public class NavigationActivity extends AppCompatActivity {
             MapFragment mapFragment = new MapFragment();
             FragmentManager manager = getSupportFragmentManager();
             manager.beginTransaction().replace(id, mapFragment).commit();
+        }
+        if(id == R.id.nav_generateQR){
+            GenerateQrFragment qrFragment = new GenerateQrFragment();
+            FragmentManager manager = getSupportFragmentManager();
+            manager.beginTransaction().replace(id, qrFragment).commit();
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
