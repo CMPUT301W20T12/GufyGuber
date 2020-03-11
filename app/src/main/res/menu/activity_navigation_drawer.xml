@@ -32,7 +32,7 @@
 	<item
             android:id="@+id/nav_scan"
             android:icon="@drawable/ic_scan"
-            android:title="Scan QR" />
+            android:title="Scan QR (Test)" />
 
     </group>
 
