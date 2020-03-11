@@ -6,12 +6,12 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="50dp"
-        android:text="Cancel Request:"
+        android:text="Cancel Request"
         android:gravity="center_vertical"
         android:paddingLeft="10dp"
         android:paddingRight="10dp"
         android:textColor="#fff"
-        android:textSize="15dp"
+        android:textSize="20sp"
         android:textStyle="bold"
         android:background="@color/colorPrimaryDark"/>
 
@@ -29,7 +29,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Ok"
-        android:background="@color/colorPrimaryDark"
+        android:theme="@style/ThemeOverlay.LightButton"
         android:layout_marginBottom="10dp"
         android:layout_gravity="center"/>
 
