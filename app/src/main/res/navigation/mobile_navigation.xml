@@ -35,6 +35,13 @@
         android:name="com.example.gufyguber.ui.CurrentRequest.CurrentRequestFragment"
         android:label="Current Requests"
         tools:layout="@layout/fragment_current_requests" />
+
+    <dialog
+        android:id="@+id/nav_sign_out"
+        android:name="com.example.gufyguber.ui.Profile.SignOutDialog"
+        android:label="Sign Out"
+        tools:layout="@layout/sign_out_dialog"/>
+
     <dialog
         android:id="@+id/nav_generateQR"
         android:name="com.example.gufyguber.GenerateQrFragment"

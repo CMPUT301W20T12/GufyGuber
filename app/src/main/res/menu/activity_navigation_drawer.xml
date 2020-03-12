@@ -22,10 +22,6 @@
             android:icon="@android:drawable/ic_dialog_map"
             android:title="Map" />
         <item
-            android:id="@+id/nav_profile"
-            android:icon="@drawable/ic_menu_gallery"
-            android:title="Profile" />
-        <item
             android:id="@+id/nav_generateQR"
             android:icon="@drawable/ic_generate"
             android:title="Generate QR (Test)"/>
@@ -38,7 +34,19 @@
                 android:id="@+id/nav_current_requests"
                 android:icon="@drawable/ic_menu_agenda"
                 android:title="Current Request" />
+        </menu>
+    </item>
 
+    <item android:title="User Profile">
+        <menu>
+            <item
+                android:id="@+id/nav_profile"
+                android:icon="@drawable/ic_menu_gallery"
+                android:title="My Profile" />
+            <item
+                android:id="@+id/nav_sign_out"
+                android:icon="@drawable/ic_menu_send"
+                android:title="Sign Out" />
         </menu>
     </item>
 
