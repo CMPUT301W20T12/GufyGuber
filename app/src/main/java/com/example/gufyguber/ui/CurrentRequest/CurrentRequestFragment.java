@@ -39,6 +39,8 @@ import com.google.firebase.auth.FirebaseAuth;
 
 import org.w3c.dom.Text;
 
+import java.util.Date;
+
 public class CurrentRequestFragment extends Fragment {
 
     private CurrentRequestViewModel currentRequestViewModel;
@@ -51,6 +53,7 @@ public class CurrentRequestFragment extends Fragment {
     private TextView dropoffLocationText;
     private TextView suggestedFareText;
     private TextView rideStatus;
+
 
 
 
@@ -112,8 +115,17 @@ public class CurrentRequestFragment extends Fragment {
         if (request != null) {
             pickupLocationText.setText(LocationInfo.latlngToString(request.getLocationInfo().getPickup()));
             dropoffLocationText.setText(LocationInfo.latlngToString(request.getLocationInfo().getDropoff()));
-            pickupTimeText.setText(String.format("%c", request.getTimeInfo().getRequestAcceptedTime()));
-            arrivalTimeText.setText(String.format("%c", request.getTimeInfo().getRequestClosedTime()));
+            if (request.getTimeInfo().getRequestOpenTime() != null) {
+                pickupTimeText.setText(request.getTimeInfo().getRequestOpenTime().toString());
+            } else {
+                pickupTimeText.setText("Time Unavailable");
+            }
+            //pickupTimeText.setText(String.format("%t", request.getTimeInfo().getRequestOpenTime()));
+            if (request.getTimeInfo().getRequestAcceptedTime() != null) {
+                arrivalTimeText.setText(request.getTimeInfo().getRequestAcceptedTime().toString());
+            } else {
+                arrivalTimeText.setText("Time Unavailable");
+            }
             rideStatus.setText(getResources().getString(R.string.request_status, request.getStatus().toString()));
             suggestedFareText.setText(String.format("$%.2f", request.getOfferedFare()));
         } else {
