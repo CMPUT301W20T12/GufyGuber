@@ -16,12 +16,8 @@ package com.example.gufyguber;
 import android.os.Bundle;
 
 import com.example.gufyguber.ui.Map.MapFragment;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.snackbar.Snackbar;
 
-import android.util.Log;
 import android.view.MenuItem;
-import android.view.View;
 
 import androidx.core.view.GravityCompat;
 import androidx.fragment.app.FragmentManager;
@@ -31,7 +27,6 @@ import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
 import com.google.android.material.navigation.NavigationView;
-import com.google.type.LatLng;
 
 import androidx.drawerlayout.widget.DrawerLayout;
 
@@ -58,7 +53,7 @@ public class NavigationActivity extends AppCompatActivity {
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
         mAppBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.nav_map, R.id.nav_profile, R.id.nav_profile)
+                R.id.nav_map, R.id.nav_profile, R.id.nav_current_requests, R.id.nav_generateQR, R.id.nav_scan, R.id.nav_sign_out)
                 .setDrawerLayout(drawer)
                 .build();
         NavController navController = Navigation.findNavController(this, nav_host_fragment);
@@ -88,6 +83,16 @@ public class NavigationActivity extends AppCompatActivity {
             MapFragment mapFragment = new MapFragment();
             FragmentManager manager = getSupportFragmentManager();
             manager.beginTransaction().replace(id, mapFragment).commit();
+        }
+        if(id == R.id.nav_generateQR){
+            GenerateQrFragment qrFragment = new GenerateQrFragment();
+            FragmentManager manager = getSupportFragmentManager();
+            manager.beginTransaction().replace(id, qrFragment).commit();
+        }
+        if(id == R.id.nav_scan){
+            ScanQrFragment scanFragment = new ScanQrFragment();
+            FragmentManager manager = getSupportFragmentManager();
+            manager.beginTransaction().replace(id, scanFragment).commit();
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);

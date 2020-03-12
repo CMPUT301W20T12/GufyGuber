@@ -33,7 +33,7 @@ public class RideRequest {
      * Enumerated representation of RideRequest status.
      * toString() methods have been overridden to provide a pretty-print string representation
      */
-    enum Status {
+    public enum Status {
         PENDING {
             @Override
             public String toString() {
@@ -72,7 +72,7 @@ public class RideRequest {
      */
     private String driverUID;
     public String getDriverUID() { return driverUID; }
-    private void setDriverUID(String driverUID) { this.driverUID = driverUID; }
+    public void setDriverUID(String driverUID) { this.driverUID = driverUID; }
 
     /**
      * Current status of this ride request

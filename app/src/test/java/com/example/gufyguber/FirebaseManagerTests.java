@@ -28,6 +28,7 @@
 package com.example.gufyguber;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.jupiter.api.BeforeAll;
 
@@ -39,11 +40,13 @@ public class FirebaseManagerTests {
     private Vehicle testVehicle;
     private RideRequest testRideRequest;
 
+    @Ignore("Unable to test Firestore right now.")
     @BeforeAll
     public void setup() {
         //TODO: Should connect to Firestore
     }
 
+    @Ignore("Unable to test Firestore right now.")
     @Test
     public void testRider() {
         final Rider testRider = new Rider("testRiderUID", "testEmail@test.com", "TestFirstName",
@@ -77,6 +80,7 @@ public class FirebaseManagerTests {
         });
     }
 
+    @Ignore("Unable to test Firestore right now.")
     @Test
     public void testVehicle() {
         String testDriverUID = "testDriver";
@@ -109,6 +113,7 @@ public class FirebaseManagerTests {
         });
     }
 
+    @Ignore("Unable to test Firestore right now.")
     @Test
     public void testDriver() {
         final Vehicle testVehicle = new Vehicle("testModel", "testMake", "testPlate", 3);
