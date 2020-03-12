@@ -9,6 +9,8 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
+    <uses-permission android:name="android.permission.CAMERA" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/gg_logo_white"
@@ -16,10 +18,16 @@
         android:roundIcon="@mipmap/gg_logo_white_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <activity android:name=".Scan" />
+
+        <meta-data
+            android:name="com.google.android.gms.vision.DEPENDENCIES"
+            android:value="barcode" />
 
         <activity android:name=".SignInActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -57,6 +65,9 @@
             android:label="Generate QR"
             android:theme="@style/AppTheme.NoActionBar">
         </activity>
+        <activity android:name=".startScanQR"
+            android:label="Scan QR"
+            android:theme="@style/AppTheme.NoActionBar" />
     </application>
 
 </manifest>

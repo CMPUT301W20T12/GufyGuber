@@ -25,6 +25,10 @@
             android:id="@+id/nav_generateQR"
             android:icon="@drawable/ic_generate"
             android:title="Generate QR (Test)"/>
+	<item
+            android:id="@+id/nav_scan"
+            android:icon="@drawable/ic_scan"
+            android:title="Scan QR (Test)" />
 
     </group>
 

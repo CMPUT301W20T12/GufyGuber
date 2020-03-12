@@ -43,4 +43,8 @@ dependencies {
 
     implementation 'com.google.zxing:core:3.4.0'
     implementation 'com.journeyapps:zxing-android-embedded:3.2.0@aar'
+
+    implementation "com.google.android.gms:play-services-base:17.1.0"
+    implementation "com.google.firebase:firebase-messaging:20.1.2"
+    implementation "com.google.android.gms:play-services-vision:19.0.0"
 }
