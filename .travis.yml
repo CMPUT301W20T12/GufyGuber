@@ -43,6 +43,8 @@ before_install:
   - export GRADLE_HOME=$PWD/gradle-5.3
   - export PATH=$GRADLE_HOME/bin:$PATH
   
+  - android list targets
+  
   # Build the project
   - gradle -v
   
