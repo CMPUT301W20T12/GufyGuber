@@ -22,6 +22,7 @@
 
 package com.example.gufyguber.ui.Profile;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
@@ -36,7 +37,9 @@ import androidx.fragment.app.DialogFragment;
 
 import com.example.gufyguber.R;
 import com.example.gufyguber.SignInActivity;
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -62,15 +65,34 @@ public class SignOutDialog extends DialogFragment {
         noBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                getActivity().getSupportFragmentManager().beginTransaction().remove(SignOutDialog.this).commit();
+                dismiss();
             }
         });
 
         yesBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                SignInActivity.getReference().signOut();
-                getActivity().finish();
+                // Configure Google sign-in to request the user's ID, email address,
+                GoogleSignInOptions gso = new
+                        GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                        // Pass server's client ID to requestIdToken method
+                        .requestIdToken(getString(R.string.default_web_client_id))
+                        .requestEmail()
+                        .build();
+
+                final Activity tempActivity = getActivity();
+                // Build a GoogleSignInClient with the options specified by gso.
+                GoogleSignInClient signInClient = GoogleSignIn.getClient(tempActivity, gso);
+                // Sign the user out of both firebase and the Google Client
+                FirebaseAuth.getInstance().signOut();
+                signInClient.signOut()
+                        .addOnCompleteListener(tempActivity, new OnCompleteListener<Void>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<Void> task) {
+                                        // update the UI to not signed in
+                                        tempActivity.finish();
+                                    }
+                                });
             }
         });
 
