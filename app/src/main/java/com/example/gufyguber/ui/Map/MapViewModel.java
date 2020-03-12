@@ -17,6 +17,10 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
+/**
+ * Unused
+ */
+
 public class MapViewModel extends ViewModel {
 
     private MutableLiveData<String> mText;

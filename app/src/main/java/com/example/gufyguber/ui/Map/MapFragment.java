@@ -51,6 +51,10 @@ import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
 
+/**
+ * This class creates a MapFragment on the NavigationActivity "Map" tab.
+ */
+
 public class MapFragment extends Fragment implements OnMapReadyCallback, CreateRideRequestFragment.CreateRideRequestListener,
         CreateRideRequestFragment.CancelCreateRideRequestListener, GoogleMap.OnMarkerClickListener {
 
@@ -61,8 +65,16 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
     private FloatingActionButton fab;
     private TextView offlineText;
     private Timer offlineTestTimer;
-
     private boolean isDriver;
+
+    /**
+     *  This class is an intermediate step to differentiate the driver from the rider
+     * @param inflater
+     * @param container
+     * @param savedInstanceState
+     * @return
+     * returns what the user type is (rider/driver)
+     */
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -101,6 +113,14 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
         }
     }
 
+    /**
+     * This function handles rider users. Creates a button for requests.
+     * @param inflater
+     * @param container
+     * @param savedInstanceState
+     * @return
+     * returns the view
+     */
     private View riderOnCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
         View v = inflater.inflate(R.layout.fragment_map, container, false);
@@ -158,6 +178,14 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
         return v;
     }
 
+    /**
+     * This function handles the driver users. Drivers are able to see the open requests.
+     * @param inflater
+     * @param container
+     * @param savedInstanceState
+     * @return
+     * returns the view
+     */
     public View driverOnCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
         View v = inflater.inflate(R.layout.fragment_driver_map, container, false);
@@ -222,6 +250,11 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
             riderOnMapReady(googleMap);
         }
     }
+
+    /**
+     * This function handles the request input for pickup and destination
+     * @param googleMap
+     */
 
     private void riderOnMapReady(GoogleMap googleMap) {
         mMap = googleMap;
@@ -297,6 +330,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
         FirebaseManager.getReference().storeRideRequest(newRequest);
         requestDialog = null;
     }
+
+    /**
+     * This function handles the markers created when the rider is making a new request and cancels
+     */
 
     public void onRideRequestCreationCancelled() {
         if (pickupMarker != null) {
