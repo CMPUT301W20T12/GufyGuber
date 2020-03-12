@@ -19,6 +19,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -28,6 +29,7 @@ import androidx.fragment.app.Fragment;
 import com.example.gufyguber.CreateRideRequestFragment;
 import com.example.gufyguber.FirebaseManager;
 import com.example.gufyguber.LocationInfo;
+import com.example.gufyguber.OfflineCache;
 import com.example.gufyguber.R;
 import com.example.gufyguber.RideRequest;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -40,12 +42,17 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
 public class MapFragment extends Fragment implements OnMapReadyCallback, CreateRideRequestFragment.CreateRideRequestListener, CreateRideRequestFragment.CancelCreateRideRequestListener {
 
     private GoogleMap mMap;
     private Marker pickupMarker;
     private Marker dropoffMarker;
     private CreateRideRequestFragment requestDialog;
+    private FloatingActionButton fab;
+    private TextView offlineText;
 
     public MapFragment() {
 
@@ -58,7 +65,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
 
         // makes a button for us to create ride requests (RIDER) from navigation drawer activity default
 
-        FloatingActionButton fab = v.findViewById(R.id.fab);
+        offlineText = v.findViewById(R.id.offline_text);
+        fab = v.findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -68,6 +76,22 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
                 requestDialog.show(getChildFragmentManager(), "create_ride_request");
             }
         });
+
+        // Sets a background task to periodically check for an internet connection
+        Timer timer = new Timer();
+        timer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        boolean isOnline = FirebaseManager.getReference().isOnline(getContext());
+                        fab.setVisibility(isOnline ? View.VISIBLE : View.GONE);
+                        offlineText.setVisibility(isOnline ? View.GONE : View.VISIBLE);
+                    }
+                });
+            }
+        }, 0, 3000);
 
         return v;
     }
@@ -136,6 +160,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
      * @param newRequest The request created by the dialog fragment
      */
     public void onRideRequestCreated(RideRequest newRequest) {
+        OfflineCache.getReference().cacheCurrentRideRequest(newRequest);
         FirebaseManager.getReference().storeRideRequest(newRequest);
         if (pickupMarker != null) {
             pickupMarker.remove();
