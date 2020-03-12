@@ -30,6 +30,7 @@ import androidx.lifecycle.ViewModelProviders;
 
 import com.example.gufyguber.FirebaseManager;
 import com.example.gufyguber.LocationInfo;
+import com.example.gufyguber.OfflineCache;
 import com.example.gufyguber.R;
 import com.example.gufyguber.RideRequest;
 import com.google.firebase.auth.FirebaseAuth;
@@ -82,18 +83,27 @@ public class CurrentRequestFragment extends Fragment {
                 }
             });
 
-        FirebaseManager.getReference().fetchRideRequest(FirebaseAuth.getInstance().getCurrentUser().getUid(), new FirebaseManager.ReturnValueListener<RideRequest>() {
-            @Override
-            public void returnValue(RideRequest value) {
-                if (value != null) {
-                    pickupLocationText.setText(LocationInfo.latlngToString(value.getLocationInfo().getPickup()));
-                    dropoffLocationText.setText(LocationInfo.latlngToString(value.getLocationInfo().getDropoff()));
-                    rideStatus.setText(getResources().getString(R.string.request_status, value.getStatus().toString()));
-                } else {
-                    rideStatus.setText(getResources().getString(R.string.request_status, ' '));
+        if (FirebaseManager.getReference().isOnline(getContext())) {
+            FirebaseManager.getReference().fetchRideRequest(FirebaseAuth.getInstance().getCurrentUser().getUid(), new FirebaseManager.ReturnValueListener<RideRequest>() {
+                @Override
+                public void returnValue(RideRequest value) {
+                    // Cache latest version of request (might be null, but this corresponds to a delete)
+                    OfflineCache.getReference().cacheCurrentRideRequest(value);
+                    updateUI(value);
                 }
-            }
-        });
+            });
+        } else {
+            updateUI(OfflineCache.getReference().retrieveCurrentRideRequest());
+        }
+    }
 
+    private void updateUI(RideRequest request) {
+        if (request != null) {
+            pickupLocationText.setText(LocationInfo.latlngToString(request.getLocationInfo().getPickup()));
+            dropoffLocationText.setText(LocationInfo.latlngToString(request.getLocationInfo().getDropoff()));
+            rideStatus.setText(getResources().getString(R.string.request_status, request.getStatus().toString()));
+        } else {
+            rideStatus.setText(getResources().getString(R.string.request_status, ' '));
+        }
     }
 }
