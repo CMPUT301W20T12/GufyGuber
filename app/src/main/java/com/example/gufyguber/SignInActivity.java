@@ -80,15 +80,8 @@ public class SignInActivity extends AppCompatActivity {
     private Button signOutButton;
     private FirebaseManager firebaseManager = FirebaseManager.getReference();
 
-    private static SignInActivity reference;
-    public static SignInActivity getReference() {
-        return reference;
-    }
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        reference = this;
-
         super.onCreate(savedInstanceState);
         setContentView(R.layout.google_sign_in);
 
@@ -172,7 +165,7 @@ public class SignInActivity extends AppCompatActivity {
     /**
      * Sign the user out of the firebase project and the Google Sign In Client.
      */
-    public void signOut() {
+    private void signOut() {
         // Sign the user out of both firebase and the Google Client
         mFirebaseAuth.signOut();
         mGoogleSignInClient.signOut()
