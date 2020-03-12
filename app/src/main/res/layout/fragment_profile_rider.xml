@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  ~ fragment_profile.xml
+  ~ fragment_profile_rider_rider.xml
   ~
   ~ Version
   ~
@@ -112,8 +112,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="25dp"
-                android:orientation="horizontal"
-                android:paddingBottom="60dp">
+                android:orientation="horizontal">
 
                 <TextView
                     android:layout_width="0dp"
@@ -132,7 +131,6 @@
                     android:textSize="25sp" />
 
             </LinearLayout>
-
 
 
         </LinearLayout>
