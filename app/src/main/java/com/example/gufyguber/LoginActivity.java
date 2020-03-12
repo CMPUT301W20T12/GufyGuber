@@ -28,6 +28,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
  * an option to register a RIDER ar DRIVER account via a dialog fragment.
  *
  * @see UserTypeFragment
+ * @deprecated
  */
 public class LoginActivity extends AppCompatActivity {
 
