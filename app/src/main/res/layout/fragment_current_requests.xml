@@ -158,6 +158,28 @@
 
         </LinearLayout>
 
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Estimated Fare:"/>
+
+            <TextView
+                android:id="@+id/user_fare"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Your Estimated Fare:"/>
+
+
+        </LinearLayout>
+
         <ImageView
             android:layout_width="70dp"
             android:layout_height="70dp"

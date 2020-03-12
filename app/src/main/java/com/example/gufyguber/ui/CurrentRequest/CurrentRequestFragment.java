@@ -34,6 +34,8 @@ import com.example.gufyguber.R;
 import com.example.gufyguber.RideRequest;
 import com.google.firebase.auth.FirebaseAuth;
 
+import org.w3c.dom.Text;
+
 public class CurrentRequestFragment extends Fragment {
 
     private CurrentRequestViewModel currentRequestViewModel;
@@ -44,6 +46,7 @@ public class CurrentRequestFragment extends Fragment {
     private TextView arrivalTimeText;
     private TextView pickupLocationText;
     private TextView dropoffLocationText;
+    private TextView suggestedFare;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -71,6 +74,7 @@ public class CurrentRequestFragment extends Fragment {
         arrivalTimeText = view.findViewById(R.id.user_arrival_time);
         pickupLocationText = view.findViewById(R.id.user_pickup_location);
         dropoffLocationText = view.findViewById(R.id.user_dropoff_location);
+        suggestedFare = view.findViewById(R.id.user_fare);
 
         cancelBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -79,7 +83,9 @@ public class CurrentRequestFragment extends Fragment {
 
                 }
             });
-
+/**
+ * add Fare Fair rider status
+ */
         FirebaseManager.getReference().fetchRideRequest(FirebaseAuth.getInstance().getCurrentUser().getUid(), new FirebaseManager.ReturnValueListener<RideRequest>() {
             @Override
             public void returnValue(RideRequest value) {
