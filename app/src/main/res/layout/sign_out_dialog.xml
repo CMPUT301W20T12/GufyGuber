@@ -48,7 +48,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="No"
-            android:background="@color/colorPrimaryDark"
+            android:theme="@style/ThemeOverlay.LightButton"
             android:layout_marginRight="5dp"/>
 
         <Button
@@ -57,7 +57,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="Yes"
-            android:background="@color/colorPrimaryDark"/>
+            android:theme="@style/ThemeOverlay.LightButton"/>
     </LinearLayout>
 
 </LinearLayout>
