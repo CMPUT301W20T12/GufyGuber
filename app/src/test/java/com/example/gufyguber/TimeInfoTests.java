@@ -22,5 +22,33 @@
 
 package com.example.gufyguber;
 
+import org.junit.Test;
+
+import java.util.Date;
+
+import static org.junit.jupiter.api.Assertions.*;
+
 public class TimeInfoTests {
+    @Test
+    public void testTimeConstruction() {
+        TimeInfo tInfo = new TimeInfo();
+        assertNotNull(tInfo.getRequestOpenTime());
+        assertNull(tInfo.getRequestAcceptedTime());
+        assertNull(tInfo.getRequestClosedTime());
+
+        tInfo.setRequestOpenTime();
+        tInfo.setRequestAcceptedTime();
+        tInfo.setRequestClosedTime();
+        assertNotNull(tInfo.getRequestOpenTime());
+        assertNotNull(tInfo.getRequestAcceptedTime());
+        assertNotNull(tInfo.getRequestClosedTime());
+
+        tInfo = new TimeInfo();
+        tInfo.setRequestOpenTime(new Date());
+        tInfo.setRequestAcceptedTime(new Date());
+        tInfo.setRequestClosedTime(new Date());
+        assertNotNull(tInfo.getRequestOpenTime());
+        assertNotNull(tInfo.getRequestAcceptedTime());
+        assertNotNull(tInfo.getRequestClosedTime());
+    }
 }

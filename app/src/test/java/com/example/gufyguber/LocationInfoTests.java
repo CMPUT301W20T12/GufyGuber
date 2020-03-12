@@ -15,12 +15,23 @@
  *
  * LocationInfoTests.java
  *
- * Last edit: scott, 12/03/20 1:41 PM
+ * Last edit: Robert, 12/03/20 1:41 PM
  *
  * Version
  */
 
 package com.example.gufyguber;
 
+import org.junit.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
+
 public class LocationInfoTests {
+    @Test
+    public void testDistanceErrors() {
+        // Empty location info should fail these tests
+        LocationInfo locInf = new LocationInfo();
+        assert(locInf.getRemainingDist() < 0);
+        assert(locInf.getTotalDist() < 0);
+    }
 }
