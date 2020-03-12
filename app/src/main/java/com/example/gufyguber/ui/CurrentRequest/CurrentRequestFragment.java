@@ -28,11 +28,13 @@ import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 
+import com.example.gufyguber.CreateRideRequestFragment;
 import com.example.gufyguber.FirebaseManager;
 import com.example.gufyguber.LocationInfo;
 import com.example.gufyguber.OfflineCache;
 import com.example.gufyguber.R;
 import com.example.gufyguber.RideRequest;
+import com.example.gufyguber.TimeInfo;
 import com.google.firebase.auth.FirebaseAuth;
 
 import org.w3c.dom.Text;
@@ -47,8 +49,10 @@ public class CurrentRequestFragment extends Fragment {
     private TextView arrivalTimeText;
     private TextView pickupLocationText;
     private TextView dropoffLocationText;
-    private TextView suggestedFare;
+    private TextView suggestedFareText;
     private TextView rideStatus;
+
+
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -76,7 +80,7 @@ public class CurrentRequestFragment extends Fragment {
         arrivalTimeText = view.findViewById(R.id.user_arrival_time);
         pickupLocationText = view.findViewById(R.id.user_pickup_location);
         dropoffLocationText = view.findViewById(R.id.user_dropoff_location);
-        suggestedFare = view.findViewById(R.id.user_fare);
+        suggestedFareText = view.findViewById(R.id.user_fare);
         rideStatus = view.findViewById(R.id.ride_status);
 
         cancelBtn.setOnClickListener(new View.OnClickListener() {
@@ -108,7 +112,10 @@ public class CurrentRequestFragment extends Fragment {
         if (request != null) {
             pickupLocationText.setText(LocationInfo.latlngToString(request.getLocationInfo().getPickup()));
             dropoffLocationText.setText(LocationInfo.latlngToString(request.getLocationInfo().getDropoff()));
+            pickupTimeText.setText(String.format("%c", request.getTimeInfo().getRequestAcceptedTime()));
+            arrivalTimeText.setText(String.format("%c", request.getTimeInfo().getRequestClosedTime()));
             rideStatus.setText(getResources().getString(R.string.request_status, request.getStatus().toString()));
+            suggestedFareText.setText(String.format("$%.2f", request.getOfferedFare()));
         } else {
             rideStatus.setText(getResources().getString(R.string.request_status, ' '));
         }
