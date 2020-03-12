@@ -32,12 +32,14 @@ public class OfflineCache {
     }
 
     private RideRequest currentRideRequest;
-
     public void cacheCurrentRideRequest(RideRequest request) {
         currentRideRequest = request;
     }
-
     public RideRequest retrieveCurrentRideRequest() {
         return currentRideRequest;
     }
+
+    private User currentUser;
+    public void cacheCurrentUser(User user) { currentUser = user; }
+    public User retrieveCurrentUser() { return currentUser; }
 }

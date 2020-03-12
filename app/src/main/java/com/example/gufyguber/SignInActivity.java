@@ -22,6 +22,7 @@
 
 package com.example.gufyguber;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
@@ -298,7 +299,32 @@ public class SignInActivity extends AppCompatActivity {
      * Goes to the app's main view
      */
     private void goToMapView() {
-        Intent openNavigation = new Intent(this, NavigationActivity.class);
-        startActivity(openNavigation);
+        final Activity tempActivity = this;
+        FirebaseManager.getReference().isUserDriver(mFirebaseAuth.getCurrentUser().getUid(), new FirebaseManager.ReturnValueListener<Boolean>() {
+            @Override
+            public void returnValue(Boolean value) {
+                if (value) {
+                    FirebaseManager.getReference().fetchDriverInfo(mFirebaseAuth.getCurrentUser().getUid(), new FirebaseManager.ReturnValueListener<Driver>() {
+                        @Override
+                        public void returnValue(Driver value) {
+                            Log.w(TAG, "IS DRIVER");
+                            OfflineCache.getReference().cacheCurrentUser(value);
+                            Intent openNavigation = new Intent(tempActivity, NavigationActivity.class);
+                            startActivity(openNavigation);
+                        }
+                    });
+                } else {
+                    FirebaseManager.getReference().fetchRiderInfo(mFirebaseAuth.getCurrentUser().getUid(), new FirebaseManager.ReturnValueListener<Rider>() {
+                        @Override
+                        public void returnValue(Rider value) {
+                            Log.w(TAG, "IS RIDER");
+                            OfflineCache.getReference().cacheCurrentUser(value);
+                            Intent openNavigation = new Intent(tempActivity, NavigationActivity.class);
+                            startActivity(openNavigation);
+                        }
+                    });
+                }
+            }
+        });
     }
 }
