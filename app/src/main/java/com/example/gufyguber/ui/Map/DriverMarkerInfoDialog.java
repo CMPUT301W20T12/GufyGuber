@@ -13,14 +13,14 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  *
- * SignOutDialog.java
+ * DriverMarkerInfoDialog.java
  *
- * Last edit: Robert, 11/03/20 12:48 PM
+ * Last edit: scott, 11/03/20 11:32 PM
  *
  * Version
  */
 
-package com.example.gufyguber.ui.Profile;
+package com.example.gufyguber.ui.Map;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -30,14 +30,16 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 
+import com.example.gufyguber.FirebaseManager;
 import com.example.gufyguber.OfflineCache;
 import com.example.gufyguber.R;
-import com.example.gufyguber.SignInActivity;
+import com.example.gufyguber.RideRequest;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
@@ -45,10 +47,18 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 
-public class SignOutDialog extends DialogFragment {
+import org.w3c.dom.Text;
 
+public class DriverMarkerInfoDialog extends DialogFragment {
     private Button noBtn;
     private Button yesBtn;
+    private TextView titleText;
+    private TextView infoText;
+    private DriverRequestMarker clickedMarker;
+
+    public DriverMarkerInfoDialog(DriverRequestMarker clickedMarker) {
+        this.clickedMarker = clickedMarker;
+    }
 
     @Override
     public void onAttach(Context context){
@@ -58,10 +68,15 @@ public class SignOutDialog extends DialogFragment {
     @NonNull
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
-        final View view = LayoutInflater.from(getActivity()).inflate(R.layout.sign_out_dialog, null);
+        final View view = LayoutInflater.from(getActivity()).inflate(R.layout.driver_marker_dialog, null);
 
-        noBtn = view.findViewById(R.id.cancel_rider_no_btn);
-        yesBtn = view.findViewById(R.id.cancel_ride_yes_btn);
+        noBtn = view.findViewById(R.id.decline_ride_request_button);
+        yesBtn = view.findViewById(R.id.accept_ride_request_button);
+        titleText = view.findViewById(R.id.ride_request_title);
+        infoText = view.findViewById(R.id.ride_request_info);
+
+        titleText.setText(clickedMarker.getMarker().getTitle());
+        infoText.setText(clickedMarker.getMarker().getSnippet());
 
         noBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -73,29 +88,16 @@ public class SignOutDialog extends DialogFragment {
         yesBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Configure Google sign-in to request the user's ID, email address,
-                GoogleSignInOptions gso = new
-                        GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                        // Pass server's client ID to requestIdToken method
-                        .requestIdToken(getString(R.string.default_web_client_id))
-                        .requestEmail()
-                        .build();
-
-                final Activity tempActivity = getActivity();
-                // Build a GoogleSignInClient with the options specified by gso.
-                GoogleSignInClient signInClient = GoogleSignIn.getClient(tempActivity, gso);
-                // Sign the user out of both firebase and the Google Client
-                FirebaseAuth.getInstance().signOut();
-                signInClient.signOut()
-                        .addOnCompleteListener(tempActivity, new OnCompleteListener<Void>() {
-                                    @Override
-                                    public void onComplete(@NonNull Task<Void> task) {
-                                        // Signing out so empty the cache
-                                        OfflineCache.getReference().cacheCurrentRideRequest(null);
-                                        OfflineCache.getReference().cacheCurrentUser(null);
-                                        tempActivity.finish();
-                                    }
-                                });
+                if (OfflineCache.getReference().retrieveCurrentRideRequest() != null) {
+                    OfflineCache.getReference().retrieveCurrentRideRequest().setStatus(RideRequest.Status.PENDING);
+                    FirebaseManager.getReference().storeRideRequest(OfflineCache.getReference().retrieveCurrentRideRequest());
+                }
+                clickedMarker.getRideRequest().setStatus(RideRequest.Status.ACCEPTED);
+                clickedMarker.getRideRequest().getTimeInfo().setRequestAcceptedTime();
+                clickedMarker.getRideRequest().setDriverUID(FirebaseAuth.getInstance().getCurrentUser().getUid());
+                OfflineCache.getReference().cacheCurrentRideRequest(clickedMarker.getRideRequest());
+                FirebaseManager.getReference().storeRideRequest(clickedMarker.getRideRequest());
+                dismiss();
             }
         });
 
@@ -104,5 +106,4 @@ public class SignOutDialog extends DialogFragment {
 
         return builder.create();
     }
-
 }

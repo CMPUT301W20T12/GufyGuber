@@ -44,8 +44,12 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.GeoPoint;
+import com.google.firebase.firestore.QuerySnapshot;
+
+import org.w3c.dom.Document;
 
 import java.sql.Time;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -115,8 +119,12 @@ public class FirebaseManager {
      * @return true if connected to the internet, false otherwise
      */
     public boolean isOnline(@NonNull Context context) {
-        NetworkInfo netInfo = ((ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE)).getActiveNetworkInfo();
-        return netInfo != null && netInfo.isConnectedOrConnecting();
+        if (context != null && context.getSystemService(Context.CONNECTIVITY_SERVICE) != null) {
+            NetworkInfo netInfo = ((ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE)).getActiveNetworkInfo();
+            return netInfo != null && netInfo.isConnectedOrConnecting();
+        } else {
+            return true;
+        }
     }
 
     /**
@@ -167,19 +175,7 @@ public class FirebaseManager {
                 if (task.isSuccessful()) {
                     DocumentSnapshot snapshot = task.getResult();
                     if (snapshot.exists()) {
-
-                        String driverUID = snapshot.getString(DRIVER_KEY);
-                        RideRequest.Status rideStatus = RideRequest.Status.valueOf(snapshot.getString(STATUS_KEY));
-                        float fare = snapshot.getDouble(FARE_KEY).floatValue();
-                        GeoPoint pickup = snapshot.getGeoPoint(PICKUP_KEY);
-                        GeoPoint dropoff = snapshot.getGeoPoint(DROPOFF_KEY);
-                        LocationInfo locationInfo = new LocationInfo(pickup, dropoff);
-                        Date requestOpenDate = snapshot.getDate(REQUEST_OPEN_TIME_KEY);
-                        Date requestAcceptedDate = snapshot.getDate(REQUEST_ACCEPTED_TIME_KEY);
-                        Date requestClosedDate = snapshot.getDate(REQUEST_CLOSED_TIME_KEY);
-                        TimeInfo timeInfo = new TimeInfo(requestOpenDate, requestAcceptedDate, requestClosedDate);
-
-                        returnFunction.returnValue(new RideRequest(riderUID, driverUID, rideStatus, fare, locationInfo, timeInfo));
+                        returnFunction.returnValue(buildRideRequest(snapshot));
                     } else {
                         Log.e(TAG, String.format("Ride request info for [%s] not found on Firestore.", riderUID));
                         returnFunction.returnValue(null);
@@ -190,7 +186,25 @@ public class FirebaseManager {
                 }
             }
         });
-        returnFunction.returnValue(null);
+    }
+
+    /**
+     * Constructs a RideRequest object from a Firestore document.
+     * @param document The Firestore document that represents this RideRequest
+     * @return The document reconstructed as a RideRequest
+     */
+    private RideRequest buildRideRequest(DocumentSnapshot document) {
+        String driverUID = document.getString(DRIVER_KEY);
+        RideRequest.Status rideStatus = RideRequest.Status.valueOf(document.getString(STATUS_KEY));
+        float fare = document.getDouble(FARE_KEY).floatValue();
+        GeoPoint pickup = document.getGeoPoint(PICKUP_KEY);
+        GeoPoint dropoff = document.getGeoPoint(DROPOFF_KEY);
+        LocationInfo locationInfo = new LocationInfo(pickup, dropoff);
+        Date requestOpenDate = document.getDate(REQUEST_OPEN_TIME_KEY);
+        Date requestAcceptedDate = document.getDate(REQUEST_ACCEPTED_TIME_KEY);
+        Date requestClosedDate = document.getDate(REQUEST_CLOSED_TIME_KEY);
+        TimeInfo timeInfo = new TimeInfo(requestOpenDate, requestAcceptedDate, requestClosedDate);
+        return new RideRequest(document.getId(), driverUID, rideStatus, fare, locationInfo, timeInfo);
     }
 
     /**
@@ -206,9 +220,29 @@ public class FirebaseManager {
      * Gets all pending ride requests (requests without an assigned driver) from our cloud Firestore
      * @param returnFunction The callback to use once we've finished retrieving a Vehicle
      */
-    public void fetchPendingRideRequests(final ReturnValueListener<List<RideRequest>> returnFunction) {
+    public void fetchRideRequestsWithStatus(final RideRequest.Status status, final ReturnValueListener<ArrayList<RideRequest>> returnFunction) {
         //TODO: Retrieve all pending ride requests from Firebase
-        returnFunction.returnValue(null);
+        FirebaseFirestore.getInstance().collection(RIDE_REQUEST_COLLECTION).whereEqualTo(STATUS_KEY, status.name()).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                if(task.isSuccessful()) {
+                    QuerySnapshot snapshot = task.getResult();
+                    if (!snapshot.isEmpty()) {
+                        ArrayList<RideRequest> rideRequests = new ArrayList<RideRequest>();
+                        for (DocumentSnapshot document : snapshot.getDocuments()) {
+                            rideRequests.add(buildRideRequest(document));
+                        }
+                        returnFunction.returnValue(rideRequests);
+                    } else {
+                        Log.e(TAG, "No pending request info found on Firestore.");
+                        returnFunction.returnValue(null);
+                    }
+                } else {
+                    Log.e(TAG, "Fetching pending ride requests failed. Issue communicating with Firestore.");
+                    returnFunction.returnValue(null);
+                }
+            }
+        });
     }
 
     /**
@@ -422,6 +456,33 @@ public class FirebaseManager {
                     }
                 } else {
                     Log.e(TAG, "Fetching vehicle info failed. Issue communicating with Firestore.");
+                    returnFunction.returnValue(null);
+                }
+            }
+        });
+    }
+
+    /**
+     * Temporary function. We'll need to figure out a better solution than this.
+     * @param userUID The user ID to look up.
+     * @param returnFunction Callback. Will pass true if the user is a driver, false otherwise
+     */
+    public void isUserDriver(final String userUID, final ReturnValueListener<Boolean> returnFunction) {
+        //TODO: Replace with something better
+        DocumentReference userDoc = FirebaseFirestore.getInstance().collection(USER_COLLECTION).document(userUID);
+        userDoc.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.isSuccessful()) {
+                    DocumentSnapshot snapshot = task.getResult();
+                    if (snapshot.exists()) {
+                        returnFunction.returnValue(snapshot.getString(USER_TYPE_KEY).equalsIgnoreCase("driver"));
+                    } else {
+                        Log.w(TAG, String.format("User info for [%s] not found on Firestore.", userUID));
+                        returnFunction.returnValue(null);
+                    }
+                } else {
+                    Log.e(TAG, "Fetching user info failed. Issue communicating with Firestore.");
                     returnFunction.returnValue(null);
                 }
             }

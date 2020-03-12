@@ -72,7 +72,7 @@ public class RideRequest {
      */
     private String driverUID;
     public String getDriverUID() { return driverUID; }
-    private void setDriverUID(String driverUID) { this.driverUID = driverUID; }
+    public void setDriverUID(String driverUID) { this.driverUID = driverUID; }
 
     /**
      * Current status of this ride request

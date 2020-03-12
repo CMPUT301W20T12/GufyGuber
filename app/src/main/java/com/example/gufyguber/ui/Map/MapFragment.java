@@ -16,6 +16,7 @@ package com.example.gufyguber.ui.Map;
 import android.Manifest;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,13 +26,16 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 
 import com.example.gufyguber.CreateRideRequestFragment;
+import com.example.gufyguber.Driver;
 import com.example.gufyguber.FirebaseManager;
 import com.example.gufyguber.LocationInfo;
 import com.example.gufyguber.OfflineCache;
 import com.example.gufyguber.R;
 import com.example.gufyguber.RideRequest;
+import com.example.gufyguber.Rider;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -41,11 +45,14 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.auth.FirebaseAuth;
 
+import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class MapFragment extends Fragment implements OnMapReadyCallback, CreateRideRequestFragment.CreateRideRequestListener, CreateRideRequestFragment.CancelCreateRideRequestListener {
+public class MapFragment extends Fragment implements OnMapReadyCallback, CreateRideRequestFragment.CreateRideRequestListener,
+        CreateRideRequestFragment.CancelCreateRideRequestListener, GoogleMap.OnMarkerClickListener {
 
     private GoogleMap mMap;
     private Marker pickupMarker;
@@ -53,13 +60,48 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
     private CreateRideRequestFragment requestDialog;
     private FloatingActionButton fab;
     private TextView offlineText;
+    private Timer offlineTestTimer;
 
-    public MapFragment() {
-
-    }
+    private boolean isDriver;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        isDriver = (OfflineCache.getReference().retrieveCurrentUser() instanceof Driver);
+
+        // Kick off a cache to sync with Firebase in case the app was closed and opened
+        if (isDriver) {
+            // For the driver, having the Rider UID will be enough to keep it synced later on with a cheaper query
+            FirebaseManager.getReference().fetchRideRequestsWithStatus(RideRequest.Status.ACCEPTED, new FirebaseManager.ReturnValueListener<ArrayList<RideRequest>>() {
+                @Override
+                public void returnValue(ArrayList<RideRequest> value) {
+                    if (value == null) {
+                        return;
+                    }
+
+                    for (RideRequest request : value) {
+                        if (request.getDriverUID().equalsIgnoreCase(FirebaseAuth.getInstance().getCurrentUser().getUid())) {
+                            OfflineCache.getReference().cacheCurrentRideRequest(request);
+                        }
+                    }
+                }
+            });
+        } else {
+            FirebaseManager.getReference().fetchRideRequest(FirebaseAuth.getInstance().getCurrentUser().getUid(), new FirebaseManager.ReturnValueListener<RideRequest>() {
+                @Override
+                public void returnValue(RideRequest value) {
+                    OfflineCache.getReference().cacheCurrentRideRequest(value);
+                }
+            });
+        }
+
+        if (isDriver) {
+            return driverOnCreateView(inflater, container, savedInstanceState);
+        } else {
+            return riderOnCreateView(inflater, container, savedInstanceState);
+        }
+    }
+
+    private View riderOnCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
         View v = inflater.inflate(R.layout.fragment_map, container, false);
 
@@ -78,18 +120,70 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
         });
 
         // Sets a background task to periodically check for an internet connection
-        Timer timer = new Timer();
-        timer.scheduleAtFixedRate(new TimerTask() {
+        offlineTestTimer = new Timer();
+        offlineTestTimer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
-                getActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        boolean isOnline = FirebaseManager.getReference().isOnline(getContext());
-                        fab.setVisibility(isOnline ? View.VISIBLE : View.GONE);
-                        offlineText.setVisibility(isOnline ? View.GONE : View.VISIBLE);
-                    }
-                });
+                if (getActivity() == null) {
+                    offlineTestTimer.cancel();
+                    offlineTestTimer.purge();
+                } else {
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            boolean isOnline = FirebaseManager.getReference().isOnline(getContext());
+                            fab.setVisibility(isOnline ? View.VISIBLE : View.GONE);
+                            offlineText.setVisibility(isOnline ? View.GONE : View.VISIBLE);
+
+                            if (mMap != null) {
+                                RideRequest request = OfflineCache.getReference().retrieveCurrentRideRequest();
+                                if (request == null && pickupMarker != null && dropoffMarker != null) {
+                                    pickupMarker.remove();
+                                    pickupMarker = null;
+                                    dropoffMarker.remove();
+                                    dropoffMarker = null;
+                                } else if (request != null && pickupMarker == null && dropoffMarker == null) {
+                                    MarkerInfo newMarker = new MarkerInfo();
+                                    pickupMarker = newMarker.makeMarker("Pickup", true, request.getLocationInfo().getPickup(), mMap);
+                                    newMarker = new MarkerInfo();
+                                    dropoffMarker = newMarker.makeMarker("Drop Off", false, request.getLocationInfo().getDropoff(), mMap);
+                                }
+                            }
+                        }
+                    });
+                }
+            }
+        }, 0, 3000);
+
+        return v;
+    }
+
+    public View driverOnCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+
+        View v = inflater.inflate(R.layout.fragment_driver_map, container, false);
+
+        offlineText = v.findViewById(R.id.offline_text);
+
+        // Sets a background task to periodically check for an internet connection
+        offlineTestTimer = new Timer();
+        offlineTestTimer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                if (getActivity() == null) {
+                    offlineTestTimer.cancel();
+                    offlineTestTimer.purge();
+                } else {
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            boolean isOnline = FirebaseManager.getReference().isOnline(getContext());
+                            offlineText.setVisibility(isOnline ? View.GONE : View.VISIBLE);
+                            if (mMap != null) {
+                                refreshRequests(isOnline);
+                            }
+                        }
+                    });
+                }
             }
         }, 0, 3000);
 
@@ -98,17 +192,39 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        if (isDriver) {
+            driverOnViewCreated(view, savedInstanceState);
+        } else {
+            riderOnViewCreated(view, savedInstanceState);
+        }
+    }
+
+    private void riderOnViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.mapTest);
+        SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.rider_map);
+        mapFragment.getMapAsync(this);
+    }
+
+    private void driverOnViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.driver_map);
         mapFragment.getMapAsync(this);
 
     }
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
-        mMap = googleMap;
+        if (isDriver) {
+            driverOnMapReady(googleMap);
+        } else {
+            riderOnMapReady(googleMap);
+        }
+    }
 
+    private void riderOnMapReady(GoogleMap googleMap) {
+        mMap = googleMap;
 
         // zoom to Edmonton and move the camera UNTIL CURRENT LOCATION WORKS
         LatLng edmonton = new LatLng(53.5461, -113.4938);
@@ -116,9 +232,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
 
         float zoomLevel = 16.0f; //max is 21
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(edmonton, zoomLevel));
-
-
-        //______________________________________________________________________________
 
         mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
 
@@ -142,7 +255,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
                             dropoffMarker.remove();
                         }
                         MarkerInfo newMarker = new MarkerInfo();
-                        dropoffMarker = newMarker.makeMarker("Dropoff", false, latLng, mMap);
+                        dropoffMarker = newMarker.makeMarker("Drop Off", false, latLng, mMap);
                         dirty = true;
                     }
 
@@ -155,6 +268,26 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
         });
     }
 
+    private void driverOnMapReady(GoogleMap googleMap) {
+        mMap = googleMap;
+        mMap.setOnMarkerClickListener(this);
+
+        // zoom to Edmonton and move the camera UNTIL CURRENT LOCATION WORKS
+        LatLng edmonton = new LatLng(53.5461, -113.4938);
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(edmonton));
+
+        float zoomLevel = 16.0f; //max is 21
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(edmonton, zoomLevel));
+    }
+
+    @Override
+    public void onDestroy() {
+        offlineTestTimer.cancel();
+        offlineTestTimer.purge();
+
+        super.onDestroy();
+    }
+
     /**
      * Automatically called when the CreateRideRequestFragment builds a new RideRequest
      * @param newRequest The request created by the dialog fragment
@@ -162,14 +295,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
     public void onRideRequestCreated(RideRequest newRequest) {
         OfflineCache.getReference().cacheCurrentRideRequest(newRequest);
         FirebaseManager.getReference().storeRideRequest(newRequest);
-        if (pickupMarker != null) {
-            pickupMarker.remove();
-        }
-        if (dropoffMarker != null) {
-            dropoffMarker.remove();
-        }
-        pickupMarker = null;
-        dropoffMarker = null;
         requestDialog = null;
     }
 
@@ -183,5 +308,58 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
         pickupMarker = null;
         dropoffMarker = null;
         requestDialog = null;
+    }
+
+    private void refreshRequests(final boolean isOnline) {
+        if (isOnline) {
+            if (OfflineCache.getReference().retrieveCurrentRideRequest() == null) {
+                FirebaseManager.getReference().fetchRideRequestsWithStatus(RideRequest.Status.PENDING, new FirebaseManager.ReturnValueListener<ArrayList<RideRequest>>() {
+                    @Override
+                    public void returnValue(ArrayList<RideRequest> value) {
+                        mMap.clear();
+                        pickupMarker = null;
+                        dropoffMarker = null;
+
+                        if (value == null) {
+                            return;
+                        }
+
+                        for (final RideRequest request : value) {
+                            DriverRequestMarker marker = new DriverRequestMarker(request);
+                            marker.makeMarker(mMap);
+                        }
+                    }
+                });
+            } else {
+                FirebaseManager.getReference().fetchRideRequest(OfflineCache.getReference().retrieveCurrentRideRequest().getRiderUID(), new FirebaseManager.ReturnValueListener<RideRequest>() {
+                    @Override
+                    public void returnValue(RideRequest value) {
+                        OfflineCache.getReference().cacheCurrentRideRequest(value);
+                        if (value != null && pickupMarker == null && dropoffMarker == null) {
+                            mMap.clear();
+                            MarkerInfo newMarker = new MarkerInfo();
+                            pickupMarker = newMarker.makeMarker("Pickup", true, value.getLocationInfo().getPickup(), mMap);
+                            newMarker = new MarkerInfo();
+                            dropoffMarker = newMarker.makeMarker("Drop Off", false, value.getLocationInfo().getDropoff(), mMap);
+                        }
+                    }
+                });
+            }
+        } else {
+            if (OfflineCache.getReference().retrieveCurrentRideRequest() == null) {
+                mMap.clear();
+            }
+        }
+    }
+
+    @Override
+    public boolean onMarkerClick(Marker marker) {
+        if (isDriver && OfflineCache.getReference().retrieveCurrentRideRequest() == null) {
+            DriverRequestMarker markerInfo = (DriverRequestMarker) marker.getTag();
+            new DriverMarkerInfoDialog(markerInfo).show(getChildFragmentManager(), "driver_marker_info_dialog");
+            return true;
+        } else {
+            return false;
+        }
     }
 }

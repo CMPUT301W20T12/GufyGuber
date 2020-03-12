@@ -15,13 +15,12 @@ package com.example.gufyguber.ui.Map;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-public class MarkerInfo extends MapFragment implements OnMapReadyCallback {
+public class MarkerInfo {
 
     private Marker marker;
 
@@ -37,10 +36,10 @@ public class MarkerInfo extends MapFragment implements OnMapReadyCallback {
 
                 //zoom
                 marker.setPosition(point);
-                mMap.animateCamera(CameraUpdateFactory.newLatLng(point));
+                //mMap.animateCamera(CameraUpdateFactory.newLatLng(point));
 
-                float zoomLevel = 16.0f; //max is 21
-                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(point, zoomLevel));
+                //float zoomLevel = 16.0f; //max is 21
+                //mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(point, zoomLevel));
 
                 return marker;
             }
