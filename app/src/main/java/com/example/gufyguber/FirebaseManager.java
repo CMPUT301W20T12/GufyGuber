@@ -12,18 +12,7 @@
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
- *
- * FirebaseManager.java
- *
- * Last edit: , 07/03/20 11:29 PM
- *
- * Version
  */
-
-// Name: Robert MacGillivray
-// File: FirebaseManager.java
-// Date: Mar.07.2020
-// Purpose: Simple manager for dealing with common Firebase interactions in a consistent way
 
 package com.example.gufyguber;
 
@@ -55,6 +44,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Handles all Firebase Firestore connections. Utilizes a singleton pattern.
+ * @author Robert MacGillivray | Mar.07.2020
+ * @author Dalton Ronan
+ */
 public class FirebaseManager {
     /**
      * Interface that allows us to return values asynchronously when loaded from our cloud Firestore
