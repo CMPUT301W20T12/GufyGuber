@@ -1,3 +1,6 @@
+<!--Portions of this are modifications based on work created and shared by Google-->
+<!--and used according to terms described in the Creative Commons 4.0 Attribution-->
+<!--License. https://firebase.google.com/docs/auth/android/google-signin-->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main_layout"
