@@ -34,6 +34,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import android.view.Menu;
+import android.view.View;
+import android.widget.TextView;
 
 import static com.example.gufyguber.R.id.nav_host_fragment;
 
@@ -59,6 +61,15 @@ public class NavigationActivity extends AppCompatActivity {
         NavController navController = Navigation.findNavController(this, nav_host_fragment);
         NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
         NavigationUI.setupWithNavController(navigationView, navController);
+
+        NavigationView navView = (NavigationView) findViewById(R.id.nav_view);
+        View headerView = navView.getHeaderView(0);
+        TextView displayName = (TextView) headerView.findViewById(R.id.display_name);
+        TextView displayEmail = (TextView) headerView.findViewById(R.id.display_email);
+        displayName.setText(OfflineCache.getReference().retrieveCurrentUser().getFirstName()+ " " + OfflineCache.getReference().retrieveCurrentUser().getLastName());
+        displayEmail.setText(OfflineCache.getReference().retrieveCurrentUser().getEmail());
+
+
     }
 
     @Override
