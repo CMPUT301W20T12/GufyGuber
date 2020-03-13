@@ -20,7 +20,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -30,16 +29,15 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 
+import com.example.gufyguber.Driver;
 import com.example.gufyguber.FirebaseManager;
+import com.example.gufyguber.OfflineCache;
 import com.example.gufyguber.R;
 import com.example.gufyguber.Rider;
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.example.gufyguber.Vehicle;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-
-import org.w3c.dom.Text;
 
 public class ProfileFragment extends Fragment {
 
@@ -49,23 +47,33 @@ public class ProfileFragment extends Fragment {
     private TextView nameText;
     private TextView phoneText;
     private TextView emailText;
+    private TextView makeText;
+    private TextView modelText;
+    private TextView plateText;
+    private TextView seatText;
     private Button editProfile;
     private Button saveProfile;
+    private boolean driver;
 
-    public View onCreateView(@NonNull LayoutInflater inflater,
-                             ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(@NonNull final LayoutInflater inflater,
+                             final ViewGroup container, Bundle savedInstanceState) {
         profileViewModel = ViewModelProviders.of(this).get(ProfileViewModel.class);
-        View root = inflater.inflate(R.layout.fragment_profile, container, false);
 
-        //final TextView textView = root.findViewById(R.id.text_profile);
+        driver = OfflineCache.getReference().retrieveCurrentUser() instanceof Driver;
+
         profileViewModel.getText().observe(getViewLifecycleOwner(), new Observer<String>() {
             @Override
             public void onChanged(@Nullable String s) {
-                //textView.setText(s);
-
             }
         });
-        return root;
+
+        if (!driver) {
+            View root = inflater.inflate(R.layout.fragment_profile_rider, container, false);
+            return root;
+        } else {
+            View root = inflater.inflate(R.layout.fragment_profile_driver, container, false);
+            return root;
+        }
     }
 
     @Override
@@ -75,6 +83,11 @@ public class ProfileFragment extends Fragment {
         nameText = view.findViewById(R.id.rider_name);
         emailText = view.findViewById(R.id.rider_email);
         phoneText = view.findViewById(R.id.rider_phone);
+        makeText = view.findViewById(R.id.make);
+        modelText = view.findViewById(R.id.model);
+        plateText = view.findViewById(R.id.plate);
+        seatText = view.findViewById(R.id.seats);
+
         editProfile = view.findViewById(R.id.edit_profile_button);
         saveProfile = view.findViewById(R.id.save_profile_button);
 
@@ -85,6 +98,17 @@ public class ProfileFragment extends Fragment {
                     nameText.setText(String.format("%s %s", value.getFirstName(), value.getLastName()));
                     emailText.setText(value.getEmail());
                     phoneText.setText(value.getPhoneNumber());
+                    if (driver) {
+                        FirebaseManager.getReference().fetchVehicleInfo(FirebaseAuth.getInstance().getUid(), new FirebaseManager.ReturnValueListener<Vehicle>() {
+                            @Override
+                            public void returnValue(Vehicle value) {
+                                makeText.setText(value.getMake());
+                                modelText.setText(value.getModel());
+                                plateText.setText(value.getPlateNumber());
+                                seatText.setText(String.valueOf(value.getSeatNumber()));
+                            }
+                        });
+                    }
                 } else {
                     Log.e(TAG, "Null rider passed to Profile Fragment.");
                 }
@@ -99,6 +123,12 @@ public class ProfileFragment extends Fragment {
                 phoneText.setEnabled(true);
                 editProfile.setVisibility(View.GONE);
                 saveProfile.setVisibility(View.VISIBLE);
+                if (driver) {
+                    makeText.setEnabled(true);
+                    modelText.setEnabled(true);
+                    seatText.setEnabled(true);
+                    plateText.setEnabled(true);
+                }
             }
         });
 
@@ -106,24 +136,51 @@ public class ProfileFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 if(validateForm()) {
-                    FirebaseManager.getReference().storeRiderInfo(new
-                            Rider(FirebaseAuth.getInstance().getCurrentUser().getUid(),
-                            emailText.getText().toString().toLowerCase(),
-                            nameText.getText().toString().split(" ")[0].toLowerCase(),
-                            nameText.getText().toString().split(" ")[1].toLowerCase(),
-                            phoneText.getText().toString()));
-                    FirebaseAuth.getInstance().getCurrentUser().updateEmail(emailText.getText().toString().toLowerCase())
-                            .addOnCompleteListener(new OnCompleteListener<Void>() {
-                                @Override
-                                public void onComplete(@NonNull Task<Void> task) {
-                                    if (task.isSuccessful()) {
-                                        Log.d(TAG, "User email address updated.");
-                                    } else {
-                                        Log.d(TAG, "Failed to update user email address.");
+                    if (driver) {
+                        FirebaseManager.getReference().storeDriverInfo(new
+                                Driver(FirebaseAuth.getInstance().getCurrentUser().getUid(),
+                                emailText.getText().toString().toLowerCase(),
+                                nameText.getText().toString().split(" ")[0].toLowerCase(),
+                                nameText.getText().toString().split(" ")[1].toLowerCase(),
+                                phoneText.getText().toString(),
+                                new Vehicle(modelText.getText().toString(),
+                                        makeText.getText().toString(),
+                                        plateText.getText().toString(),
+                                        Integer.parseInt(seatText.getText().toString()))));
+                        FirebaseManager.getReference().storeVehicleInfo(FirebaseAuth.getInstance().getCurrentUser().getUid(), new Vehicle(modelText.getText().toString(),
+                                makeText.getText().toString(),
+                                plateText.getText().toString(),
+                                Integer.parseInt(seatText.getText().toString())));
+                        FirebaseAuth.getInstance().getCurrentUser().updateEmail(emailText.getText().toString().toLowerCase())
+                                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<Void> task) {
+                                        if (task.isSuccessful()) {
+                                            Log.d(TAG, "User email address updated.");
+                                        } else {
+                                            Log.d(TAG, "Failed to update user email address.");
+                                        }
                                     }
-                                }
-                            });
-
+                                });
+                    } else {
+                        FirebaseManager.getReference().storeRiderInfo(new
+                                Rider(FirebaseAuth.getInstance().getCurrentUser().getUid(),
+                                emailText.getText().toString().toLowerCase(),
+                                nameText.getText().toString().split(" ")[0].toLowerCase(),
+                                nameText.getText().toString().split(" ")[1].toLowerCase(),
+                                phoneText.getText().toString()));
+                        FirebaseAuth.getInstance().getCurrentUser().updateEmail(emailText.getText().toString().toLowerCase())
+                                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<Void> task) {
+                                        if (task.isSuccessful()) {
+                                            Log.d(TAG, "User email address updated.");
+                                        } else {
+                                            Log.d(TAG, "Failed to update user email address.");
+                                        }
+                                    }
+                                });
+                    }
                     Toast.makeText(getContext(), "Profile successfully updated", Toast.LENGTH_LONG).show();
                     getActivity().onBackPressed();
                 } else {
