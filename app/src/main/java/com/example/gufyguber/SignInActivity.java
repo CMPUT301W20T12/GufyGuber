@@ -17,8 +17,12 @@
  *
  * Last edit: dalton, 02/03/20 11:12 PM
  *
- * Version
+ * Portions of this are modifications based on work created and shared by Google
+ * and used according to terms described in the Creative Commons 4.0 Attribution
+ * License. https://firebase.google.com/docs/auth/android/google-signin
  */
+
+
 
 package com.example.gufyguber;
 

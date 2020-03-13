@@ -20,9 +20,23 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+/**
+ * This class creates an instance of a marker.
+ */
+
 public class MarkerInfo {
 
     private Marker marker;
+
+    /**
+     *
+     * @param title name of the marker
+     * @param startPoint the start point or the end point
+     * @param point LatLng of where the marker will be
+     * @param mMap the GoogleMap view
+     * @return
+     * returns a marker
+     */
 
     public Marker makeMarker(String title, boolean startPoint, LatLng point, GoogleMap mMap) {
 
@@ -45,17 +59,4 @@ public class MarkerInfo {
             }
 
 
-
-    /**
-     * takes in a marker (on Click)
-     * @param marker
-     * @return
-     * returns the LatLng
-     */
-
-    public LatLng getLatLng(Marker marker) {
-        Marker newMarker = marker;
-
-        return newMarker.getPosition();
-    }
 }

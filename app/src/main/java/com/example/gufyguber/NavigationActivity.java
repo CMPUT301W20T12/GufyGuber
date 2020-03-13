@@ -38,6 +38,11 @@ import android.widget.TextView;
 
 import static com.example.gufyguber.R.id.nav_host_fragment;
 
+
+/**
+ * This class creates an instance of the NavigationActivity and populates the toolbar with tabs
+ */
+
 public class NavigationActivity extends AppCompatActivity {
 
     private AppBarConfiguration mAppBarConfiguration;
@@ -81,6 +86,11 @@ public class NavigationActivity extends AppCompatActivity {
                 || super.onSupportNavigateUp();
     }
 
+    /**
+     * This function directs the user to the correct fragment when the item is pressed.
+     * @param item
+     * @return
+     */
     //@Override
     public boolean onNavigationItemSelected(MenuItem item) {
         int id = item.getItemId();

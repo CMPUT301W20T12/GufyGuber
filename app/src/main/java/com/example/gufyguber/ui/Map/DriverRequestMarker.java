@@ -33,6 +33,10 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+/**
+ * This class populates the driver's map with open requests
+ */
+
 public class DriverRequestMarker {
     private Marker marker;
     public Marker getMarker() { return marker; }
@@ -40,6 +44,11 @@ public class DriverRequestMarker {
     public RideRequest getRideRequest() { return rideRequest; }
     private Rider requestRider;
     private String markerTitle = "";
+
+    /**
+     * this function gets the data from the riders' requests to make a marker
+     * @param request
+     */
 
     public DriverRequestMarker(RideRequest request) {
         this.rideRequest = request;
@@ -57,6 +66,13 @@ public class DriverRequestMarker {
             }
         });
     }
+
+    /**
+     * This function creates the marker
+     * @param mMap
+     * @return
+     * returns a marker
+     */
 
     public Marker makeMarker(GoogleMap mMap) {
         // creates a maker and zooms to it. Get coordinates.

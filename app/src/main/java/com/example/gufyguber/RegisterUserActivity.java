@@ -103,16 +103,17 @@ public class RegisterUserActivity extends AppCompatActivity {
         register.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(validateForm()) {
+                if(validateForm()) {        // check that all User fields filled in
                     if(userType.equals("Rider")) {
                         newUser = new Rider(UID, email.getText().toString().toLowerCase(),
                                 firstName.getText().toString(),
                                 lastName.getText().toString(),
                                 phoneNumber.getText().toString());
+                        // use firebase manager to store new rider info
                         FirebaseManager.getReference().storeRiderInfo((Rider) newUser);
                         finish();
-                    }else
-                        if(validateVehicleInfo()) {
+                    } else
+                        if(validateVehicleInfo()) {     // if they are driver, make sure vehicle info is filled in
                             newVehicle = new Vehicle(model.getText().toString(),
                                     make.getText().toString(),
                                     plateNumber.getText().toString(),
@@ -122,6 +123,7 @@ public class RegisterUserActivity extends AppCompatActivity {
                                     lastName.getText().toString(),
                                     phoneNumber.getText().toString(),
                                     newVehicle);
+                            // use firebase manager to store new driver and vehicle info
                             FirebaseManager.getReference().storeDriverInfo((Driver) newUser);
                             FirebaseManager.getReference().storeVehicleInfo(newUser.getUID(), newVehicle);
                             finish();
@@ -131,6 +133,11 @@ public class RegisterUserActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Method to check the the User profile fields are not left empty
+     * @return
+     *  Return true if all fields filled in, or false if some are empty
+     */
     private boolean validateForm() {
         boolean valid = false;          // return boolean
         int validCounter = 0;           // counter to check all needs of form are satisfied
@@ -154,10 +161,14 @@ public class RegisterUserActivity extends AppCompatActivity {
             /* if all 3 checks pass, the register form is valid */
             valid = true;
         }
-
         return valid;
     }
 
+    /**
+     * Method to check the the Vehicle information fields are not left empty
+     * @return
+     *  Return true if all fields filled in, or false if some are empty
+     */
     private boolean validateVehicleInfo() {
         boolean valid = false;
         int validCounter = 0;

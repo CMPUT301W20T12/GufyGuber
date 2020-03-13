@@ -29,6 +29,7 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 
 import com.example.gufyguber.CreateRideRequestFragment;
+import com.example.gufyguber.Driver;
 import com.example.gufyguber.FirebaseManager;
 import com.example.gufyguber.LocationInfo;
 import com.example.gufyguber.OfflineCache;
@@ -41,12 +42,16 @@ import org.w3c.dom.Text;
 
 import java.util.Date;
 
+/**
+ * Displays ride request information for a rider's current open request
+ * @author Nahome
+ */
 public class CurrentRequestFragment extends Fragment {
 
     private CurrentRequestViewModel currentRequestViewModel;
     private Button cancelBtn;
 
-    private TextView destinationText;
+    private TextView driverText;
     private TextView pickupTimeText;
     private TextView arrivalTimeText;
     private TextView pickupLocationText;
@@ -78,7 +83,7 @@ public class CurrentRequestFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         cancelBtn = view.findViewById(R.id.cancel_btn);
-        destinationText = view.findViewById(R.id.user_destination);
+        driverText = view.findViewById(R.id.driver_name);
         pickupTimeText = view.findViewById(R.id.user_pickup_time);
         arrivalTimeText = view.findViewById(R.id.user_arrival_time);
         pickupLocationText = view.findViewById(R.id.user_pickup_location);
@@ -93,9 +98,6 @@ public class CurrentRequestFragment extends Fragment {
 
                 }
             });
-/**
- * add Fare Fair rider status
- */
 
         if (FirebaseManager.getReference().isOnline(getContext())) {
             FirebaseManager.getReference().fetchRideRequest(FirebaseAuth.getInstance().getCurrentUser().getUid(), new FirebaseManager.ReturnValueListener<RideRequest>() {
@@ -113,6 +115,20 @@ public class CurrentRequestFragment extends Fragment {
 
     private void updateUI(RideRequest request) {
         if (request != null) {
+            if (request.getDriverUID() == null) {
+                driverText.setText("Driver Unavailable");
+            } else {
+                FirebaseManager.getReference().fetchDriverInfo(request.getDriverUID(), new FirebaseManager.ReturnValueListener<Driver>() {
+                    @Override
+                    public void returnValue(Driver value) {
+                        if (value == null) {
+                            driverText.setText("Driver Unavailable");
+                        } else {
+                            driverText.setText(String.format("%s %s", value.getFirstName(), value.getLastName()));
+                        }
+                    }
+                });
+            }
             pickupLocationText.setText(LocationInfo.latlngToString(request.getLocationInfo().getPickup()));
             dropoffLocationText.setText(LocationInfo.latlngToString(request.getLocationInfo().getDropoff()));
             if (request.getTimeInfo().getRequestOpenTime() != null) {
