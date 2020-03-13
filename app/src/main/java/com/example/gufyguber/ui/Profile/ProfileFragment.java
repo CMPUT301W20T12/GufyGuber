@@ -152,8 +152,8 @@ public class ProfileFragment extends Fragment {
                         FirebaseManager.getReference().storeDriverInfo(new
                                 Driver(FirebaseAuth.getInstance().getCurrentUser().getUid(),
                                 emailText.getText().toString().toLowerCase(),
-                                nameText.getText().toString().split(" ")[0].toLowerCase(),
-                                nameText.getText().toString().split(" ")[1].toLowerCase(),
+                                nameText.getText().toString().split(" ")[0],
+                                nameText.getText().toString().split(" ")[1],
                                 phoneText.getText().toString(),
                                 new Vehicle(modelText.getText().toString(),     // Driver needs a Vehicle in the input as well
                                         makeText.getText().toString(),
@@ -182,6 +182,7 @@ public class ProfileFragment extends Fragment {
                             @Override
                             public void returnValue(Driver value) {
                                 OfflineCache.getReference().cacheCurrentUser(value);
+                                ((NavigationActivity)getActivity()).setMenuDisplays(value.getFirstName(), value.getLastName(), value.getEmail());
                             }
                         });
                     } else {
@@ -189,8 +190,8 @@ public class ProfileFragment extends Fragment {
                         FirebaseManager.getReference().storeRiderInfo(new
                                 Rider(FirebaseAuth.getInstance().getCurrentUser().getUid(),
                                 emailText.getText().toString().toLowerCase(),
-                                nameText.getText().toString().split(" ")[0].toLowerCase(),
-                                nameText.getText().toString().split(" ")[1].toLowerCase(),
+                                nameText.getText().toString().split(" ")[0],
+                                nameText.getText().toString().split(" ")[1],
                                 phoneText.getText().toString()));
                         FirebaseAuth.getInstance().getCurrentUser().updateEmail(emailText.getText().toString().toLowerCase())
                                 .addOnCompleteListener(new OnCompleteListener<Void>() {
@@ -203,10 +204,11 @@ public class ProfileFragment extends Fragment {
                                         }
                                     }
                                 });
-                        FirebaseManager.getReference().fetchDriverInfo(FirebaseAuth.getInstance().getCurrentUser().getUid(), new FirebaseManager.ReturnValueListener<Driver>() {
+                        FirebaseManager.getReference().fetchRiderInfo(FirebaseAuth.getInstance().getCurrentUser().getUid(), new FirebaseManager.ReturnValueListener<Rider>() {
                             @Override
-                            public void returnValue(Driver value) {
+                            public void returnValue(Rider value) {
                                 OfflineCache.getReference().cacheCurrentUser(value);
+                                ((NavigationActivity)getActivity()).setMenuDisplays(value.getFirstName(), value.getLastName(), value.getEmail());
                             }
                         });
                     }
