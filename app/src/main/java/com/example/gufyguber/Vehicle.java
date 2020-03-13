@@ -123,7 +123,7 @@ public class Vehicle {
      * @return
      *  Return the number of available seats in the vehicle
      */
-    public int getSeatNumber() {
+    public Integer getSeatNumber() {
         return seatNumber;
     }
 }

@@ -61,9 +61,11 @@ public class NavigationActivity extends AppCompatActivity {
         NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
         NavigationUI.setupWithNavController(navigationView, navController);
 
-        setMenuDisplays();
+        User user = OfflineCache.getReference().retrieveCurrentUser();
+        setMenuDisplays(user.getFirstName(), user.getLastName(), user.getEmail());
 
     }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -108,7 +110,7 @@ public class NavigationActivity extends AppCompatActivity {
      * Sets the display name and emails for the current user in the sidebar menu using the
      * offline cache.
      */
-    private void setMenuDisplays(){
+    public void setMenuDisplays(String firstName, String lastName, String email){
         NavigationView navigationView = findViewById(R.id.nav_view);
 
         TextView displayName = navigationView.getHeaderView(0)
@@ -117,9 +119,8 @@ public class NavigationActivity extends AppCompatActivity {
         TextView displayEmail = navigationView.getHeaderView(0)
                 .findViewById(R.id.display_email);
 
-        User user = OfflineCache.getReference().retrieveCurrentUser();
-        displayName.setText(user.getFirstName() + " " + user.getLastName());
-        displayEmail.setText(user.getEmail());
+        displayName.setText(firstName + " " + lastName);
+        displayEmail.setText(email);
 
         return;
     }
