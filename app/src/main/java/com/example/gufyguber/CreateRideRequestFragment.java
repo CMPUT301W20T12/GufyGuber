@@ -14,13 +14,6 @@
  *    limitations under the License.
  */
 
-// Name: Robert MacGillivray
-// File: CreateRideRequestFragment.java
-// Date: Mar.02.2020
-// Purpose: To control a fragment that Riders use to fill in their ride requests
-
-// Last Updated: Mar.02.2020 by Robert MacGillivray
-
 package com.example.gufyguber;
 
 import android.app.AlertDialog;
@@ -33,6 +26,7 @@ import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -45,6 +39,10 @@ import androidx.fragment.app.FragmentManager;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.firebase.auth.FirebaseAuth;
 
+/**
+ * Manages the dialog fragment that pops up when a Rider is attempting to create a new ride request
+ * @author Robert MacGillivray | Mar.02.2020
+ */
 public class CreateRideRequestFragment extends DialogFragment {
 
     public interface CreateRideRequestListener {
@@ -55,16 +53,14 @@ public class CreateRideRequestFragment extends DialogFragment {
         void onRideRequestCreationCancelled();
     }
 
-    //TODO: Looks a little clunky. Maybe create a custom fragment that covers the bottom 1/3 of the screen
-    //      with the three fields, and a positive and negative button. Can hide when start or end fields are touched
-    //      just like the alert dialog now.
-
     private CreateRideRequestListener onCreatedListener;
     private CancelCreateRideRequestListener onCreationCancelledListener;
 
     private EditText fareEditText;
     private EditText startLocationEditText;
     private EditText endLocationEditText;
+    private Button positiveButton;
+    private Button negativeButton;
 
     private TextView fairFareText;
 
@@ -74,18 +70,9 @@ public class CreateRideRequestFragment extends DialogFragment {
     private float tempFare = -1f;
     private LocationInfo tempLocationInfo;
 
-    public CreateRideRequestFragment() {
-
-    }
-
-    public CreateRideRequestFragment(float initialFare, LocationInfo initialLocationInfo) {
-        tempFare = initialFare;
-        tempLocationInfo = initialLocationInfo;
-    }
-
     private void initUIElements() {
         if (tempFare >= 0) {
-            fareEditText.setText(String.format("%.2f", tempFare));
+            fareEditText.setText(String.format("$%.2f", tempFare));
         } else {
             fareEditText.setText("");
         }
@@ -135,26 +122,26 @@ public class CreateRideRequestFragment extends DialogFragment {
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
         final View view = LayoutInflater.from(getActivity()).inflate(R.layout.create_ride_request_layout, null);
         fareEditText = view.findViewById(R.id.fare_EditText);
+        fareEditText.addTextChangedListener(new CurrencyTextWatcher(fareEditText));
         startLocationEditText = view.findViewById(R.id.start_location_EditText);
         endLocationEditText = view.findViewById(R.id.end_location_EditText);
         fairFareText = view.findViewById(R.id.fair_fare_textview);
+        positiveButton = view.findViewById(R.id.create_ride_request_button);
+        negativeButton = view.findViewById(R.id.cancel_ride_request_button);
         initUIElements();
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(getContext())
-                .setView(view)
-                .setTitle("Create Ride Request")
-                .setNegativeButton("Cancel", null)
-                .setPositiveButton("Send Request", null);
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext()).setView(view);
 
-        // Need to set the onClick here instead of in the builder because normal AlertDialog onClicks
-        // automatically close the dialog
         final AlertDialog dialog = builder.create();
         dialog.show();
-        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
+
+        positiveButton.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
+            public void onClick(View v) {
                 if (validateEntries()) {
-                    RideRequest newRequest = new RideRequest(FirebaseAuth.getInstance().getCurrentUser().getUid(), Float.parseFloat(fareEditText.getText().toString()), tempLocationInfo);
+                    RideRequest newRequest = new RideRequest(FirebaseAuth.getInstance().getCurrentUser().getUid(),
+                            Float.parseFloat(fareEditText.getText().toString().replaceAll("[$]","")),
+                            tempLocationInfo);
                     if (onCreatedListener != null) {
                         onCreatedListener.onRideRequestCreated(newRequest);
                     }
@@ -164,9 +151,10 @@ public class CreateRideRequestFragment extends DialogFragment {
                 }
             }
         });
-        dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setOnClickListener(new View.OnClickListener() {
+
+        negativeButton.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
+            public void onClick(View v) {
                 if (onCreationCancelledListener != null) {
                     onCreationCancelledListener.onRideRequestCreationCancelled();
                 }
@@ -178,6 +166,9 @@ public class CreateRideRequestFragment extends DialogFragment {
             @Override
             public void onClick(View v) {
                 settingStart = true;
+                if (fareEditText.getText().length() > 0) {
+                    tempFare = Float.parseFloat(fareEditText.getText().toString().replaceAll("[$]", ""));
+                }
                 dialog.dismiss();
             }
         });
@@ -186,6 +177,9 @@ public class CreateRideRequestFragment extends DialogFragment {
             @Override
             public void onClick(View v) {
                 settingEnd = true;
+                if (fareEditText.getText().length() > 0) {
+                    tempFare = Float.parseFloat(fareEditText.getText().toString().replaceAll("[$]", ""));
+                }
                 dialog.dismiss();
             }
         });

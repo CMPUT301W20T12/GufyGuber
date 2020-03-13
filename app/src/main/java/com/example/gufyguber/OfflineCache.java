@@ -12,16 +12,15 @@
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
- *
- * OfflineCache.java
- *
- * Last edit: scott, 11/03/20 7:09 PM
- *
- * Version
  */
 
 package com.example.gufyguber;
 
+/**
+ * Caches references to important objects that need to persist in the event of connectivity loss.
+ * Utilizes a singleton pattern.
+ * @author Robert MacGillivray | Mar.11.2020
+ */
 public class OfflineCache {
     private static OfflineCache reference;
     public static OfflineCache getReference() {

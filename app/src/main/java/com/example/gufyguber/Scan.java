@@ -12,6 +12,10 @@
  *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
+ *
+ *    Adapted from tutorial:
+ *    Prudhvi Raj Kumar. "QRCode Scanner - Google Vision API." Online video clip. Youtube.
+ *    Youtube, 2 Jan. 2017. Web. 18 Feb. 2020.
  */
 
 package com.example.gufyguber;
@@ -44,7 +48,6 @@ import java.io.IOException;
  *      Prudhvi Raj Kumar. "QRCode Scanner - Google Vision API." Online video clip. Youtube. Youtube, 2 Jan. 2017. Web. 18 Feb. 2020.
  *
  */
-
 public class Scan extends AppCompatActivity {
     SurfaceView cameraView;
     BarcodeDetector barcode;

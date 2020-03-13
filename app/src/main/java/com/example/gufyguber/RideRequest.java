@@ -14,11 +14,6 @@
  *    limitations under the License.
  */
 
-// Name: Robert MacGillivray
-// File: RideRequest.java
-// Date: Feb.24.2020
-// Purpose: To model user ride requests for the Gufy Guber app
-
 package com.example.gufyguber;
 
 import android.location.Location;
@@ -30,6 +25,7 @@ import java.sql.Time;
 
 /**
  * Model class for Gufy Guber ride requests
+ * @author Robert MacGillivray | Feb.24.2020
  */
 public class RideRequest {
     /**
@@ -63,7 +59,7 @@ public class RideRequest {
 
     private static final String TAG = "RideRequest";
 
-    public static final float FAIR_FARE_PER_METRE = 5f;
+    public static final float FAIR_FARE_PER_METRE = 0.01f;
 
     /**
      * Firebase UID of rider that initiated this ride request
