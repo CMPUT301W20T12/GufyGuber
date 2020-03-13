@@ -22,6 +22,7 @@
 
 package com.example.gufyguber;
 
+import android.app.ActionBar;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.widget.ImageView;
@@ -53,6 +54,8 @@ public class GenerateQR extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.generate_qr);
+
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         qrCode = findViewById(R.id.qrCode);
         qrMessage = findViewById(R.id.showMessage);

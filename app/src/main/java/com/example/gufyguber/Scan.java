@@ -41,6 +41,12 @@ import java.io.IOException;
 
 /**
  * Builds camera and stores the data of the scanned QR code.
+ * @author kenzbauer
+ *
+ * External resource used is:
+ *
+ *      Prudhvi Raj Kumar. "QRCode Scanner - Google Vision API." Online video clip. Youtube. Youtube, 2 Jan. 2017. Web. 18 Feb. 2020.
+ *
  */
 public class Scan extends AppCompatActivity {
     SurfaceView cameraView;
@@ -51,6 +57,8 @@ public class Scan extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         setContentView(R.layout.activity_scan);
         cameraView = findViewById(R.id.cameraView);

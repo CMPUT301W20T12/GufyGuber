@@ -18,7 +18,6 @@
         android:roundIcon="@mipmap/gg_logo_white_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".Scan" />
 
         <meta-data
             android:name="com.google.android.gms.vision.DEPENDENCIES"
@@ -63,11 +62,17 @@
 
 	    <activity android:name=".GenerateQR"
             android:label="Generate QR"
-            android:theme="@style/AppTheme.NoActionBar">
+            android:theme="@style/AppTheme"
+            android:parentActivityName=".NavigationActivity">
         </activity>
         <activity android:name=".startScanQR"
             android:label="Scan QR"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/AppTheme"
+            android:parentActivityName=".NavigationActivity"/>
+        <activity android:name=".Scan"
+            android:label="Scan QR"
+            android:theme="@style/AppTheme"
+            android:parentActivityName=".startScanQR"/>
     </application>
 
 </manifest>

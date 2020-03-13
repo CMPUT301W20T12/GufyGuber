@@ -33,6 +33,8 @@ import com.google.android.gms.vision.barcode.Barcode;
 /**
  * This activity includes accessing the camera to scan a QR code.
  *  It also shows the result of the QR code scan.
+ *
+ * @author kenzbauer
  */
 
 public class startScanQR extends AppCompatActivity {
@@ -46,6 +48,8 @@ public class startScanQR extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_start);
+
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         scan = findViewById(R.id.scan);
         result = findViewById(R.id.result);
