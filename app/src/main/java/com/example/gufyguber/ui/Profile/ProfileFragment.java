@@ -109,8 +109,8 @@ public class ProfileFragment extends Fragment {
                     FirebaseManager.getReference().storeRiderInfo(new
                             Rider(FirebaseAuth.getInstance().getCurrentUser().getUid(),
                             emailText.getText().toString().toLowerCase(),
-                            nameText.getText().toString().split(" ")[0].toLowerCase(),
-                            nameText.getText().toString().split(" ")[1].toLowerCase(),
+                            nameText.getText().toString().split(" ")[0],
+                            nameText.getText().toString().split(" ")[1],
                             phoneText.getText().toString()));
                     FirebaseAuth.getInstance().getCurrentUser().updateEmail(emailText.getText().toString().toLowerCase())
                             .addOnCompleteListener(new OnCompleteListener<Void>() {

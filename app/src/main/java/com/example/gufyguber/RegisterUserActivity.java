@@ -106,8 +106,8 @@ public class RegisterUserActivity extends AppCompatActivity {
                 if(validateForm()) {
                     if(userType.equals("Rider")) {
                         newUser = new Rider(UID, email.getText().toString().toLowerCase(),
-                                firstName.getText().toString().toLowerCase(),
-                                lastName.getText().toString().toLowerCase(),
+                                firstName.getText().toString(),
+                                lastName.getText().toString(),
                                 phoneNumber.getText().toString());
                         FirebaseManager.getReference().storeRiderInfo((Rider) newUser);
                         finish();
@@ -118,8 +118,8 @@ public class RegisterUserActivity extends AppCompatActivity {
                                     plateNumber.getText().toString(),
                                     Integer.parseInt(seatNumber.getText().toString()));
                             newUser = new Driver(UID, email.getText().toString().toLowerCase(),
-                                    firstName.getText().toString().toLowerCase(),
-                                    lastName.getText().toString().toLowerCase(),
+                                    firstName.getText().toString(),
+                                    lastName.getText().toString(),
                                     phoneNumber.getText().toString(),
                                     newVehicle);
                             FirebaseManager.getReference().storeDriverInfo((Driver) newUser);
