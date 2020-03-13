@@ -31,6 +31,7 @@ import androidx.lifecycle.ViewModelProviders;
 
 import com.example.gufyguber.Driver;
 import com.example.gufyguber.FirebaseManager;
+import com.example.gufyguber.NavigationActivity;
 import com.example.gufyguber.OfflineCache;
 import com.example.gufyguber.R;
 import com.example.gufyguber.Rider;

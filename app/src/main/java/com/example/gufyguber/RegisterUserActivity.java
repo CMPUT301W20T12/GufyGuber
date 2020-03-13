@@ -106,8 +106,8 @@ public class RegisterUserActivity extends AppCompatActivity {
                 if(validateForm()) {        // check that all User fields filled in
                     if(userType.equals("Rider")) {
                         newUser = new Rider(UID, email.getText().toString().toLowerCase(),
-                                firstName.getText().toString().toLowerCase(),
-                                lastName.getText().toString().toLowerCase(),
+                                firstName.getText().toString(),
+                                lastName.getText().toString(),
                                 phoneNumber.getText().toString());
                         // use firebase manager to store new rider info
                         FirebaseManager.getReference().storeRiderInfo((Rider) newUser);
@@ -119,8 +119,8 @@ public class RegisterUserActivity extends AppCompatActivity {
                                     plateNumber.getText().toString(),
                                     Integer.parseInt(seatNumber.getText().toString()));
                             newUser = new Driver(UID, email.getText().toString().toLowerCase(),
-                                    firstName.getText().toString().toLowerCase(),
-                                    lastName.getText().toString().toLowerCase(),
+                                    firstName.getText().toString(),
+                                    lastName.getText().toString(),
                                     phoneNumber.getText().toString(),
                                     newVehicle);
                             // use firebase manager to store new driver and vehicle info

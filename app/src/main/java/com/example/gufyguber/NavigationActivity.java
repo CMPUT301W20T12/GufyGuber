@@ -34,6 +34,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import android.view.Menu;
+import android.widget.TextView;
 
 import static com.example.gufyguber.R.id.nav_host_fragment;
 
@@ -64,7 +65,12 @@ public class NavigationActivity extends AppCompatActivity {
         NavController navController = Navigation.findNavController(this, nav_host_fragment);
         NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
         NavigationUI.setupWithNavController(navigationView, navController);
+
+        User user = OfflineCache.getReference().retrieveCurrentUser();
+        setMenuDisplays(user.getFirstName(), user.getLastName(), user.getEmail());
+
     }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -108,5 +114,24 @@ public class NavigationActivity extends AppCompatActivity {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    /**
+     * Sets the display name and emails for the current user in the sidebar menu using the
+     * offline cache.
+     */
+    public void setMenuDisplays(String firstName, String lastName, String email){
+        NavigationView navigationView = findViewById(R.id.nav_view);
+
+        TextView displayName = navigationView.getHeaderView(0)
+                .findViewById(R.id.display_name);
+
+        TextView displayEmail = navigationView.getHeaderView(0)
+                .findViewById(R.id.display_email);
+
+        displayName.setText(firstName + " " + lastName);
+        displayEmail.setText(email);
+
+        return;
     }
 }
