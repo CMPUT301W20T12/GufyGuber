@@ -92,11 +92,13 @@ public class DriverMarkerInfoDialog extends DialogFragment {
                     OfflineCache.getReference().retrieveCurrentRideRequest().setStatus(RideRequest.Status.PENDING);
                     FirebaseManager.getReference().storeRideRequest(OfflineCache.getReference().retrieveCurrentRideRequest());
                 }
-                clickedMarker.getRideRequest().setStatus(RideRequest.Status.ACCEPTED);
-                clickedMarker.getRideRequest().getTimeInfo().setRequestAcceptedTime();
-                clickedMarker.getRideRequest().setDriverUID(FirebaseAuth.getInstance().getCurrentUser().getUid());
-                OfflineCache.getReference().cacheCurrentRideRequest(clickedMarker.getRideRequest());
-                FirebaseManager.getReference().storeRideRequest(clickedMarker.getRideRequest());
+
+                // Try to claim the request. If it succeeds, cache the request and update Firestore
+                boolean success = clickedMarker.getRideRequest().driverAcceptRideRequest(FirebaseAuth.getInstance().getCurrentUser().getUid());
+                if (success) {
+                    OfflineCache.getReference().cacheCurrentRideRequest(clickedMarker.getRideRequest());
+                    FirebaseManager.getReference().storeRideRequest(clickedMarker.getRideRequest());
+                }
                 dismiss();
             }
         });

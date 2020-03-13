@@ -62,6 +62,7 @@ public class NavigationActivity extends AppCompatActivity {
         NavigationUI.setupWithNavController(navigationView, navController);
 
         setMenuDisplays();
+
     }
 
     @Override

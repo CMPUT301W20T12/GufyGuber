@@ -86,7 +86,7 @@ public class LocationInfo {
      */
     public float getRemainingDist() {
         if (getCurrent() == null || getDropoff() == null) {
-            Log.e(TAG, "LocationInfo.getRemainingDist called with a null current or dropoff.");
+            Log.e(TAG, "LocationInfo.getRemainingDist() called with a null current or dropoff.");
             return -1.0f;
         }
         float[] results = new float[1];

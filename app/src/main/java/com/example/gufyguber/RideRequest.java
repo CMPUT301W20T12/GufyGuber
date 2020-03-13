@@ -22,6 +22,9 @@
 package com.example.gufyguber;
 
 import android.location.Location;
+import android.util.Log;
+
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.sql.Time;
 
@@ -58,7 +61,9 @@ public class RideRequest {
         }
     }
 
-    private static final float FAIR_FARE_PER_METRE = 0.01f;
+    private static final String TAG = "RideRequest";
+
+    public static final float FAIR_FARE_PER_METRE = 5f;
 
     /**
      * Firebase UID of rider that initiated this ride request
@@ -130,13 +135,19 @@ public class RideRequest {
      * @return True if the request acceptance succeeded, false otherwise
      */
     public boolean driverAcceptRideRequest(String driverUID) {
-        if (getDriverUID() == null || getStatus() != Status.PENDING) {
+        if (getDriverUID() != null || getStatus() != Status.PENDING) {
+            Log.w(TAG, "Ride Request failed to be accepted.");
             return false;
         }
 
         // Can set the driverUID to null to cancel an accepted request, otherwise mark request accepted
         setDriverUID(driverUID);
         setStatus(getDriverUID() == null ? Status.PENDING : Status.ACCEPTED);
+        if (getStatus() == Status.ACCEPTED) {
+            getTimeInfo().setRequestAcceptedTime();
+        } else {
+            getTimeInfo().setRequestAcceptedTime(null);
+        }
         return true;
     }
 
@@ -150,7 +161,27 @@ public class RideRequest {
         //TODO: Instead of deleting, modify status to notify drivers of cancelled requests
     }
 
+    /**
+     * Calculates a fair fare based on provided LocationInfo
+     * @param locationInfo The LocationInfo used to calculate a distance with which to calculate the fair fare
+     * @return A float representing a fair fare in dollars
+     */
     public static float fairFareEstimate(LocationInfo locationInfo) {
-        return locationInfo.getTotalDist() * FAIR_FARE_PER_METRE;
+        return fairFareEstimate(locationInfo.getTotalDist());
+    }
+
+    /**
+     * Calculates a Fair fare based on provided distance
+     * @param estimatedDistance The driving distance used to calculate a fair fare
+     * @return A float representing a fair fare in dollars
+     */
+    public static float fairFareEstimate(float estimatedDistance) {
+        if (estimatedDistance < 0) {
+            Log.e(TAG, "Fairs cannot be estimated with negative distance. Returning 0.");
+            return 0f;
+        } else {
+            float fairFair = estimatedDistance * FAIR_FARE_PER_METRE;
+            return fairFair == Float.POSITIVE_INFINITY ? Float.MAX_VALUE : fairFair;
+        }
     }
 }

@@ -28,12 +28,18 @@ import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 
+import com.example.gufyguber.CreateRideRequestFragment;
 import com.example.gufyguber.FirebaseManager;
 import com.example.gufyguber.LocationInfo;
 import com.example.gufyguber.OfflineCache;
 import com.example.gufyguber.R;
 import com.example.gufyguber.RideRequest;
+import com.example.gufyguber.TimeInfo;
 import com.google.firebase.auth.FirebaseAuth;
+
+import org.w3c.dom.Text;
+
+import java.util.Date;
 
 public class CurrentRequestFragment extends Fragment {
 
@@ -45,7 +51,11 @@ public class CurrentRequestFragment extends Fragment {
     private TextView arrivalTimeText;
     private TextView pickupLocationText;
     private TextView dropoffLocationText;
+    private TextView suggestedFareText;
     private TextView rideStatus;
+
+
+
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -73,6 +83,7 @@ public class CurrentRequestFragment extends Fragment {
         arrivalTimeText = view.findViewById(R.id.user_arrival_time);
         pickupLocationText = view.findViewById(R.id.user_pickup_location);
         dropoffLocationText = view.findViewById(R.id.user_dropoff_location);
+        suggestedFareText = view.findViewById(R.id.user_fare);
         rideStatus = view.findViewById(R.id.ride_status);
 
         cancelBtn.setOnClickListener(new View.OnClickListener() {
@@ -82,6 +93,9 @@ public class CurrentRequestFragment extends Fragment {
 
                 }
             });
+/**
+ * add Fare Fair rider status
+ */
 
         if (FirebaseManager.getReference().isOnline(getContext())) {
             FirebaseManager.getReference().fetchRideRequest(FirebaseAuth.getInstance().getCurrentUser().getUid(), new FirebaseManager.ReturnValueListener<RideRequest>() {
@@ -101,7 +115,19 @@ public class CurrentRequestFragment extends Fragment {
         if (request != null) {
             pickupLocationText.setText(LocationInfo.latlngToString(request.getLocationInfo().getPickup()));
             dropoffLocationText.setText(LocationInfo.latlngToString(request.getLocationInfo().getDropoff()));
+            if (request.getTimeInfo().getRequestOpenTime() != null) {
+                pickupTimeText.setText(request.getTimeInfo().getRequestOpenTime().toString());
+            } else {
+                pickupTimeText.setText("Time Unavailable");
+            }
+            //pickupTimeText.setText(String.format("%t", request.getTimeInfo().getRequestOpenTime()));
+            if (request.getTimeInfo().getRequestAcceptedTime() != null) {
+                arrivalTimeText.setText(request.getTimeInfo().getRequestAcceptedTime().toString());
+            } else {
+                arrivalTimeText.setText("Time Unavailable");
+            }
             rideStatus.setText(getResources().getString(R.string.request_status, request.getStatus().toString()));
+            suggestedFareText.setText(String.format("$%.2f", request.getOfferedFare()));
         } else {
             rideStatus.setText(getResources().getString(R.string.request_status, ' '));
         }

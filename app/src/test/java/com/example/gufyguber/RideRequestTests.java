@@ -25,6 +25,8 @@ package com.example.gufyguber;
 
 import com.google.android.gms.maps.model.LatLng;
 
+import android.location.Location;
+
 import org.junit.Before;
 import org.junit.Test;
 
@@ -73,8 +75,27 @@ public class RideRequestTests {
         assertEquals(RideRequest.Status.COMPLETED, testRideRequest.getStatus());
     }
 
+    @Test
+    public void testFairFare() {
+        assertEquals(testRideRequest.fairFareEstimate(-Float.MAX_VALUE), 0f);
+        assertEquals(testRideRequest.fairFareEstimate(0f), 0f);
+        if (RideRequest.FAIR_FARE_PER_METRE > 1) {
+            assertEquals(testRideRequest.fairFareEstimate(Float.MAX_VALUE), Float.MAX_VALUE);
+        } else {
+            assertEquals(testRideRequest.fairFareEstimate(Float.MAX_VALUE), Float.MAX_VALUE * RideRequest.FAIR_FARE_PER_METRE);
+        }
+    }
+
+    @Test
+    public void testDriverAccept() {
+        assertEquals(testRideRequest.driverAcceptRideRequest("Test Driver"), true);
+        assertEquals(testRideRequest.getDriverUID(), "Test Driver");
+        assertEquals(testRideRequest.driverAcceptRideRequest("Test Driver 2"), false);
+        assertEquals(testRideRequest.getDriverUID(), "Test Driver");
+    }
+
   public static RideRequest generateTestRequest() {
-      LocationInfo testLocation = new LocationInfo(new LatLng(13, 13), new LatLng(31,31));
+      LocationInfo testLocation = new LocationInfo(new LatLng(13, 13), new LatLng(13,13));
       return new RideRequest("123456789", 13.13f, testLocation);
   }
 }
