@@ -162,6 +162,12 @@ public class ProfileFragment extends Fragment {
                                         }
                                     }
                                 });
+                        FirebaseManager.getReference().fetchDriverInfo(FirebaseAuth.getInstance().getCurrentUser().getUid(), new FirebaseManager.ReturnValueListener<Driver>() {
+                            @Override
+                            public void returnValue(Driver value) {
+                                OfflineCache.getReference().cacheCurrentUser(value);
+                            }
+                        });
                     } else {
                         FirebaseManager.getReference().storeRiderInfo(new
                                 Rider(FirebaseAuth.getInstance().getCurrentUser().getUid(),
@@ -180,6 +186,12 @@ public class ProfileFragment extends Fragment {
                                         }
                                     }
                                 });
+                        FirebaseManager.getReference().fetchDriverInfo(FirebaseAuth.getInstance().getCurrentUser().getUid(), new FirebaseManager.ReturnValueListener<Driver>() {
+                            @Override
+                            public void returnValue(Driver value) {
+                                OfflineCache.getReference().cacheCurrentUser(value);
+                            }
+                        });
                     }
                     Toast.makeText(getContext(), "Profile successfully updated", Toast.LENGTH_LONG).show();
                     getActivity().onBackPressed();
