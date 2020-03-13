@@ -148,6 +148,10 @@ public class ProfileFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 if(validateForm()) {    // check that all fields are filled in
+                    ((NavigationActivity)getActivity()).setMenuDisplays(
+                            nameText.getText().toString().split(" ")[0],
+                            nameText.getText().toString().split(" ")[1],
+                            emailText.getText().toString().toLowerCase());
                     if (driver) {       // if they are a driver, store the new Driver object in FB via the manager
                         FirebaseManager.getReference().storeDriverInfo(new
                                 Driver(FirebaseAuth.getInstance().getCurrentUser().getUid(),
@@ -182,7 +186,6 @@ public class ProfileFragment extends Fragment {
                             @Override
                             public void returnValue(Driver value) {
                                 OfflineCache.getReference().cacheCurrentUser(value);
-                                ((NavigationActivity)getActivity()).setMenuDisplays(value.getFirstName(), value.getLastName(), value.getEmail());
                             }
                         });
                     } else {
@@ -207,8 +210,7 @@ public class ProfileFragment extends Fragment {
                         FirebaseManager.getReference().fetchRiderInfo(FirebaseAuth.getInstance().getCurrentUser().getUid(), new FirebaseManager.ReturnValueListener<Rider>() {
                             @Override
                             public void returnValue(Rider value) {
-                                OfflineCache.getReference().cacheCurrentUser(value);
-                                ((NavigationActivity)getActivity()).setMenuDisplays(value.getFirstName(), value.getLastName(), value.getEmail());
+                                OfflineCache.getReference().cacheCurrentUser(value); 
                             }
                         });
                     }
