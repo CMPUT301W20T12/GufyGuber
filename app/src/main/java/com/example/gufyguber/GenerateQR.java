@@ -58,7 +58,17 @@ public class GenerateQR extends AppCompatActivity {
         qrMessage = findViewById(R.id.showMessage);
 
         //code message will equal the user's email and the amount owed to the driver
-        codeMessage = "Trial!!!";
+        RideRequest currentRequest = OfflineCache.getReference().retrieveCurrentRideRequest();
+        if (currentRequest == null) {
+            codeMessage = "Trial!!!";
+        } else {
+            User user = OfflineCache.getReference().retrieveCurrentUser();
+            if (user != null && user instanceof Rider) {
+                codeMessage = String.format("%s %s owes $%.2f", user.getFirstName(), user.getLastName(), currentRequest.getOfferedFare());
+            } else {
+                codeMessage = String.format("You are owed $%.2f", currentRequest.getOfferedFare());
+            }
+        }
 
         qrMessage.setText(codeMessage);
 
