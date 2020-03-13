@@ -47,6 +47,8 @@ public class startScanQR extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_start);
 
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
         scan = findViewById(R.id.scan);
         result = findViewById(R.id.result);
 
