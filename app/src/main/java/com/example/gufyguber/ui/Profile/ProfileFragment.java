@@ -153,8 +153,8 @@ public class ProfileFragment extends Fragment {
             public void onClick(View v) {
                 if(validateForm()) {    // check that all fields are filled in
                     String userEmail = emailText.getText().toString().toLowerCase();
-                    String userFirstName = firstNameText.getText();
-                    String userLastName = lastNameText.getText();
+                    String userFirstName = firstNameText.getText().toString();
+                    String userLastName = lastNameText.getText().toString();
                     String userPhone = phoneText.getText().toString();
 
                     ((NavigationActivity)getActivity()).setMenuDisplays(
