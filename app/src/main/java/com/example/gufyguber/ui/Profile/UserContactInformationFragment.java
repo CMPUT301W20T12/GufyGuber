@@ -43,6 +43,13 @@ import com.example.gufyguber.R;
 
 //https://developer.android.com/guide/components/intents-common#Phone
 
+/**
+ * Displays user contact information for another user to view.
+ * Handles directing to and pre-dialing the users default phone app
+ *
+ * @author Harrison Peters
+ */
+
 public class UserContactInformationFragment extends DialogFragment {
     private TextView contactEmail;
     private TextView contactPhone;
