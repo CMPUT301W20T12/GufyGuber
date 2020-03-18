@@ -13,12 +13,14 @@
 
 package com.example.gufyguber.ui.Profile;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -224,12 +226,21 @@ public class ProfileFragment extends Fragment {
                         });
                     }
                     Toast.makeText(getContext(), "Profile successfully updated", Toast.LENGTH_LONG).show();
-                    getActivity().onBackPressed(); // head back to map after updated
+                    closeFragment();// head back to map after updated
                 } else {
                     Toast.makeText(getContext(), "Missing Required Info", Toast.LENGTH_SHORT).show();
                 }
             }
         });
+    }
+
+    // https://stackoverflow.com/a/43061269
+    private void closeFragment(){
+        if (getActivity().getCurrentFocus() != null) {
+            InputMethodManager inputManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+            inputManager.hideSoftInputFromWindow(getActivity().getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+        }
+        getActivity().getSupportFragmentManager().popBackStack();
     }
 
     /**
