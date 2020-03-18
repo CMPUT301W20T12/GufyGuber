@@ -150,35 +150,11 @@ public class RideRequest {
     }
 
     /**
-     * Allows a driver to accept a ride request if it hasn't already been accepted
-     * @param driverUID The UID of the driver user that is attempting to accept this ride request
-     * @return True if the request acceptance succeeded, false otherwise
-     */
-    public boolean driverAcceptRideRequest(String driverUID) {
-        if (getDriverUID() != null || getStatus() != Status.PENDING) {
-            Log.w(TAG, "Ride Request failed to be accepted.");
-            return false;
-        }
-
-        // Can set the driverUID to null to cancel an accepted request, otherwise mark request accepted
-        setDriverUID(driverUID);
-        setStatus(getDriverUID() == null ? Status.PENDING : Status.ACCEPTED);
-        if (getStatus() == Status.ACCEPTED) {
-            getTimeInfo().setRequestAcceptedTime();
-        } else {
-            getTimeInfo().setRequestAcceptedTime(null);
-        }
-        return true;
-    }
-
-    /**
      * Cancels this ride request and initiates related cleanup
      */
     public void cancelRideRequest() {
         setStatus(Status.CANCELLED);
         FirebaseManager.getReference().deleteRideRequest(getRiderUID());
-
-        //TODO: Instead of deleting, modify status to notify drivers of cancelled requests
     }
 
     /**

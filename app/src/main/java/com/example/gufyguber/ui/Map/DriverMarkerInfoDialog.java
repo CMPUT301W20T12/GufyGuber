@@ -31,6 +31,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -94,11 +95,15 @@ public class DriverMarkerInfoDialog extends DialogFragment {
                 }
 
                 // Try to claim the request. If it succeeds, cache the request and update Firestore
-                boolean success = clickedMarker.getRideRequest().driverAcceptRideRequest(FirebaseAuth.getInstance().getCurrentUser().getUid());
-                if (success) {
-                    OfflineCache.getReference().cacheCurrentRideRequest(clickedMarker.getRideRequest());
-                    FirebaseManager.getReference().storeRideRequest(clickedMarker.getRideRequest());
-                }
+                FirebaseManager.getReference().driverAcceptRideRequest(FirebaseAuth.getInstance().getCurrentUser().getUid(), clickedMarker.getRideRequest(),
+                        new FirebaseManager.ReturnValueListener<Boolean>() {
+                    @Override
+                    public void returnValue(Boolean value) {
+                        if (!value) {
+                            Toast toast = Toast.makeText(getContext(), "Ride request unavailable.", Toast.LENGTH_LONG);
+                        }
+                    }
+                });
                 dismiss();
             }
         });

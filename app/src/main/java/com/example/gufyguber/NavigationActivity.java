@@ -80,8 +80,8 @@ public class NavigationActivity extends AppCompatActivity implements RideRequest
 
     @Override
     public void onDestroy() {
-        super.onDestroy();
         OfflineCache.getReference().removeRideRequestStatusChangedListener(this);
+        super.onDestroy();
     }
 
 
