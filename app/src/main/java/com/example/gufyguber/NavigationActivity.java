@@ -43,7 +43,7 @@ import static com.example.gufyguber.R.id.nav_host_fragment;
  * This class creates an instance of the NavigationActivity and populates the toolbar with tabs
  */
 
-public class NavigationActivity extends AppCompatActivity {
+public class NavigationActivity extends AppCompatActivity implements RideRequest.StatusChangedListener {
 
     private AppBarConfiguration mAppBarConfiguration;
 

@@ -74,6 +74,13 @@ public class RideRequest {
         }
     }
 
+    /**
+     * Interface that allows us to message listeners when the cached ride request status changes
+     */
+    public interface StatusChangedListener{
+        public void onStatusChanged(Status newStatus);
+    }
+
     private static final String TAG = "RideRequest";
 
     public static final float FAIR_FARE_PER_METRE = 0.01f;
