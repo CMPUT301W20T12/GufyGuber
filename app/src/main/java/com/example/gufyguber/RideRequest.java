@@ -38,22 +38,39 @@ public class RideRequest {
             public String toString() {
                 return "Pending";
             }
+            public String userDisplay() { return "Request Pending"; }
         },
         ACCEPTED {
             @Override
             public String toString() {
                 return "Accepted";
             }
+            public String userDisplay() { return "Driver Accepted"; }
+        },
+        CONFIRMED {
+          @Override
+          public String toString() { return "Confirmed"; }
+          public String userDisplay() { return "Awaiting Pickup"; }
+        },
+        EN_ROUTE {
+            @Override
+            public String toString() { return "En Route"; }
+            public String userDisplay() { return "En Route"; }
+        },
+        ARRIVED {
+            @Override
+            public String toString() { return "Arrived"; }
+            public String userDisplay() { return "Ride Complete"; }
         },
         COMPLETED {
             @Override
-            public String toString() {
-                return "Completed";
-            }
+            public String toString() { return "Completed"; }
+            public String userDisplay() { return "Payment Complete"; }
         },
         CANCELLED {
             @Override
             public String toString() { return "Cancelled"; }
+            public String userDisplay() { return "Request Cancelled"; }
         }
     }
 
