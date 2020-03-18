@@ -48,7 +48,8 @@ public class ProfileFragment extends Fragment {
     // Declare variables for later; some are for the Vehicle object and will not
     // be used if the user is a rider
     private ProfileViewModel profileViewModel;
-    private TextView nameText;
+    private TextView firstNameText;
+    private TextView lastNameText;
     private TextView phoneText;
     private TextView emailText;
     private TextView makeText;
@@ -86,7 +87,8 @@ public class ProfileFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         // get all the views by id
-        nameText = view.findViewById(R.id.rider_name);
+        firstNameText = view.findViewById(R.id.user_first_name);
+        lastNameText = view.findViewById(R.id.user_last_name);
         emailText = view.findViewById(R.id.rider_email);
         phoneText = view.findViewById(R.id.rider_phone);
         makeText = view.findViewById(R.id.make);
@@ -102,7 +104,8 @@ public class ProfileFragment extends Fragment {
             @Override
             public void returnValue(Rider value) {
                 if (value != null) {
-                    nameText.setText(String.format("%s %s", value.getFirstName(), value.getLastName()));
+                    firstNameText.setText(value.getFirstName());
+                    lastNameText.setText(value.getLastName());
                     emailText.setText(value.getEmail());
                     phoneText.setText(value.getPhoneNumber());
                     if (driver) {
@@ -129,7 +132,8 @@ public class ProfileFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 // when user clicks the edit button, change the fields to be editable
-                nameText.setEnabled(true);
+                firstNameText.setEnabled(true);
+                lastNameText.setEnabled(true);
                 emailText.setEnabled(true);
                 phoneText.setEnabled(true);
                 editProfile.setVisibility(View.GONE);
@@ -149,8 +153,8 @@ public class ProfileFragment extends Fragment {
             public void onClick(View v) {
                 if(validateForm()) {    // check that all fields are filled in
                     String userEmail = emailText.getText().toString().toLowerCase();
-                    String userFirstName = nameText.getText().toString().split(" ")[0];
-                    String userLastName = nameText.getText().toString().split(" ")[1];
+                    String userFirstName = firstNameText.getText().toString();
+                    String userLastName = lastNameText.getText().toString();
                     String userPhone = phoneText.getText().toString();
 
                     ((NavigationActivity)getActivity()).setMenuDisplays(
@@ -236,7 +240,8 @@ public class ProfileFragment extends Fragment {
     private boolean validateForm() {
         if (driver) {
             return (!TextUtils.isEmpty(emailText.getText().toString()) &&
-                    !TextUtils.isEmpty(nameText.getText().toString()) &&
+                    !TextUtils.isEmpty(firstNameText.getText().toString()) &&
+                    !TextUtils.isEmpty(lastNameText.getText().toString()) &&
                     !TextUtils.isEmpty(phoneText.getText().toString()) &&
                     !TextUtils.isEmpty(makeText.getText().toString()) &&
                     !TextUtils.isEmpty(modelText.getText().toString()) &&
@@ -244,7 +249,8 @@ public class ProfileFragment extends Fragment {
                     !TextUtils.isEmpty(seatText.getText().toString()));
         } else {
             return (!TextUtils.isEmpty(emailText.getText().toString()) &&
-                    !TextUtils.isEmpty(nameText.getText().toString()) &&
+                    !TextUtils.isEmpty(firstNameText.getText().toString()) &&
+                    !TextUtils.isEmpty(lastNameText.getText().toString()) &&
                     !TextUtils.isEmpty(phoneText.getText().toString()));
         }
     }
