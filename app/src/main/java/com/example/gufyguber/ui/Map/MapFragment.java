@@ -162,19 +162,34 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
 
                             if (mMap != null) {
                                 RideRequest request = OfflineCache.getReference().retrieveCurrentRideRequest();
-                                if (request == null) {
-                                    if (requestDialog == null) {
-                                        removePickupFromMap();
-                                        removeDropoffFromMap();
+                                FirebaseManager.getReference().fetchRideRequest(OfflineCache.getReference().retrieveCurrentUser().getUID(), new FirebaseManager.ReturnValueListener<RideRequest>() {
+                                    @Override
+                                    public void returnValue(RideRequest value) {
+                                        OfflineCache.getReference().cacheCurrentRideRequest(value);
+                                        RideRequest request = OfflineCache.getReference().retrieveCurrentRideRequest();
+                                        if (request == null) {
+                                            if (requestDialog == null) {
+                                                removePickupFromMap();
+                                                removeDropoffFromMap();
+                                            }
+                                        } else {
+                                            if (request.getLocationInfo().getPickup() != null) {
+                                                if (pickupMarker == null ||
+                                                        pickupMarker.getPosition().latitude != request.getLocationInfo().getPickup().latitude ||
+                                                        pickupMarker.getPosition().longitude != request.getLocationInfo().getPickup().longitude) {
+                                                    addPickupToMap(request.getLocationInfo().getPickup());
+                                                }
+                                            }
+                                            if (request.getLocationInfo().getDropoff() != null) {
+                                                if (dropoffMarker == null ||
+                                                        dropoffMarker.getPosition().latitude != request.getLocationInfo().getDropoff().latitude ||
+                                                        dropoffMarker.getPosition().longitude != request.getLocationInfo().getDropoff().longitude) {
+                                                    addDropoffToMap(request.getLocationInfo().getDropoff());
+                                                }
+                                            }
+                                        }
                                     }
-                                } else {
-                                    if (request.getLocationInfo().getPickup() != null) {
-                                        addPickupToMap(request.getLocationInfo().getPickup());
-                                    }
-                                    if (request.getLocationInfo().getDropoff() != null) {
-                                        addDropoffToMap(request.getLocationInfo().getDropoff());
-                                    }
-                                }
+                                });
                             }
                         }
                     });
@@ -368,11 +383,25 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
                 FirebaseManager.getReference().fetchRideRequest(OfflineCache.getReference().retrieveCurrentRideRequest().getRiderUID(), new FirebaseManager.ReturnValueListener<RideRequest>() {
                     @Override
                     public void returnValue(RideRequest value) {
+                        if (pickupMarker == null && dropoffMarker == null) {
+                            mMap.clear();
+                        }
+
                         OfflineCache.getReference().cacheCurrentRideRequest(value);
-                        mMap.clear();
                         if (value != null) {
-                            addPickupToMap(value.getLocationInfo().getPickup());
-                            addDropoffToMap(value.getLocationInfo().getDropoff());
+                            if (pickupMarker == null ||
+                                    pickupMarker.getPosition().latitude != value.getLocationInfo().getPickup().latitude ||
+                                    pickupMarker.getPosition().longitude != value.getLocationInfo().getPickup().longitude) {
+                                addPickupToMap(value.getLocationInfo().getPickup());
+                            }
+                            if (dropoffMarker == null ||
+                                    dropoffMarker.getPosition().latitude != value.getLocationInfo().getDropoff().latitude ||
+                                    dropoffMarker.getPosition().longitude != value.getLocationInfo().getDropoff().longitude) {
+                                addDropoffToMap(value.getLocationInfo().getDropoff());
+                            }
+                        } else {
+                            removePickupFromMap();
+                            removeDropoffFromMap();
                         }
                     }
                 });

@@ -24,7 +24,7 @@ import java.util.Observable;
  * Utilizes a singleton pattern.
  * @author Robert MacGillivray | Mar.11.2020
  */
-public class OfflineCache extends Observable {
+public class OfflineCache {
     private static OfflineCache reference;
     public static OfflineCache getReference() {
         if (reference == null) {
