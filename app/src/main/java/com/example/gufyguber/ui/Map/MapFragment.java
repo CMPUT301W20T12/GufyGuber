@@ -44,6 +44,8 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 
@@ -61,11 +63,14 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
     private GoogleMap mMap;
     private Marker pickupMarker;
     private Marker dropoffMarker;
+    private Polyline routeLine;
     private CreateRideRequestFragment requestDialog;
     private FloatingActionButton fab;
     private TextView offlineText;
     private Timer offlineTestTimer;
     private boolean isDriver;
+
+    private static final String TAG = "MapFragment";
 
     /**
      *  This class is an intermediate step to differentiate the driver from the rider
@@ -157,16 +162,18 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
 
                             if (mMap != null) {
                                 RideRequest request = OfflineCache.getReference().retrieveCurrentRideRequest();
-                                if (request == null && pickupMarker != null && dropoffMarker != null) {
-                                    pickupMarker.remove();
-                                    pickupMarker = null;
-                                    dropoffMarker.remove();
-                                    dropoffMarker = null;
-                                } else if (request != null && pickupMarker == null && dropoffMarker == null) {
-                                    MarkerInfo newMarker = new MarkerInfo();
-                                    pickupMarker = newMarker.makeMarker("Pickup", true, request.getLocationInfo().getPickup(), mMap);
-                                    newMarker = new MarkerInfo();
-                                    dropoffMarker = newMarker.makeMarker("Drop Off", false, request.getLocationInfo().getDropoff(), mMap);
+                                if (request == null) {
+                                    if (requestDialog == null) {
+                                        removePickupFromMap();
+                                        removeDropoffFromMap();
+                                    }
+                                } else {
+                                    if (request.getLocationInfo().getPickup() != null) {
+                                        addPickupToMap(request.getLocationInfo().getPickup());
+                                    }
+                                    if (request.getLocationInfo().getDropoff() != null) {
+                                        addDropoffToMap(request.getLocationInfo().getDropoff());
+                                    }
                                 }
                             }
                         }
@@ -272,23 +279,16 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
             public void onMapClick(LatLng latLng) {
                 if (requestDialog != null) {
                     boolean dirty = false;
+
                     if (requestDialog.settingStart) {
                         requestDialog.setNewPickup(latLng);
-                        if (pickupMarker != null) {
-                            pickupMarker.remove();
-                        }
-                        MarkerInfo newMarker = new MarkerInfo();
-                        pickupMarker = newMarker.makeMarker("Pickup", true, latLng, mMap);
+                        addPickupToMap(latLng);
                         dirty = true;
                     }
 
                     if (requestDialog.settingEnd) {
                         requestDialog.setNewDropoff(latLng);
-                        if (dropoffMarker != null) {
-                            dropoffMarker.remove();
-                        }
-                        MarkerInfo newMarker = new MarkerInfo();
-                        dropoffMarker = newMarker.makeMarker("Drop Off", false, latLng, mMap);
+                        addDropoffToMap(latLng);
                         dirty = true;
                     }
 
@@ -334,19 +334,16 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
     /**
      * This function handles the markers created when the rider is making a new request and cancels
      */
-
     public void onRideRequestCreationCancelled() {
-        if (pickupMarker != null) {
-            pickupMarker.remove();
-        }
-        if (dropoffMarker != null) {
-            dropoffMarker.remove();
-        }
-        pickupMarker = null;
-        dropoffMarker = null;
+        removePickupFromMap();
+        removeDropoffFromMap();
         requestDialog = null;
     }
 
+    /**
+     * Refreshes the pins in the map based on current data (drivers only)
+     * @param isOnline Used to determine whether to lean into cached data or not
+     */
     private void refreshRequests(final boolean isOnline) {
         if (isOnline) {
             if (OfflineCache.getReference().retrieveCurrentRideRequest() == null) {
@@ -361,9 +358,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
                             return;
                         }
 
+                        // Add a marker to the map for each pending ride request (at the request start location)
                         for (final RideRequest request : value) {
-                            DriverRequestMarker marker = new DriverRequestMarker(request);
-                            marker.makeMarker(mMap);
+                            new DriverRequestMarker(request).makeMarker(mMap);
                         }
                     }
                 });
@@ -372,12 +369,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
                     @Override
                     public void returnValue(RideRequest value) {
                         OfflineCache.getReference().cacheCurrentRideRequest(value);
-                        if (value != null && pickupMarker == null && dropoffMarker == null) {
-                            mMap.clear();
-                            MarkerInfo newMarker = new MarkerInfo();
-                            pickupMarker = newMarker.makeMarker("Pickup", true, value.getLocationInfo().getPickup(), mMap);
-                            newMarker = new MarkerInfo();
-                            dropoffMarker = newMarker.makeMarker("Drop Off", false, value.getLocationInfo().getDropoff(), mMap);
+                        mMap.clear();
+                        if (value != null) {
+                            addPickupToMap(value.getLocationInfo().getPickup());
+                            addDropoffToMap(value.getLocationInfo().getDropoff());
                         }
                     }
                 });
@@ -386,6 +381,50 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
             if (OfflineCache.getReference().retrieveCurrentRideRequest() == null) {
                 mMap.clear();
             }
+        }
+    }
+
+    private void addPickupToMap(LatLng location) {
+        removePickupFromMap();
+        pickupMarker = new MarkerInfo().makeMarker("Pickup", true, location, mMap);
+        updateNavLine();
+    }
+
+    private void removePickupFromMap() {
+        if (pickupMarker != null) {
+            pickupMarker.remove();
+            pickupMarker = null;
+            updateNavLine();
+        }
+    }
+
+    private void addDropoffToMap(LatLng location) {
+        removeDropoffFromMap();
+        dropoffMarker = new MarkerInfo().makeMarker("Drop Off", false, location, mMap);
+        updateNavLine();
+    }
+
+    private void removeDropoffFromMap() {
+        if (dropoffMarker != null) {
+            dropoffMarker.remove();
+            dropoffMarker = null;
+            updateNavLine();
+        }
+    }
+
+    /**
+     * Removes the current nav line and adds a new one as appropriate
+     */
+    private void updateNavLine() {
+        if (routeLine != null) {
+            routeLine.remove();
+            routeLine = null;
+        }
+        if (pickupMarker != null && dropoffMarker != null) {
+            routeLine = mMap.addPolyline(new PolylineOptions()
+                    .add(pickupMarker.getPosition())
+                    .add(dropoffMarker.getPosition())
+                    .color(0xFFFF0000));
         }
     }
 
