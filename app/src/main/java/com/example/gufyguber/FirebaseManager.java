@@ -22,6 +22,7 @@ import android.net.NetworkInfo;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -31,8 +32,11 @@ import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.GeoPoint;
+import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import org.w3c.dom.Document;
@@ -202,6 +206,31 @@ public class FirebaseManager {
     }
 
     /**
+     * @param riderUID The key used to identify the ride request to listen to
+     * @param onChangedFunction Callback used when the ride request is updated on Firestore
+     * @return A ListenerRegistration object that should be used to remove the listener when no longer needed
+     */
+    public ListenerRegistration listenToRideRequest(final String riderUID, final ReturnValueListener<RideRequest> onChangedFunction) {
+        DocumentReference requestDoc = FirebaseFirestore.getInstance().collection(RIDE_REQUEST_COLLECTION).document(riderUID);
+        return requestDoc.addSnapshotListener(new EventListener<DocumentSnapshot>() {
+            @Override
+            public void onEvent(@Nullable DocumentSnapshot documentSnapshot, @Nullable FirebaseFirestoreException e) {
+                if (e != null) {
+                    Log.w(TAG, String.format("Listen to ride request [%s] failed", riderUID), e);
+                    return;
+                }
+
+                // Return our value. Null if deleted.
+                if (documentSnapshot != null && documentSnapshot.exists()) {
+                    onChangedFunction.returnValue(buildRideRequest(documentSnapshot));
+                } else {
+                    onChangedFunction.returnValue(null);
+                }
+            }
+        });
+    }
+
+    /**
      * Deletes a Ride Request record from our cloud Firestore
      * @param riderUID The Rider UID associated with the ride request to be deleted
      */
@@ -215,7 +244,6 @@ public class FirebaseManager {
      * @param returnFunction The callback to use once we've finished retrieving a Vehicle
      */
     public void fetchRideRequestsWithStatus(final RideRequest.Status status, final ReturnValueListener<ArrayList<RideRequest>> returnFunction) {
-        //TODO: Retrieve all pending ride requests from Firebase
         FirebaseFirestore.getInstance().collection(RIDE_REQUEST_COLLECTION).whereEqualTo(STATUS_KEY, status.name()).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
             @Override
             public void onComplete(@NonNull Task<QuerySnapshot> task) {
