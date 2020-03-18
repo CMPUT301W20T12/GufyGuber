@@ -66,16 +66,27 @@ public class CurrentRequestFragment extends Fragment {
                              ViewGroup container, Bundle savedInstanceState) {
         currentRequestViewModel =
                 ViewModelProviders.of(this).get(CurrentRequestViewModel.class);
-        View root = inflater.inflate(R.layout.fragment_current_requests, container, false);
-        //final TextView textView = root.findViewById(R.id.text_current_requests);
-        currentRequestViewModel.getText().observe(getViewLifecycleOwner(), new Observer<String>() {
-            @Override
-            public void onChanged(@Nullable String s) {
-                //textView.setText(s);
-            }
-        });
-
-        return root;
+        if (OfflineCache.getReference().retrieveCurrentRideRequest() != null) {
+            View root = inflater.inflate(R.layout.fragment_current_requests, container, false);
+            //final TextView textView = root.findViewById(R.id.text_current_requests);
+            currentRequestViewModel.getText().observe(getViewLifecycleOwner(), new Observer<String>() {
+                @Override
+                public void onChanged(@Nullable String s) {
+                    //textView.setText(s);
+                }
+            });
+            return root;
+        } else {
+            View root = inflater.inflate(R.layout.no_current_request, container, false);
+            //final TextView textView = root.findViewById(R.id.text_current_requests);
+            currentRequestViewModel.getText().observe(getViewLifecycleOwner(), new Observer<String>() {
+                @Override
+                public void onChanged(@Nullable String s) {
+                    //textView.setText(s);
+                }
+            });
+            return root;
+        }
     }
 
     @Override
@@ -91,25 +102,27 @@ public class CurrentRequestFragment extends Fragment {
         suggestedFareText = view.findViewById(R.id.user_fare);
         rideStatus = view.findViewById(R.id.ride_status);
 
-        cancelBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                new CancelRequestFragment().show(getFragmentManager(), "cancel_request_fragment");
-
-                }
-            });
-
-        if (FirebaseManager.getReference().isOnline(getContext())) {
-            FirebaseManager.getReference().fetchRideRequest(FirebaseAuth.getInstance().getCurrentUser().getUid(), new FirebaseManager.ReturnValueListener<RideRequest>() {
+        if (OfflineCache.getReference().retrieveCurrentRideRequest() != null) {
+            cancelBtn.setOnClickListener(new View.OnClickListener() {
                 @Override
-                public void returnValue(RideRequest value) {
-                    // Cache latest version of request (might be null, but this corresponds to a delete)
-                    OfflineCache.getReference().cacheCurrentRideRequest(value);
-                    updateUI(value);
+                public void onClick(View v) {
+                    new CancelRequestFragment().show(getFragmentManager(), "cancel_request_fragment");
+
                 }
             });
-        } else {
-            updateUI(OfflineCache.getReference().retrieveCurrentRideRequest());
+
+            if (FirebaseManager.getReference().isOnline(getContext())) {
+                FirebaseManager.getReference().fetchRideRequest(FirebaseAuth.getInstance().getCurrentUser().getUid(), new FirebaseManager.ReturnValueListener<RideRequest>() {
+                    @Override
+                    public void returnValue(RideRequest value) {
+                        // Cache latest version of request (might be null, but this corresponds to a delete)
+                        OfflineCache.getReference().cacheCurrentRideRequest(value);
+                        updateUI(value);
+                    }
+                });
+            } else {
+                updateUI(OfflineCache.getReference().retrieveCurrentRideRequest());
+            }
         }
     }
 
