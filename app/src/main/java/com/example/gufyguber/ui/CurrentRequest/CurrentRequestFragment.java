@@ -13,7 +13,6 @@
 
 package com.example.gufyguber.ui.CurrentRequest;
 
-import android.app.Dialog;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -24,23 +23,17 @@ import android.widget.TextView;
 import androidx.annotation.Nullable;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 
-import com.example.gufyguber.CreateRideRequestFragment;
 import com.example.gufyguber.Driver;
 import com.example.gufyguber.FirebaseManager;
 import com.example.gufyguber.LocationInfo;
 import com.example.gufyguber.OfflineCache;
 import com.example.gufyguber.R;
 import com.example.gufyguber.RideRequest;
-import com.example.gufyguber.TimeInfo;
+import com.example.gufyguber.ui.Profile.UserContactInformationFragment;
 import com.google.firebase.auth.FirebaseAuth;
-
-import org.w3c.dom.Text;
-
-import java.util.Date;
 
 /**
  * Displays ride request information for a rider's current open request
@@ -98,6 +91,13 @@ public class CurrentRequestFragment extends Fragment {
 
                 }
             });
+
+        driverText.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                new UserContactInformationFragment().show(getFragmentManager(), "user_contact_information");
+            }
+        });
 
         if (FirebaseManager.getReference().isOnline(getContext())) {
             FirebaseManager.getReference().fetchRideRequest(FirebaseAuth.getInstance().getCurrentUser().getUid(), new FirebaseManager.ReturnValueListener<RideRequest>() {
