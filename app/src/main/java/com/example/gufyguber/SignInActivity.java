@@ -82,7 +82,6 @@ public class SignInActivity extends AppCompatActivity {
     private GoogleSignInClient mGoogleSignInClient;
     private TextView mStatusTextView;
     private SignInButton signInButton;
-    private Button signOutButton;
     private FirebaseManager firebaseManager = FirebaseManager.getReference();
 
     @Override
@@ -102,13 +101,6 @@ public class SignInActivity extends AppCompatActivity {
             }
         });
 
-        signOutButton = findViewById(R.id.sign_out_button);
-        signOutButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                signOut();
-            }
-        });
 
 
         // Configure Google sign-in to request the user's ID, email address,
@@ -165,23 +157,6 @@ public class SignInActivity extends AppCompatActivity {
         // the result code
         Intent signInIntent = mGoogleSignInClient.getSignInIntent();
         startActivityForResult(signInIntent, RC_SIGN_IN);
-    }
-
-    /**
-     * Sign the user out of the firebase project and the Google Sign In Client.
-     */
-    private void signOut() {
-        // Sign the user out of both firebase and the Google Client
-        mFirebaseAuth.signOut();
-        mGoogleSignInClient.signOut()
-                .addOnCompleteListener(this,
-                        new OnCompleteListener<Void>() {
-                            @Override
-                            public void onComplete(@NonNull Task<Void> task) {
-                                // update the UI to not signed in
-                                updateUI(null);
-                            }
-                        });
     }
 
     /**

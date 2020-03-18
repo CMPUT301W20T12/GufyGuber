@@ -20,6 +20,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -62,7 +63,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
     private Marker pickupMarker;
     private Marker dropoffMarker;
     private CreateRideRequestFragment requestDialog;
-    private FloatingActionButton fab;
+    private Button fab;
     private TextView offlineText;
     private Timer offlineTestTimer;
     private boolean isDriver;
