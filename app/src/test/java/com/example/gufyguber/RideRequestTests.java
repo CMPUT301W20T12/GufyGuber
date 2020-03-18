@@ -85,8 +85,8 @@ public class RideRequestTests {
         assertEquals(RideRequest.Status.PENDING, testRideRequest.getStatus());
         testRideRequest.setStatus(RideRequest.Status.ACCEPTED);
         assertEquals(RideRequest.Status.ACCEPTED, testRideRequest.getStatus());
-        testRideRequest.setStatus(RideRequest.Status.values()[2]);
-        assertEquals(RideRequest.Status.COMPLETED, testRideRequest.getStatus());
+        testRideRequest.setStatus(RideRequest.Status.values()[3]);
+        assertEquals(RideRequest.Status.EN_ROUTE, testRideRequest.getStatus());
     }
 
     @Test
