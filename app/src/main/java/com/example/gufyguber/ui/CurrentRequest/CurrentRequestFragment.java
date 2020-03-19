@@ -103,6 +103,13 @@ public class CurrentRequestFragment extends Fragment {
 
                 }
             });
+            
+            driverText.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    new UserContactInformationFragment().show(getFragmentManager(), "user_contact_information");
+                }
+            });
 
 
             if (FirebaseManager.getReference().isOnline(getContext())) {
