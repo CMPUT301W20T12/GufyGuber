@@ -24,6 +24,7 @@ package com.example.gufyguber.ui.Map;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Application;
 import android.app.Dialog;
 import android.content.Context;
 import android.os.Bundle;
@@ -57,6 +58,8 @@ public class DriverMarkerInfoDialog extends DialogFragment {
     private TextView infoText;
     private DriverRequestMarker clickedMarker;
 
+    private Context parentContext;
+
     public DriverMarkerInfoDialog(DriverRequestMarker clickedMarker) {
         this.clickedMarker = clickedMarker;
     }
@@ -64,6 +67,7 @@ public class DriverMarkerInfoDialog extends DialogFragment {
     @Override
     public void onAttach(Context context){
         super.onAttach(context);
+        parentContext = context;
     }
 
     @NonNull
@@ -100,7 +104,8 @@ public class DriverMarkerInfoDialog extends DialogFragment {
                     @Override
                     public void returnValue(Boolean value) {
                         if (!value) {
-                            Toast toast = Toast.makeText(getContext(), "Ride request unavailable.", Toast.LENGTH_LONG);
+                            Toast toast = Toast.makeText(parentContext, "Ride request unavailable.", Toast.LENGTH_LONG);
+                            toast.show();
                         }
                     }
                 });
