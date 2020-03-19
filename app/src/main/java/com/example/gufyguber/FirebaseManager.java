@@ -66,6 +66,10 @@ public class FirebaseManager {
         public void onRideRequestUpdated(RideRequest updatedRequest);
     }
 
+    public interface DriverRideRequestCollectionListener{
+        public void onRideRequestsUpdated(ArrayList<RideRequest> rideRequests);
+    }
+
     // Singleton Pattern for this manager
     private static FirebaseManager reference;
     public static FirebaseManager getReference() {
@@ -308,6 +312,27 @@ public class FirebaseManager {
                     Log.e(TAG, "Fetching pending ride requests failed. Issue communicating with Firestore.");
                     returnFunction.returnValue(null);
                 }
+            }
+        });
+    }
+
+    public ListenerRegistration listenToAllRideRequests(final DriverRideRequestCollectionListener onChangedListener) {
+        CollectionReference collectionReference = FirebaseFirestore.getInstance().collection(RIDE_REQUEST_COLLECTION);
+        return collectionReference.addSnapshotListener(new EventListener<QuerySnapshot>() {
+            @Override
+            public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
+                if (e != null) {
+                    Log.w(TAG, "Listen to ride request collection failed.", e);
+                    return;
+                }
+
+                // Return the results of a new "Pending" query
+                fetchRideRequestsWithStatus(RideRequest.Status.PENDING, new ReturnValueListener<ArrayList<RideRequest>>() {
+                    @Override
+                    public void returnValue(ArrayList<RideRequest> value) {
+                        onChangedListener.onRideRequestsUpdated(value);
+                    }
+                });
             }
         });
     }
