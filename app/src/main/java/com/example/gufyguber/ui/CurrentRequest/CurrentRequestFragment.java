@@ -13,6 +13,8 @@
 
 package com.example.gufyguber.ui.CurrentRequest;
 
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -103,14 +105,6 @@ public class CurrentRequestFragment extends Fragment {
 
                 }
             });
-            
-            driverText.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    new UserContactInformationFragment().show(getFragmentManager(), "user_contact_information");
-                }
-            });
-
 
             if (FirebaseManager.getReference().isOnline(getContext())) {
                 FirebaseManager.getReference().fetchRideRequest(FirebaseAuth.getInstance().getCurrentUser().getUid(), new FirebaseManager.ReturnValueListener<RideRequest>() {
@@ -125,6 +119,7 @@ public class CurrentRequestFragment extends Fragment {
                 updateUI(OfflineCache.getReference().retrieveCurrentRideRequest());
             }
         }
+
     }
 
     private void updateUI(RideRequest request) {
@@ -139,8 +134,10 @@ public class CurrentRequestFragment extends Fragment {
                             driverText.setText("Driver Unavailable");
                         } else {
                             driverText.setText(String.format("%s %s", value.getFirstName(), value.getLastName()));
+                            makeDriverNameClickable(value, driverText);
                         }
                     }
+
                 });
             }
             pickupLocationText.setText(LocationInfo.latlngToString(request.getLocationInfo().getPickup()));
@@ -161,5 +158,25 @@ public class CurrentRequestFragment extends Fragment {
         } else {
             rideStatus.setText(getResources().getString(R.string.request_status, ' '));
         }
+
+    }
+
+    private void makeDriverNameClickable(final Driver driver, TextView driverText){
+        driverText.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Bundle bundle = new Bundle();
+                bundle.putString("email", driver.getEmail());
+                bundle.putString("phone", driver.getPhoneNumber());
+                UserContactInformationFragment infoFragment = new UserContactInformationFragment();
+                infoFragment.setArguments(bundle);
+                infoFragment.show(getFragmentManager(), "user_contact_information");
+            }
+        });
+        driverText.setTextColor(Color.BLUE);
+        Paint paint = new Paint();
+        paint.setFlags(Paint.UNDERLINE_TEXT_FLAG);
+        driverText.setPaintFlags(paint.getFlags());
+
     }
 }

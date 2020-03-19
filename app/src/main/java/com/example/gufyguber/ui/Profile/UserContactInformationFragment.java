@@ -54,17 +54,23 @@ import com.example.gufyguber.R;
 public class UserContactInformationFragment extends DialogFragment {
     private TextView contactEmail;
     private TextView contactPhone;
+    private String email;
+    private String phoneNumber;
 
     @NonNull
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
         View view = LayoutInflater.from(getActivity()).inflate(R.layout.fragment_contact_info, null);
+        Bundle bundle = this.getArguments();
+
+        email = bundle.getString("email");
+        phoneNumber = bundle.getString("phone");
 
         contactEmail = view.findViewById(R.id.contact_email);
         contactPhone = view.findViewById(R.id.contact_phone);
 
-        contactEmail.setText("example@gufyguber.ca");
-        contactPhone.setText("12345678901");
+        contactEmail.setText(email);
+        contactPhone.setText(phoneNumber);
 
         Paint paint = new Paint();
         paint.setFlags(Paint.UNDERLINE_TEXT_FLAG);
@@ -78,7 +84,7 @@ public class UserContactInformationFragment extends DialogFragment {
             @Override
             public void onClick(View v) {
                     Intent intent = new Intent(Intent.ACTION_DIAL);
-                    intent.setData(Uri.parse("tel:" + contactPhone.getText().toString()));
+                    intent.setData(Uri.parse("tel:" + phoneNumber));
                     if (intent.resolveActivity(getActivity().getPackageManager()) != null) {
                         startActivity(intent);
                     }
@@ -88,7 +94,7 @@ public class UserContactInformationFragment extends DialogFragment {
         contactEmail.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                    String [] recipient = {"example@gufyguber.ca"};
+                    String [] recipient = {email};
                     Intent intent = new Intent(Intent.ACTION_SENDTO);
                     intent.setData(Uri.parse("mailto:")); // only email apps should handle this
                     intent.putExtra(Intent.EXTRA_EMAIL, recipient);
