@@ -111,18 +111,8 @@ public class CurrentRequestFragment extends Fragment {
                 }
             });
 
-            if (FirebaseManager.getReference().isOnline(getContext())) {
-                FirebaseManager.getReference().fetchRideRequest(FirebaseAuth.getInstance().getCurrentUser().getUid(), new FirebaseManager.ReturnValueListener<RideRequest>() {
-                    @Override
-                    public void returnValue(RideRequest value) {
-                        // Cache latest version of request (might be null, but this corresponds to a delete)
-                        OfflineCache.getReference().cacheCurrentRideRequest(value);
-                        updateUI(value);
-                    }
-                });
-            } else {
-                updateUI(OfflineCache.getReference().retrieveCurrentRideRequest());
-            }
+            // This fragment shouldn't be in charge of caching values, so we can pull straight from the cache
+            updateUI(OfflineCache.getReference().retrieveCurrentRideRequest());
         }
     }
 
