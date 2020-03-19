@@ -169,8 +169,13 @@ public class NavigationActivity extends AppCompatActivity implements RideRequest
                         @Override
                         public void returnValue(Driver value) {
                             if (value != null) {
-                                toast.setText(String.format("Request accepted by %s %s.", value.getFirstName(), value.getLastName()));
-                                toast.show();
+                                Bundle bundle = new Bundle();
+                                bundle.putString("first_name", value.getFirstName());
+                                bundle.putString("last_name", value.getLastName());
+                                bundle.putString("rating", "99"); //TODO: get driver rating
+                                DriverAcceptFragment acceptFragment = new DriverAcceptFragment();
+                                acceptFragment.setArguments(bundle);
+                                acceptFragment.show(getSupportFragmentManager(), "DRIVER_OFFER");
                             }
                         }
                     });
