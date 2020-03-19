@@ -34,7 +34,8 @@
         <activity
             android:name=".NavigationActivity"
             android:label="@string/title_activity_navigation"
-            android:theme="@style/AppTheme.NoActionBar">
+            android:theme="@style/AppTheme.NoActionBar"
+            android:configChanges="orientation|screenSize|keyboardHidden"> <!--https://stackoverflow.com/questions/28576824/my-first-android-app-crashes-when-rotated -->
         </activity>
 
         <meta-data
