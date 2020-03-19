@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   ~ Copyright (c) 2020  GufyGuber. All Rights Reserved.
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
@@ -25,170 +24,186 @@
     android:layout_height="match_parent">
 
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        android:orientation="vertical" android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+        
         <TextView
             android:id="@+id/ride_status"
             android:layout_width="match_parent"
             android:layout_height="50dp"
-            android:text="@string/request_status"
+            android:background="@color/colorPrimary"
             android:gravity="center_vertical"
             android:paddingLeft="10dp"
             android:paddingRight="10dp"
+            android:text="@string/request_status"
             android:textColor="#fff"
             android:textSize="20sp"
-            android:textStyle="bold"
-            android:background="@color/colorPrimary"/>
+            android:textStyle="bold" />
 
-
-        <LinearLayout
-            android:orientation="horizontal"
+        <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="10dp"
-            android:layout_margin="10dp">
+            android:layout_weight="1">
 
-            <TextView
-                android:layout_width="0dp"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:textSize="20sp"
-                android:text="Your Rider:"/>
+                android:orientation="vertical">
 
-            <TextView
-                android:id="@+id/rider_name"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="2"
-                android:textSize="20sp"
-                android:text="Rider Name"/>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="10dp"
+                    android:orientation="horizontal"
+                    android:padding="10dp">
 
-        </LinearLayout>
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Your Rider:"
+                        android:textSize="20sp" />
 
-        <LinearLayout
-            android:orientation="horizontal"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:padding="10dp"
+                    <TextView
+                        android:id="@+id/rider_name"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="2"
+                        android:text="Rider Name"
+                        android:textSize="20sp" />
 
-            android:layout_margin="10dp">
+                </LinearLayout>
 
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:textSize="20sp"
-                android:text="Request Opened:"/>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="10dp"
+                    android:orientation="horizontal"
 
-            <TextView
-                android:id="@+id/user_pickup_time"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="2"
-                android:textSize="20sp"
-                android:text="Your Pick Up Time:"/>
+                    android:padding="10dp">
 
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Request Opened:"
+                        android:textSize="20sp" />
 
-        </LinearLayout>
-
-        <LinearLayout
-            android:orientation="horizontal"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:padding="10dp"
-            android:layout_margin="10dp">
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:textSize="20sp"
-                android:text="Request Accepted:"/>
-
-            <TextView
-                android:id="@+id/user_arrival_time"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="2"
-                android:textSize="20sp"
-                android:text="Your Arrival Time:"/>
+                    <TextView
+                        android:id="@+id/user_pickup_time"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="2"
+                        android:text="Your Pick Up Time:"
+                        android:textSize="20sp" />
 
 
-        </LinearLayout>
+                </LinearLayout>
 
-        <LinearLayout
-            android:orientation="horizontal"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:padding="10dp"
-            android:layout_margin="10dp">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="10dp"
+                    android:orientation="horizontal"
+                    android:padding="10dp">
 
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:textSize="20sp"
-                android:text="Pick Up:"/>
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Request Accepted:"
+                        android:textSize="20sp" />
 
-            <TextView
-                android:id="@+id/user_pickup_location"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="2"
-                android:textSize="20sp"
-                android:text="Your Pick Up Location:"/>
-
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:orientation="horizontal"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:padding="10dp"
-            android:layout_margin="10dp">
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:textSize="20sp"
-                android:text="Drop Off:"/>
-
-            <TextView
-                android:id="@+id/user_dropoff_location"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="2"
-                android:textSize="20sp"
-                android:text="Your Drop Off Location:"/>
+                    <TextView
+                        android:id="@+id/user_arrival_time"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="2"
+                        android:text="Your Arrival Time:"
+                        android:textSize="20sp" />
 
 
-        </LinearLayout>
+                </LinearLayout>
 
-        <LinearLayout
-            android:orientation="horizontal"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:padding="10dp"
-            android:layout_margin="10dp">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="10dp"
+                    android:orientation="horizontal"
+                    android:padding="10dp">
 
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:textSize="20sp"
-                android:text="Fare:"/>
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Pick Up:"
+                        android:textSize="20sp" />
 
-            <TextView
-                android:id="@+id/user_fare"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="2"
-                android:textSize="20sp"
-                android:text="Your Estimated Fare:"/>
-        </LinearLayout>
+                    <TextView
+                        android:id="@+id/user_pickup_location"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="2"
+                        android:text="Your Pick Up Location:"
+                        android:textSize="20sp" />
+
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="10dp"
+                    android:orientation="horizontal"
+                    android:padding="10dp">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Drop Off:"
+                        android:textSize="20sp" />
+
+                    <TextView
+                        android:id="@+id/user_dropoff_location"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="2"
+                        android:text="Your Drop Off Location:"
+                        android:textSize="20sp" />
+
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="10dp"
+                    android:orientation="horizontal"
+                    android:padding="10dp">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Fare:"
+                        android:textSize="20sp" />
+
+                    <TextView
+                        android:id="@+id/user_fare"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="2"
+                        android:text="Your Estimated Fare:"
+                        android:textSize="20sp" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </ScrollView>
+
     </LinearLayout>
+
 </androidx.constraintlayout.widget.ConstraintLayout>
