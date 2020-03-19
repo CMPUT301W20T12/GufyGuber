@@ -13,6 +13,9 @@
 
 package com.example.gufyguber.ui.CurrentRequest;
 
+
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -33,6 +36,7 @@ import com.example.gufyguber.OfflineCache;
 import com.example.gufyguber.R;
 import com.example.gufyguber.RideRequest;
 import com.example.gufyguber.Rider;
+import com.example.gufyguber.ui.Profile.UserContactInformationFragment;
 import com.google.firebase.auth.FirebaseAuth;
 
 /**
@@ -160,6 +164,7 @@ public class CurrentRequestFragment extends Fragment {
         } else {
             rideStatus.setText(getResources().getString(R.string.request_status, ' '));
         }
+
     }
 
     private void updateUIRider(RideRequest request) {
@@ -174,8 +179,10 @@ public class CurrentRequestFragment extends Fragment {
                             driverText.setText("Driver Unavailable");
                         } else {
                             driverText.setText(String.format("%s %s", value.getFirstName(), value.getLastName()));
+                            makeNameClickable(value, driverText);
                         }
                     }
+
                 });
             }
             pickupLocationText.setText(LocationInfo.latlngToString(request.getLocationInfo().getPickup()));
@@ -196,5 +203,25 @@ public class CurrentRequestFragment extends Fragment {
         } else {
             rideStatus.setText(getResources().getString(R.string.request_status, ' '));
         }
+
+    }
+
+    private void makeNameClickable(final Driver driver, TextView driverText){
+        driverText.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Bundle bundle = new Bundle();
+                bundle.putString("email", driver.getEmail());
+                bundle.putString("phone", driver.getPhoneNumber());
+                UserContactInformationFragment infoFragment = new UserContactInformationFragment();
+                infoFragment.setArguments(bundle);
+                infoFragment.show(getFragmentManager(), "user_contact_information");
+            }
+        });
+        driverText.setTextColor(Color.BLUE);
+        Paint paint = new Paint();
+        paint.setFlags(Paint.UNDERLINE_TEXT_FLAG);
+        driverText.setPaintFlags(paint.getFlags());
+
     }
 }
