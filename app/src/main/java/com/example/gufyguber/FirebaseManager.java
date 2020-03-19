@@ -289,6 +289,39 @@ public class FirebaseManager {
     }
 
     /**
+     *
+     * @param riderUID
+     * @param request
+     * @param returnFunction
+     */
+    public void riderAcceptDriverOffer(String riderUID, RideRequest request, final ReturnValueListener<Boolean> returnFunction) {
+        fetchRideRequest(riderUID, new ReturnValueListener<RideRequest>() {
+            @Override
+            public void returnValue(RideRequest value) {
+                value.setStatus(value.getDriverUID() == null ? RideRequest.Status.ACCEPTED : RideRequest.Status.CONFIRMED);
+                storeRideRequest(value);
+                OfflineCache.getReference().cacheCurrentRideRequest(value);
+                returnFunction.returnValue(true);
+                return;
+            }
+        });
+    }
+
+    public void riderDeclineDriverOffer(String riderUID, RideRequest request, final ReturnValueListener<Boolean> returnFunction) {
+        fetchRideRequest(riderUID, new ReturnValueListener<RideRequest>() {
+            @Override
+            public void returnValue(RideRequest value) {
+                value.setDriverUID(null);
+                value.setStatus(value.getDriverUID() == null ? RideRequest.Status.PENDING : RideRequest.Status.ACCEPTED);
+                storeRideRequest(value);
+                OfflineCache.getReference().cacheCurrentRideRequest(value);
+                returnFunction.returnValue(true);
+                return;
+            }
+        });
+    }
+
+    /**
      * Gets all pending ride requests (requests without an assigned driver) from our cloud Firestore
      * @param returnFunction The callback to use once we've finished retrieving a Vehicle
      */

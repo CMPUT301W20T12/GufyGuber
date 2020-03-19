@@ -29,6 +29,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -36,8 +37,8 @@ import androidx.fragment.app.DialogFragment;
 
 public class DriverAcceptFragment extends DialogFragment {
 
-    private EditText driverName;
-    private EditText driverRating;
+    private TextView driverName;
+    private TextView driverRating;
     private Button accept;
     private Button decline;
 
@@ -64,14 +65,34 @@ public class DriverAcceptFragment extends DialogFragment {
         accept.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ;
+                if (OfflineCache.getReference().retrieveCurrentRideRequest() != null) {
+                    OfflineCache.getReference().retrieveCurrentRideRequest().setStatus(RideRequest.Status.ACCEPTED);
+                    FirebaseManager.getReference().storeRideRequest(OfflineCache.getReference().retrieveCurrentRideRequest());
+                }
+                FirebaseManager.getReference().riderAcceptDriverOffer(OfflineCache.getReference().retrieveCurrentUser().getUID(), OfflineCache.getReference().retrieveCurrentRideRequest(), new FirebaseManager.ReturnValueListener<Boolean>() {
+                    @Override
+                    public void returnValue(Boolean value) {
+                        if (!value) {
+                            ;
+                        }
+                    }
+                });
+                dismiss();
             }
         });
 
         decline.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ;
+                FirebaseManager.getReference().riderDeclineDriverOffer(OfflineCache.getReference().retrieveCurrentUser().getUID(), OfflineCache.getReference().retrieveCurrentRideRequest(), new FirebaseManager.ReturnValueListener<Boolean>() {
+                    @Override
+                    public void returnValue(Boolean value) {
+                        if (!value) {
+                            ;
+                        }
+                    }
+                });
+                dismiss();
             }
         });
 
