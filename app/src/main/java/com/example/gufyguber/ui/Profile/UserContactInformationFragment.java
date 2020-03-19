@@ -42,6 +42,7 @@ import com.example.gufyguber.R;
 
 
 //https://developer.android.com/guide/components/intents-common#Phone
+//https://developer.android.com/guide/components/intents-common#ComposeEmail
 
 /**
  * Displays user contact information for another user to view.
@@ -62,14 +63,17 @@ public class UserContactInformationFragment extends DialogFragment {
         contactEmail = view.findViewById(R.id.contact_email);
         contactPhone = view.findViewById(R.id.contact_phone);
 
-        contactEmail.setText("hmp@ualberta.ca");
-        contactPhone.setText("7809654819");
+        contactEmail.setText("example@gufyguber.ca");
+        contactPhone.setText("12345678901");
 
         Paint paint = new Paint();
         paint.setFlags(Paint.UNDERLINE_TEXT_FLAG);
         contactPhone.setPaintFlags(paint.getFlags()); //https://stackoverflow.com/questions/8033316/to-draw-an-underline-below-the-textview-in-android/43757835
+        contactEmail.setPaintFlags(paint.getFlags());
 
         contactPhone.setTextColor(Color.BLUE);
+        contactEmail.setTextColor(Color.BLUE);
+
         contactPhone.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -81,11 +85,24 @@ public class UserContactInformationFragment extends DialogFragment {
             }
         });
 
+        contactEmail.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                    String [] recipient = {"example@gufyguber.ca"};
+                    Intent intent = new Intent(Intent.ACTION_SENDTO);
+                    intent.setData(Uri.parse("mailto:")); // only email apps should handle this
+                    intent.putExtra(Intent.EXTRA_EMAIL, recipient);
+                    intent.putExtra(Intent.EXTRA_SUBJECT, "GufyGuber Ride Request Inquiry");
+                    if (intent.resolveActivity(getActivity().getPackageManager()) != null) {
+                        startActivity(intent);
+                    }
+            }
+        });
+
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
         return builder
                 .setView(view)
-                .setTitle("Contact")
                 .create();
     }
 }
