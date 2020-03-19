@@ -13,6 +13,7 @@
 
 package com.example.gufyguber;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import com.example.gufyguber.ui.Map.MapFragment;
@@ -210,6 +211,11 @@ public class NavigationActivity extends AppCompatActivity implements RideRequest
                 }
                 break;
         }
+    }
+
+    public void logout(){
+        Intent intent = new Intent(this, SignInActivity.class);
+        startActivity(intent);
     }
 
 }
