@@ -211,8 +211,5 @@ public class NavigationActivity extends AppCompatActivity implements RideRequest
                 break;
         }
     }
-    @Override
-    public void onBackPressed() {
-        finishAffinity();       // https://stackoverflow.com/questions/6330200/how-to-quit-android-application-programmatically
-    }
+
 }
