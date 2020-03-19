@@ -100,14 +100,6 @@ public class RideRequestTests {
         }
     }
 
-    @Test
-    public void testDriverAccept() {
-        assertEquals(testRideRequest.driverAcceptRideRequest("Test Driver"), true);
-        assertEquals(testRideRequest.getDriverUID(), "Test Driver");
-        assertEquals(testRideRequest.driverAcceptRideRequest("Test Driver 2"), false);
-        assertEquals(testRideRequest.getDriverUID(), "Test Driver");
-    }
-
   public static RideRequest generateTestRequest() {
       LocationInfo testLocation = new LocationInfo(new LatLng(13, 13), new LatLng(13,13));
       return new RideRequest("123456789", 13.13f, testLocation);
