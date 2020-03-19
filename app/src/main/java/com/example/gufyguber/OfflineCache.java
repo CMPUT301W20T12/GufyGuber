@@ -108,4 +108,11 @@ public class OfflineCache {
             listener.onStatusChanged(newStatus);
         }
     }
+
+    /**
+     * Dismantles the cache. Should really only be used when the user signs out.
+     */
+    public void clearCache() {
+        reference = null;
+    }
 }

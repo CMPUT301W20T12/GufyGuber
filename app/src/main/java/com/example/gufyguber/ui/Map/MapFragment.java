@@ -103,6 +103,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
                     for (RideRequest request : value) {
                         if (request.getDriverUID().equalsIgnoreCase(FirebaseAuth.getInstance().getCurrentUser().getUid())) {
                             OfflineCache.getReference().cacheCurrentRideRequest(request);
+                            onRideRequestUpdated(request);
                         }
                     }
                 }
@@ -112,6 +113,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
                 @Override
                 public void returnValue(RideRequest value) {
                     OfflineCache.getReference().cacheCurrentRideRequest(value);
+                    onRideRequestUpdated(value);
                 }
             });
         }
@@ -242,7 +244,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
-        // May have cached something asynchronously from a previous session. The map is ready to update now.
+        // If our Firestore async request finished before the map loaded, this will force a UI update
         onRideRequestUpdated(OfflineCache.getReference().retrieveCurrentRideRequest());
 
         // zoom to Edmonton and move the camera UNTIL CURRENT LOCATION WORKS
