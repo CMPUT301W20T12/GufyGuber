@@ -261,7 +261,7 @@ public class SignInActivity extends AppCompatActivity {
     private void updateUI(FirebaseUser user) {
         if (user != null) {
             mStatusTextView.setText(getString(R.string.signed_in_fmt,
-                    user.getDisplayName()));
+                    user.getEmail()));
 
             findViewById(R.id.sign_in_button).setVisibility(View.GONE);
             findViewById(R.id.sign_out_and_disconnect).setVisibility(
