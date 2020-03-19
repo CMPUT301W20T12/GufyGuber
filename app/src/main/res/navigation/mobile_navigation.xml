@@ -34,7 +34,7 @@
         android:id="@+id/nav_current_requests"
         android:name="com.example.gufyguber.ui.CurrentRequest.CurrentRequestFragment"
         android:label="Current Requests"
-        tools:layout="@layout/fragment_current_requests" />
+        tools:layout="@layout/fragment_current_requests_rider" />
 
     <dialog
         android:id="@+id/nav_sign_out"
