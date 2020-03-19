@@ -307,6 +307,12 @@ public class FirebaseManager {
         });
     }
 
+    /**
+     *
+     * @param riderUID
+     * @param request
+     * @param returnFunction
+     */
     public void riderDeclineDriverOffer(String riderUID, RideRequest request, final ReturnValueListener<Boolean> returnFunction) {
         fetchRideRequest(riderUID, new ReturnValueListener<RideRequest>() {
             @Override

@@ -30,6 +30,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -73,7 +74,8 @@ public class DriverAcceptFragment extends DialogFragment {
                     @Override
                     public void returnValue(Boolean value) {
                         if (!value) {
-                            ;
+                            Toast toast = Toast.makeText(getContext(), "Ride request unavailable.", Toast.LENGTH_LONG);
+                            toast.show();
                         }
                     }
                 });
@@ -88,7 +90,8 @@ public class DriverAcceptFragment extends DialogFragment {
                     @Override
                     public void returnValue(Boolean value) {
                         if (!value) {
-                            ;
+                            Toast toast = Toast.makeText(getContext(), "Ride request unavailable.", Toast.LENGTH_LONG);
+                            toast.show();
                         }
                     }
                 });

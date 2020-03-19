@@ -161,7 +161,18 @@ public class NavigationActivity extends AppCompatActivity implements RideRequest
         ((TextView)toastView.findViewById(android.R.id.message)).setTextColor(0xFFFFFFFF);
         switch (status) {
             case PENDING:
-                Log.w(TAG, "Status changed to PENDING... which shouldn't be possible.");
+                Log.w(TAG, "Status changed to PENDING... which shouldn't be possible."); // It is now
+                if (OfflineCache.getReference().retrieveCurrentUser() instanceof Driver) {
+                    FirebaseManager.getReference().fetchDriverInfo(OfflineCache.getReference().retrieveCurrentRideRequest().getDriverUID(), new FirebaseManager.ReturnValueListener<Driver>() {
+                        @Override
+                        public void returnValue(Driver value) {
+                            if (value != null) {
+                                toast.setText(String.format("Your offer was declined."));
+                                toast.show();
+                            }
+                        }
+                    });
+                }
                 break;
             case ACCEPTED:
                 if (OfflineCache.getReference().retrieveCurrentUser() instanceof Rider) {
