@@ -24,6 +24,7 @@ package com.example.gufyguber.ui.Map;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Application;
 import android.app.Dialog;
 import android.content.Context;
 import android.os.Bundle;
@@ -31,6 +32,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -56,6 +58,8 @@ public class DriverMarkerInfoDialog extends DialogFragment {
     private TextView infoText;
     private DriverRequestMarker clickedMarker;
 
+    private Context parentContext;
+
     public DriverMarkerInfoDialog(DriverRequestMarker clickedMarker) {
         this.clickedMarker = clickedMarker;
     }
@@ -63,6 +67,7 @@ public class DriverMarkerInfoDialog extends DialogFragment {
     @Override
     public void onAttach(Context context){
         super.onAttach(context);
+        parentContext = context;
     }
 
     @NonNull
@@ -94,11 +99,16 @@ public class DriverMarkerInfoDialog extends DialogFragment {
                 }
 
                 // Try to claim the request. If it succeeds, cache the request and update Firestore
-                boolean success = clickedMarker.getRideRequest().driverAcceptRideRequest(FirebaseAuth.getInstance().getCurrentUser().getUid());
-                if (success) {
-                    OfflineCache.getReference().cacheCurrentRideRequest(clickedMarker.getRideRequest());
-                    FirebaseManager.getReference().storeRideRequest(clickedMarker.getRideRequest());
-                }
+                FirebaseManager.getReference().driverAcceptRideRequest(FirebaseAuth.getInstance().getCurrentUser().getUid(), clickedMarker.getRideRequest(),
+                        new FirebaseManager.ReturnValueListener<Boolean>() {
+                    @Override
+                    public void returnValue(Boolean value) {
+                        if (!value) {
+                            Toast toast = Toast.makeText(parentContext, "Ride request unavailable.", Toast.LENGTH_LONG);
+                            toast.show();
+                        }
+                    }
+                });
                 dismiss();
             }
         });

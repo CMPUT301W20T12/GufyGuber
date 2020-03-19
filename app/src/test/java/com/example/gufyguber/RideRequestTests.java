@@ -85,8 +85,8 @@ public class RideRequestTests {
         assertEquals(RideRequest.Status.PENDING, testRideRequest.getStatus());
         testRideRequest.setStatus(RideRequest.Status.ACCEPTED);
         assertEquals(RideRequest.Status.ACCEPTED, testRideRequest.getStatus());
-        testRideRequest.setStatus(RideRequest.Status.values()[2]);
-        assertEquals(RideRequest.Status.COMPLETED, testRideRequest.getStatus());
+        testRideRequest.setStatus(RideRequest.Status.values()[3]);
+        assertEquals(RideRequest.Status.EN_ROUTE, testRideRequest.getStatus());
     }
 
     @Test
@@ -98,14 +98,6 @@ public class RideRequestTests {
         } else {
             assertEquals(testRideRequest.fairFareEstimate(Float.MAX_VALUE), Float.MAX_VALUE * RideRequest.FAIR_FARE_PER_METRE);
         }
-    }
-
-    @Test
-    public void testDriverAccept() {
-        assertEquals(testRideRequest.driverAcceptRideRequest("Test Driver"), true);
-        assertEquals(testRideRequest.getDriverUID(), "Test Driver");
-        assertEquals(testRideRequest.driverAcceptRideRequest("Test Driver 2"), false);
-        assertEquals(testRideRequest.getDriverUID(), "Test Driver");
     }
 
   public static RideRequest generateTestRequest() {

@@ -17,6 +17,8 @@ import android.os.Bundle;
 
 import com.example.gufyguber.ui.Map.MapFragment;
 
+import android.util.Log;
+import android.view.Gravity;
 import android.view.MenuItem;
 
 import androidx.core.view.GravityCompat;
@@ -34,7 +36,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import android.view.Menu;
+import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import static com.example.gufyguber.R.id.nav_host_fragment;
 
@@ -43,7 +47,9 @@ import static com.example.gufyguber.R.id.nav_host_fragment;
  * This class creates an instance of the NavigationActivity and populates the toolbar with tabs
  */
 
-public class NavigationActivity extends AppCompatActivity {
+public class NavigationActivity extends AppCompatActivity implements RideRequest.StatusChangedListener {
+
+    private static final String TAG = "NavigationActivity";
 
     private AppBarConfiguration mAppBarConfiguration;
 
@@ -69,6 +75,13 @@ public class NavigationActivity extends AppCompatActivity {
         User user = OfflineCache.getReference().retrieveCurrentUser();
         setMenuDisplays(user.getFirstName(), user.getLastName(), user.getEmail());
 
+        OfflineCache.getReference().addRideRequestStatusChangedListener(this);
+    }
+
+    @Override
+    public void onDestroy() {
+        OfflineCache.getReference().removeRideRequestStatusChangedListener(this);
+        super.onDestroy();
     }
 
 
@@ -135,8 +148,71 @@ public class NavigationActivity extends AppCompatActivity {
         return;
     }
 
+    public void onStatusChanged(RideRequest.Status status) {
+        final Toast toast = Toast.makeText(this, "Error In Navigation Activity Status Callback", Toast.LENGTH_LONG);
+        toast.setGravity(Gravity.CENTER, 0, 0);
+        View toastView = toast.getView();
+        toastView.setBackgroundColor(0x99000000);
+        TextView toastText = (TextView)toastView.findViewById(android.R.id.message);
+        toastText.setTextColor(0xFFFFFFFF);
+        toastText.setTextSize(20);
+        toastText.setGravity(Gravity.CENTER);
+        ((TextView)toastView.findViewById(android.R.id.message)).setTextColor(0xFFFFFFFF);
+        switch (status) {
+            case PENDING:
+                Log.w(TAG, "Status changed to PENDING... which shouldn't be possible.");
+                break;
+            case ACCEPTED:
+                if (OfflineCache.getReference().retrieveCurrentUser() instanceof Rider) {
+                    FirebaseManager.getReference().fetchDriverInfo(OfflineCache.getReference().retrieveCurrentRideRequest().getDriverUID(), new FirebaseManager.ReturnValueListener<Driver>() {
+                        @Override
+                        public void returnValue(Driver value) {
+                            if (value != null) {
+                                toast.setText(String.format("Request accepted by %s %s.", value.getFirstName(), value.getLastName()));
+                                toast.show();
+                            }
+                        }
+                    });
+                }
+                break;
+            case CONFIRMED:
+                if (OfflineCache.getReference().retrieveCurrentUser() instanceof Driver) {
+                    FirebaseManager.getReference().fetchRiderInfo(OfflineCache.getReference().retrieveCurrentRideRequest().getRiderUID(), new FirebaseManager.ReturnValueListener<Rider>() {
+                        @Override
+                        public void returnValue(Rider value) {
+                            if (value != null) {
+                                toast.setText(String.format("Offer accepted by %s %s.", value.getFirstName(), value.getLastName()));
+                                toast.show();
+                            }
+                        }
+                    });
+                }
+                break;
+            case EN_ROUTE:
+                break;
+            case ARRIVED:
+                if (OfflineCache.getReference().retrieveCurrentUser() instanceof Rider) {
+                    toast.setText("You have arrived. Please offer payment.");
+                    toast.show();
+                } else {
+                    toast.setText("Ride complete. Please collect payment.");
+                    toast.show();
+                }
+                break;
+            case COMPLETED:
+                toast.setText("Payment complete.");
+                toast.show();
+                break;
+            case CANCELLED:
+                if (OfflineCache.getReference().retrieveCurrentUser() instanceof Driver) {
+                    toast.setText("Your ride offer was rejected.");
+                    toast.show();
+                }
+                break;
+        }
+    }
     @Override
-    public void onBackPressed(){
+    public void onBackPressed() {
         finishAffinity();       // https://stackoverflow.com/questions/6330200/how-to-quit-android-application-programmatically
     }
 }
