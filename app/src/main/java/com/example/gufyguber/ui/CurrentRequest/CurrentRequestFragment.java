@@ -134,7 +134,7 @@ public class CurrentRequestFragment extends Fragment {
                             driverText.setText("Driver Unavailable");
                         } else {
                             driverText.setText(String.format("%s %s", value.getFirstName(), value.getLastName()));
-                            makeDriverNameClickable(value, driverText);
+                            makeNameClickable(value, driverText);
                         }
                     }
 
@@ -161,7 +161,7 @@ public class CurrentRequestFragment extends Fragment {
 
     }
 
-    private void makeDriverNameClickable(final Driver driver, TextView driverText){
+    private void makeNameClickable(final Driver driver, TextView driverText){
         driverText.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
