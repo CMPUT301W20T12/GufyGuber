@@ -213,6 +213,9 @@ public class NavigationActivity extends AppCompatActivity implements RideRequest
         }
     }
 
+    /**
+     * This method starts a new sign in activity so that the user can sign in again
+     */
     public void logout(){
         Intent intent = new Intent(this, SignInActivity.class);
         startActivity(intent);
