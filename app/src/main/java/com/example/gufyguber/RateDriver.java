@@ -59,7 +59,14 @@ public class RateDriver extends AppCompatActivity {
         db = FirebaseFirestore.getInstance();
 
         //get id of driver
-        userID = mAuth.getCurrentUser().getUid();
+        RideRequest currentRequest = OfflineCache.getReference().retrieveCurrentRideRequest();
+        if (currentRequest == null) {
+            //sets userID to the Uid of the current user
+            userID = mAuth.getCurrentUser().getUid();
+        }
+        else {
+            userID = currentRequest.getDriverUID();
+        }
 
 
         thumbsUp = findViewById(R.id.upp);
@@ -105,7 +112,7 @@ public class RateDriver extends AppCompatActivity {
                         }
                     }
                 });
-                Intent intent = new Intent(RateDriver.this, SignInActivity.class);
+                Intent intent = new Intent(RateDriver.this, NavigationActivity.class);
                 startActivity(intent);
             }
         });

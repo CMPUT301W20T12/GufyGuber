@@ -23,8 +23,11 @@
 package com.example.gufyguber;
 
 import android.app.ActionBar;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -49,6 +52,7 @@ public class GenerateQR extends AppCompatActivity {
     String codeMessage;
     ImageView qrCode;
     TextView qrMessage;
+    Button next;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,6 +89,16 @@ public class GenerateQR extends AppCompatActivity {
         } catch (WriterException e) {
             e.printStackTrace();
         }
+
+        //button to begin rating driver
+        next = findViewById(R.id.next);
+        next.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent rateDriver = new Intent(getApplicationContext(), RateDriver.class);
+                startActivity(rateDriver);
+            }
+        });
     }
 
 }

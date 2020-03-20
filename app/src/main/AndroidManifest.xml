@@ -61,9 +61,7 @@
         </activity>
 
 	    <activity android:name=".GenerateQR"
-            android:label="Generate QR"
-            android:theme="@style/AppTheme"
-            android:parentActivityName=".NavigationActivity">
+            android:label="Generate QR">
         </activity>
         <activity android:name=".startScanQR"
             android:label="Scan QR"
@@ -74,7 +72,9 @@
             android:theme="@style/AppTheme"
             android:parentActivityName=".startScanQR"/>
         <activity android:name=".RateDriver"
-            android:label="Rate Driver"/>
+            android:label="Rate Driver"
+            android:theme="@style/AppTheme"
+            android:parentActivityName=".GenerateQR"/>
     </application>
 
 </manifest>
