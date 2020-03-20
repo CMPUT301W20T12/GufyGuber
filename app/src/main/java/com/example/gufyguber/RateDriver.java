@@ -108,7 +108,7 @@ public class RateDriver extends AppCompatActivity {
                         }
                     }
                 });
-                Intent intent = new Intent(RateDriver.this, NavigationActivity.class);
+                Intent intent = new Intent(RateDriver.this, SignInActivity.class);
                 startActivity(intent);
             }
         });
