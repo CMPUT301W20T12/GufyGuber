@@ -62,6 +62,14 @@ public class FirebaseManager {
         public void returnValue(T value);
     }
 
+    public interface RideRequestListener{
+        public void onRideRequestUpdated(RideRequest updatedRequest);
+    }
+
+    public interface DriverRideRequestCollectionListener{
+        public void onRideRequestsUpdated(ArrayList<RideRequest> rideRequests);
+    }
+
     // Singleton Pattern for this manager
     private static FirebaseManager reference;
     public static FirebaseManager getReference() {
@@ -207,10 +215,10 @@ public class FirebaseManager {
 
     /**
      * @param riderUID The key used to identify the ride request to listen to
-     * @param onChangedFunction Callback used when the ride request is updated on Firestore
+     * @param onChangedListener Listener to notify when the ride request is updated on Firestore
      * @return A ListenerRegistration object that should be used to remove the listener when no longer needed
      */
-    public ListenerRegistration listenToRideRequest(final String riderUID, final ReturnValueListener<RideRequest> onChangedFunction) {
+    public ListenerRegistration listenToRideRequest(final String riderUID, final RideRequestListener onChangedListener) {
         DocumentReference requestDoc = FirebaseFirestore.getInstance().collection(RIDE_REQUEST_COLLECTION).document(riderUID);
         return requestDoc.addSnapshotListener(new EventListener<DocumentSnapshot>() {
             @Override
@@ -222,9 +230,9 @@ public class FirebaseManager {
 
                 // Return our value. Null if deleted.
                 if (documentSnapshot != null && documentSnapshot.exists()) {
-                    onChangedFunction.returnValue(buildRideRequest(documentSnapshot));
+                    onChangedListener.onRideRequestUpdated(buildRideRequest(documentSnapshot));
                 } else {
-                    onChangedFunction.returnValue(null);
+                    onChangedListener.onRideRequestUpdated(null);
                 }
             }
         });
@@ -237,6 +245,47 @@ public class FirebaseManager {
     public void deleteRideRequest(final String riderUID) {
         DocumentReference requestDoc = FirebaseFirestore.getInstance().collection(RIDE_REQUEST_COLLECTION).document(riderUID);
         requestDoc.delete();
+    }
+
+    /**
+     * Allows a driver to accept a ride request if it hasn't already been accepted
+     * @param driverUID The UID of the driver user that is attempting to accept this ride request
+     * @return True if the request acceptance succeeded, false otherwise
+     */
+    public void driverAcceptRideRequest(final String driverUID, RideRequest request, final ReturnValueListener<Boolean> returnFunction) {
+        fetchRideRequest(request.getRiderUID(), new ReturnValueListener<RideRequest>() {
+            @Override
+            public void returnValue(RideRequest value) {
+                // Request was deleted before it could be accepted
+                if (value == null) {
+                    returnFunction.returnValue(false);
+                    return;
+                }
+
+                // Request was accepted by another driver first
+                if (value.getDriverUID() != null || value.getStatus() != RideRequest.Status.PENDING) {
+                    Log.w(TAG, "Ride Request failed to be accepted.");
+                    returnFunction.returnValue(false);
+                    return;
+                }
+
+                // Can set the driverUID to null to cancel an accepted request, otherwise mark request accepted
+                value.setDriverUID(driverUID);
+                value.setStatus(value.getDriverUID() == null ? RideRequest.Status.PENDING : RideRequest.Status.ACCEPTED);
+                if (value.getStatus() == RideRequest.Status.ACCEPTED) {
+                    value.getTimeInfo().setRequestAcceptedTime();
+                } else {
+                    value.getTimeInfo().setRequestAcceptedTime(null);
+                }
+
+                // Push the modifed request to Firebase since we've successfully claimed it
+                storeRideRequest(value);
+                OfflineCache.getReference().cacheCurrentRideRequest(value);
+
+                returnFunction.returnValue(true);
+                return;
+            }
+        });
     }
 
     /**
@@ -263,6 +312,27 @@ public class FirebaseManager {
                     Log.e(TAG, "Fetching pending ride requests failed. Issue communicating with Firestore.");
                     returnFunction.returnValue(null);
                 }
+            }
+        });
+    }
+
+    public ListenerRegistration listenToAllRideRequests(final DriverRideRequestCollectionListener onChangedListener) {
+        CollectionReference collectionReference = FirebaseFirestore.getInstance().collection(RIDE_REQUEST_COLLECTION);
+        return collectionReference.addSnapshotListener(new EventListener<QuerySnapshot>() {
+            @Override
+            public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
+                if (e != null) {
+                    Log.w(TAG, "Listen to ride request collection failed.", e);
+                    return;
+                }
+
+                // Return the results of a new "Pending" query
+                fetchRideRequestsWithStatus(RideRequest.Status.PENDING, new ReturnValueListener<ArrayList<RideRequest>>() {
+                    @Override
+                    public void returnValue(ArrayList<RideRequest> value) {
+                        onChangedListener.onRideRequestsUpdated(value);
+                    }
+                });
             }
         });
     }

@@ -91,8 +91,7 @@ public class SignOutDialog extends DialogFragment {
                                     @Override
                                     public void onComplete(@NonNull Task<Void> task) {
                                         // Signing out so empty the cache
-                                        OfflineCache.getReference().cacheCurrentRideRequest(null);
-                                        OfflineCache.getReference().cacheCurrentUser(null);
+                                        OfflineCache.getReference().clearCache();
                                         tempActivity.finish();
                                     }
                                 });
