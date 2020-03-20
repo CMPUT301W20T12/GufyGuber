@@ -80,7 +80,6 @@ public class RateDriver extends AppCompatActivity {
                             db.collection("users").document(userID).update("positive", FieldValue.increment(1));
                         }
                         else {
-                            Toast.makeText(RateDriver.this, "Not existed", Toast.LENGTH_SHORT).show();
                             Map<String, Object> driver = new HashMap<>();
                             driver.put("positive", 1);
                             db.collection("users").document(userID).set(driver, SetOptions.merge());
@@ -96,8 +95,6 @@ public class RateDriver extends AppCompatActivity {
         thumbsDown.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(RateDriver.this, "down works", Toast.LENGTH_SHORT).show();
-
                 db.collection("users").document(userID).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
                     @Override
                     public void onSuccess(DocumentSnapshot documentSnapshot) {
@@ -105,7 +102,6 @@ public class RateDriver extends AppCompatActivity {
                             db.collection("users").document(userID).update("negative", FieldValue.increment(1));
                         }
                         else {
-                            Toast.makeText(RateDriver.this, "Not existed", Toast.LENGTH_SHORT).show();
                             Map<String, Object> driver = new HashMap<>();
                             driver.put("negative", 1);
                             db.collection("users").document(userID).set(driver, SetOptions.merge());
