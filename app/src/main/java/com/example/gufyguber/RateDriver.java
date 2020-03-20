@@ -22,6 +22,7 @@
 
 package com.example.gufyguber;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageButton;
@@ -31,8 +32,6 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.CollectionReference;
-import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -45,9 +44,6 @@ public class RateDriver extends AppCompatActivity {
     ImageButton thumbsUp;
     ImageButton thumbsDown;
     String userID;
-    Double existingRate;
-    Double numberRates;
-    Double overall;
 
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
@@ -84,6 +80,8 @@ public class RateDriver extends AppCompatActivity {
                         }
                     }
                 });
+                Intent intent = new Intent(RateDriver.this, SignInActivity.class);
+                startActivity(intent);
             }
         });
 
@@ -107,6 +105,8 @@ public class RateDriver extends AppCompatActivity {
                         }
                     }
                 });
+                Intent intent = new Intent(RateDriver.this, SignInActivity.class);
+                startActivity(intent);
             }
         });
 
