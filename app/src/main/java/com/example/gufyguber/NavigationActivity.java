@@ -163,12 +163,19 @@ public class NavigationActivity extends AppCompatActivity implements RideRequest
             case PENDING:
                 Log.w(TAG, "Status changed to PENDING... which shouldn't be possible."); // It is now
                 if (OfflineCache.getReference().retrieveCurrentUser() instanceof Driver) {
-                    FirebaseManager.getReference().fetchDriverInfo(OfflineCache.getReference().retrieveCurrentRideRequest().getDriverUID(), new FirebaseManager.ReturnValueListener<Driver>() {
+                    FirebaseManager.getReference().fetchDriverInfo(OfflineCache.getReference().retrieveCurrentUser().getUID(), new FirebaseManager.ReturnValueListener<Driver>() {
                         @Override
                         public void returnValue(Driver value) {
                             if (value != null) {
                                 toast.setText(String.format("Your offer was declined."));
                                 toast.show();
+                                OfflineCache.getReference().clearCurrentRideRequest();
+                                //Maybe change this
+                                //This restarts the navigation activity to clear the map
+                                Intent mIntent = getIntent();
+                                finish();
+                                startActivity(mIntent);
+
                             }
                         }
                     });

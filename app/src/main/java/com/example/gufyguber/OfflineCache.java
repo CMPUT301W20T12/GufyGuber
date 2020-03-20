@@ -56,6 +56,11 @@ public class OfflineCache {
             }
         }
     }
+
+    public void clearCurrentRideRequest(){
+        currentRideRequest = null;
+        return;
+    }
     public RideRequest retrieveCurrentRideRequest() {
         return currentRideRequest;
     }
