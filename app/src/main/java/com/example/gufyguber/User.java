@@ -22,6 +22,8 @@
 
 package com.example.gufyguber;
 
+import java.net.URI;
+
 /**
  * This is an abstract class that stores the app user's profile details. It is the superclass to
  * user types Rider and Driver.
@@ -36,6 +38,7 @@ public abstract class User {
     private String firstName;
     private String lastName;
     private String phoneNumber;
+    private URI profilePicture;
     //TODO: Reference to a wallet
 
     /**
