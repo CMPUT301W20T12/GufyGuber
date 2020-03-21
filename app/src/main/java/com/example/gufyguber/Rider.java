@@ -22,6 +22,8 @@
 
 package com.example.gufyguber;
 
+import java.net.URI;
+
 /**
  * This is an instance of a User class for a 'Rider' on the app
  * @author dalton
