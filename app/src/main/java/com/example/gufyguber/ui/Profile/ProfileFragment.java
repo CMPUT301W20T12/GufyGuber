@@ -14,6 +14,7 @@
 package com.example.gufyguber.ui.Profile;
 
 import android.content.Context;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -22,6 +23,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -37,10 +39,16 @@ import com.example.gufyguber.NavigationActivity;
 import com.example.gufyguber.OfflineCache;
 import com.example.gufyguber.R;
 import com.example.gufyguber.Rider;
+import com.example.gufyguber.SignInActivity;
 import com.example.gufyguber.Vehicle;
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
+import com.squareup.picasso.Picasso;
+
+import java.net.URI;
 
 public class ProfileFragment extends Fragment {
 
@@ -60,6 +68,7 @@ public class ProfileFragment extends Fragment {
     private TextView seatText;
     private Button editProfile;
     private Button saveProfile;
+    private ImageView profilePicture;
     // simple boolean to check if the user is a driver or rider so we know
     private boolean driver;
 
@@ -99,12 +108,24 @@ public class ProfileFragment extends Fragment {
         seatText = view.findViewById(R.id.seats);
         editProfile = view.findViewById(R.id.edit_profile_button);
         saveProfile = view.findViewById(R.id.save_profile_button);
+        profilePicture = view.findViewById(R.id.user_image);
+
 
         // Use firebase manager to get the user profile info to auto pop the fields
+        // use googleSignIn feature to retrieve profile picture
+
+
         FirebaseManager.getReference().fetchRiderInfo(FirebaseAuth.getInstance().getCurrentUser().getUid(),
                 new FirebaseManager.ReturnValueListener<Rider>() {
             @Override
             public void returnValue(Rider value) {
+                // Retrieve google sign in profile photo and use Picasso to set the image.
+
+                GoogleSignInAccount acct = GoogleSignIn.getLastSignedInAccount(getActivity());
+                if (acct != null) {
+                    String userPhoto = acct.getPhotoUrl().toString();
+                    Picasso.with(getContext()).load(userPhoto).into(profilePicture);
+                }
                 if (value != null) {
                     firstNameText.setText(value.getFirstName());
                     lastNameText.setText(value.getLastName());

@@ -92,6 +92,7 @@ public class FirebaseManager {
     public static final String LAST_NAME_KEY = "last_name";
     public static final String PHONE_NUMBER_KEY = "phone";
     public static final String USER_TYPE_KEY = "userType";
+    public static final String USER_PROFILEPIC_KEY = "profile_pic";
 
     // Vehicle Keys
     public static final String VEHICLE_COLLECTION = "vehicles";
