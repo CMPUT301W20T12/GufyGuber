@@ -14,9 +14,11 @@
 package com.example.gufyguber.ui.CurrentRequest;
 
 
+import android.app.Activity;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -38,12 +40,13 @@ import com.example.gufyguber.RideRequest;
 import com.example.gufyguber.Rider;
 import com.example.gufyguber.ui.Profile.UserContactInformationFragment;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.ListenerRegistration;
 
 /**
  * Displays ride request information for a rider's current open request
  * @author Nahome
  */
-public class CurrentRequestFragment extends Fragment {
+public class CurrentRequestFragment extends Fragment implements FirebaseManager.RideRequestListener {
 
     private CurrentRequestViewModel currentRequestViewModel;
     private Button cancelBtn;
@@ -57,6 +60,8 @@ public class CurrentRequestFragment extends Fragment {
     private TextView dropoffLocationText;
     private TextView suggestedFareText;
     private TextView rideStatus;
+    private ListenerRegistration rideRequestListener;
+
     private boolean isDriver;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -65,6 +70,7 @@ public class CurrentRequestFragment extends Fragment {
                 ViewModelProviders.of(this).get(CurrentRequestViewModel.class);
 
         isDriver = (OfflineCache.getReference().retrieveCurrentUser() instanceof Driver);
+        rideRequestListener = FirebaseManager.getReference().listenToRideRequest(OfflineCache.getReference().retrieveCurrentRideRequest().getRiderUID(), this);
 
         if (OfflineCache.getReference().retrieveCurrentRideRequest() != null && !isDriver) {
             View root = inflater.inflate(R.layout.fragment_current_requests_rider, container, false);
@@ -228,5 +234,15 @@ public class CurrentRequestFragment extends Fragment {
         paint.setFlags(Paint.UNDERLINE_TEXT_FLAG);
         driverText.setPaintFlags(paint.getFlags());
 
+    }
+
+    @Override
+    public void onRideRequestUpdated(RideRequest updatedRequest) {
+        Log.d("UPDATEPLS", "update UI for driver");
+        if (isDriver){
+            updateUIDriver(updatedRequest);
+        } else {
+            updateUIRider(updatedRequest);
+        }
     }
 }
