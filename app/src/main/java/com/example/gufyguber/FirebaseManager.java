@@ -103,6 +103,7 @@ public class FirebaseManager {
 
     // Ride Request Keys
     public static final String RIDE_REQUEST_COLLECTION = "ride_requests";
+    public static final String DRIVER_ACCEPTED_REQUESTS = "driver_accepted_requests";
     public static final String STATUS_KEY = "status";
     public static final String DRIVER_KEY = "driver_uid";
     public static final String FARE_KEY = "fare";
@@ -253,7 +254,7 @@ public class FirebaseManager {
      * @param driverUID The UID of the driver user that is attempting to accept this ride request
      * @return True if the request acceptance succeeded, false otherwise
      */
-    public void driverAcceptRideRequest(final String driverUID, RideRequest request, final ReturnValueListener<Boolean> returnFunction) {
+    public void driverAcceptRideRequest(final String driverUID, final RideRequest request, final ReturnValueListener<Boolean> returnFunction) {
         fetchRideRequest(request.getRiderUID(), new ReturnValueListener<RideRequest>() {
             @Override
             public void returnValue(RideRequest value) {
@@ -282,6 +283,29 @@ public class FirebaseManager {
                 // Push the modifed request to Firebase since we've successfully claimed it
                 storeRideRequest(value);
                 OfflineCache.getReference().cacheCurrentRideRequest(value);
+
+
+                CollectionReference requestDoc = FirebaseFirestore.getInstance().collection(DRIVER_ACCEPTED_REQUESTS);
+
+                Log.d(TAG, String.format("Storing Ride Request for driver [%s]", driverUID));
+
+                HashMap<String, Object> data = new HashMap<>();
+
+                data.put("rider_uid", request.getRiderUID());
+                requestDoc.document(driverUID)
+                        .set(data)
+                        .addOnSuccessListener(new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void aVoid) {
+                                Log.d(TAG, "Ride request addition successful");
+                            }
+                        })
+                        .addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                Log.d(TAG, "Ride request addition failed" + e.toString());
+                            }
+                        });
 
                 returnFunction.returnValue(true);
                 return;
