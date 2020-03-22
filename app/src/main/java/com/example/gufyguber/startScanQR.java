@@ -38,7 +38,6 @@ import com.google.android.gms.vision.barcode.Barcode;
  */
 
 public class startScanQR extends AppCompatActivity {
-    Button scan;
     TextView result;
 
     public static final int REQUEST_CODE = 100;
@@ -51,20 +50,14 @@ public class startScanQR extends AppCompatActivity {
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        scan = findViewById(R.id.scan);
         result = findViewById(R.id.result);
 
         if(ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String [] {Manifest.permission.CAMERA}, PERMISSION_REQUEST);
         }
 
-        scan.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(startScanQR.this, Scan.class);
-                startActivityForResult(intent, REQUEST_CODE);
-            }
-        });
+        Intent intent = new Intent(startScanQR.this, Scan.class);
+        startActivityForResult(intent, REQUEST_CODE);
     }
 
     /**

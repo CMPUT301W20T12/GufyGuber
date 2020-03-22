@@ -40,6 +40,7 @@ import com.example.gufyguber.OfflineCache;
 import com.example.gufyguber.R;
 import com.example.gufyguber.RideRequest;
 import com.example.gufyguber.Rider;
+import com.example.gufyguber.Scan;
 import com.example.gufyguber.startScanQR;
 import com.example.gufyguber.ui.Profile.UserContactInformationFragment;
 import com.google.firebase.auth.FirebaseAuth;

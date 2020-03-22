@@ -36,6 +36,7 @@ import androidx.fragment.app.DialogFragment;
  *      pay the driver.
  *
  * @author kenzbauer
+ * @deprecated
  */
 
 public class GenerateQrFragment extends DialogFragment {

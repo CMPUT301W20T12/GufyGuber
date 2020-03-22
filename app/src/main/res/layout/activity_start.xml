@@ -25,15 +25,6 @@
     android:paddingRight="16dp"
     android:paddingTop="16dp">
 
-    <Button
-        android:id="@+id/scan"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="61dp"
-        android:text="OPEN CAMERA TO SCAN" />
-
     <TextView
         android:id="@+id/result"
         android:layout_width="match_parent"
