@@ -283,29 +283,29 @@ public class FirebaseManager {
                 // Push the modifed request to Firebase since we've successfully claimed it
                 storeRideRequest(value);
                 OfflineCache.getReference().cacheCurrentRideRequest(value);
-
-
-                CollectionReference requestDoc = FirebaseFirestore.getInstance().collection(DRIVER_ACCEPTED_REQUESTS);
-
-                Log.d(TAG, String.format("Storing Ride Request for driver [%s]", driverUID));
-
-                HashMap<String, Object> data = new HashMap<>();
-
-                data.put("rider_uid", request.getRiderUID());
-                requestDoc.document(driverUID)
-                        .set(data)
-                        .addOnSuccessListener(new OnSuccessListener<Void>() {
-                            @Override
-                            public void onSuccess(Void aVoid) {
-                                Log.d(TAG, "Ride request addition successful");
-                            }
-                        })
-                        .addOnFailureListener(new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull Exception e) {
-                                Log.d(TAG, "Ride request addition failed" + e.toString());
-                            }
-                        });
+//
+//
+//                CollectionReference requestDoc = FirebaseFirestore.getInstance().collection(DRIVER_ACCEPTED_REQUESTS);
+//
+//                Log.d(TAG, String.format("Storing Ride Request for driver [%s]", driverUID));
+//
+//                HashMap<String, Object> data = new HashMap<>();
+//
+//                data.put("rider_uid", request.getRiderUID());
+//                requestDoc.document(driverUID)
+//                        .set(data)
+//                        .addOnSuccessListener(new OnSuccessListener<Void>() {
+//                            @Override
+//                            public void onSuccess(Void aVoid) {
+//                                Log.d(TAG, "Ride request addition successful");
+//                            }
+//                        })
+//                        .addOnFailureListener(new OnFailureListener() {
+//                            @Override
+//                            public void onFailure(@NonNull Exception e) {
+//                                Log.d(TAG, "Ride request addition failed" + e.toString());
+//                            }
+//                        });
 
                 returnFunction.returnValue(true);
                 return;
