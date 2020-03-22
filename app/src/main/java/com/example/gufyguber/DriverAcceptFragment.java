@@ -98,6 +98,8 @@ public class DriverAcceptFragment extends DialogFragment {
                 dismiss();
             }
         });
+        
+        setCancelable(false);
 
         return builder
                 .setView(view)
