@@ -16,6 +16,7 @@ package com.example.gufyguber;
 import android.content.Intent;
 import android.os.Bundle;
 
+import com.example.gufyguber.ui.CurrentRequest.CurrentRequestFragment;
 import com.example.gufyguber.ui.Map.MapFragment;
 
 import android.util.Log;

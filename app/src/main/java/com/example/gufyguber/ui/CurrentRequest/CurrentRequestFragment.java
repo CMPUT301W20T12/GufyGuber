@@ -47,6 +47,7 @@ public class CurrentRequestFragment extends Fragment {
 
     private CurrentRequestViewModel currentRequestViewModel;
     private Button cancelBtn;
+    private Button confirmPickup;
 
     private TextView driverText;
     private TextView riderText;
@@ -110,6 +111,7 @@ public class CurrentRequestFragment extends Fragment {
         dropoffLocationText = view.findViewById(R.id.user_dropoff_location);
         suggestedFareText = view.findViewById(R.id.user_fare);
         rideStatus = view.findViewById(R.id.ride_status);
+        confirmPickup =  view.findViewById(R.id.confirm_pickup);
 
         if (OfflineCache.getReference().retrieveCurrentRideRequest() != null && !isDriver) {
             cancelBtn.setOnClickListener(new View.OnClickListener() {
@@ -160,6 +162,9 @@ public class CurrentRequestFragment extends Fragment {
                 arrivalTimeText.setText("Time Unavailable");
             }
             rideStatus.setText(getResources().getString(R.string.request_status, request.getStatus().toString()));
+            if (request.getStatus().toString().equals("Confirmed")) {
+                confirmPickup.setVisibility(View.VISIBLE);
+            }
             suggestedFareText.setText(String.format("$%.2f", request.getOfferedFare()));
         } else {
             rideStatus.setText(getResources().getString(R.string.request_status, ' '));
