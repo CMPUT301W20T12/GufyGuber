@@ -15,6 +15,7 @@ package com.example.gufyguber.ui.CurrentRequest;
 
 
 import android.app.Activity;
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.Bundle;
@@ -33,11 +34,13 @@ import androidx.lifecycle.ViewModelProviders;
 
 import com.example.gufyguber.Driver;
 import com.example.gufyguber.FirebaseManager;
+import com.example.gufyguber.GenerateQR;
 import com.example.gufyguber.LocationInfo;
 import com.example.gufyguber.OfflineCache;
 import com.example.gufyguber.R;
 import com.example.gufyguber.RideRequest;
 import com.example.gufyguber.Rider;
+import com.example.gufyguber.startScanQR;
 import com.example.gufyguber.ui.Profile.UserContactInformationFragment;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.ListenerRegistration;
@@ -192,7 +195,8 @@ public class CurrentRequestFragment extends Fragment implements FirebaseManager.
                 takePayment.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        ;
+                        Intent qrIntent = new Intent(getActivity(), startScanQR.class);
+                        startActivity(qrIntent);
                     }
                 });
             }
@@ -251,7 +255,8 @@ public class CurrentRequestFragment extends Fragment implements FirebaseManager.
                 makePayment.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        ;
+                        Intent qrIntent = new Intent(getActivity(), GenerateQR.class);
+                        startActivity(qrIntent);
                     }
                 });
             }
