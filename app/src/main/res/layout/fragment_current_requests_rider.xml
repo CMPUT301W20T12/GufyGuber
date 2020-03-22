@@ -224,6 +224,15 @@
                 android:visibility="gone"
                 android:theme="@style/ThemeOverlay.LightButton"/>
 
+            <Button
+                android:id="@+id/make_payment"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="Make payment"
+                android:visibility="gone"
+                android:theme="@style/ThemeOverlay.LightButton"/>
+
         </LinearLayout>
 
 

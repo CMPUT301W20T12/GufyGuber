@@ -52,6 +52,8 @@ public class CurrentRequestFragment extends Fragment implements FirebaseManager.
     private Button cancelBtn;
     private Button confirmPickup;
     private Button confirmArrival;
+    private Button makePayment;
+    private Button takePayment;
 
     private TextView driverText;
     private TextView riderText;
@@ -121,6 +123,8 @@ public class CurrentRequestFragment extends Fragment implements FirebaseManager.
         rideStatus = view.findViewById(R.id.ride_status);
         confirmPickup =  view.findViewById(R.id.confirm_pickup);
         confirmArrival = view.findViewById(R.id.confirm_arrival);
+        makePayment = view.findViewById(R.id.make_payment);
+        takePayment = view.findViewById(R.id.take_payment);
 
         if (OfflineCache.getReference().retrieveCurrentRideRequest() != null && !isDriver) {
             cancelBtn.setOnClickListener(new View.OnClickListener() {
@@ -183,6 +187,15 @@ public class CurrentRequestFragment extends Fragment implements FirebaseManager.
             if (request.getStatus().toString().equals("En Route")) {
                 confirmPickup.setVisibility(View.GONE);
             }
+            if (request.getStatus().toString().equals("Arrived")) {
+                takePayment.setVisibility(View.VISIBLE);
+                takePayment.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        ;
+                    }
+                });
+            }
             suggestedFareText.setText(String.format("$%.2f", request.getOfferedFare()));
         } else {
             rideStatus.setText(getResources().getString(R.string.request_status, ' '));
@@ -222,13 +235,23 @@ public class CurrentRequestFragment extends Fragment implements FirebaseManager.
             }
             rideStatus.setText(getResources().getString(R.string.request_status, request.getStatus().toString()));
             suggestedFareText.setText(String.format("$%.2f", request.getOfferedFare()));
-
             if (request.getStatus().toString().equals("En Route")) {
                 confirmArrival.setVisibility(View.VISIBLE);
                 confirmArrival.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         FirebaseManager.getReference().confirmArrival(request);
+                    }
+                });
+            }
+            if (request.getStatus().toString().equals("Arrived")) {
+                cancelBtn.setVisibility(View.GONE);
+                confirmArrival.setVisibility(View.GONE);
+                makePayment.setVisibility(View.VISIBLE);
+                makePayment.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        ;
                     }
                 });
             }

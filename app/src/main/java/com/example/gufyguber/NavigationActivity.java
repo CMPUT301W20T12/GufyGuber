@@ -214,6 +214,10 @@ public class NavigationActivity extends AppCompatActivity implements RideRequest
                 }
                 break;
             case EN_ROUTE:
+                if (OfflineCache.getReference().retrieveCurrentUser() instanceof Rider) {
+                    toast.setText("Your driver is waiting for you!");
+                    toast.show();
+                }
                 break;
             case ARRIVED:
                 if (OfflineCache.getReference().retrieveCurrentUser() instanceof Rider) {
