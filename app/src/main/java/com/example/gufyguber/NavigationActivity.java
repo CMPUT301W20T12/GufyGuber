@@ -231,6 +231,10 @@ public class NavigationActivity extends AppCompatActivity implements RideRequest
             case COMPLETED:
                 toast.setText("Payment complete.");
                 toast.show();
+                OfflineCache.getReference().clearCurrentRideRequest();
+                if (OfflineCache.getReference().retrieveCurrentUser() instanceof Rider) {
+                    FirebaseManager.getReference().deleteRideRequest(OfflineCache.getReference().retrieveCurrentUser().getUID());
+                }
                 break;
             case CANCELLED:
                 if (OfflineCache.getReference().retrieveCurrentUser() instanceof Driver) {

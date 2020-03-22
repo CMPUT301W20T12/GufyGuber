@@ -120,6 +120,7 @@ public class Scan extends AppCompatActivity {
                     Intent intent = new Intent();
                     intent.putExtra("barcode", barcodes.valueAt(0));
                     setResult(RESULT_OK, intent);
+                    FirebaseManager.getReference().completeRide(OfflineCache.getReference().retrieveCurrentRideRequest());
                     finish();
                 }
             }
