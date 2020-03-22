@@ -41,6 +41,7 @@ import com.google.firebase.firestore.QuerySnapshot;
 
 import org.w3c.dom.Document;
 
+import java.io.BufferedOutputStream;
 import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Date;
@@ -244,11 +245,15 @@ public class FirebaseManager {
      * Deletes a Ride Request record from our cloud Firestore
      * @param riderUID The Rider UID associated with the ride request to be deleted
      */
-    public void deleteRideRequest(final String riderUID) {
+    public void deleteRideRequest(final String riderUID, final ReturnValueListener<Boolean> returnFunction) {
         DocumentReference requestDoc = FirebaseFirestore.getInstance().collection(RIDE_REQUEST_COLLECTION).document(riderUID);
-        requestDoc.delete();
+        requestDoc.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                returnFunction.returnValue(Boolean.TRUE);
+            }
+        });
     }
-
     /**
      * Allows a driver to accept a ride request if it hasn't already been accepted
      * @param driverUID The UID of the driver user that is attempting to accept this ride request
@@ -682,6 +687,5 @@ public class FirebaseManager {
     public void completeRide(RideRequest request) {
         request.setStatus(RideRequest.Status.COMPLETED);
         storeRideRequest(request);
-        OfflineCache.getReference().cacheCurrentRideRequest(request);
     }
 }
