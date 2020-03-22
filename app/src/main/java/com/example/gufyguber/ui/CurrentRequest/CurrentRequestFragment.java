@@ -51,6 +51,7 @@ public class CurrentRequestFragment extends Fragment implements FirebaseManager.
     private CurrentRequestViewModel currentRequestViewModel;
     private Button cancelBtn;
     private Button confirmPickup;
+    private Button confirmArrival;
 
     private TextView driverText;
     private TextView riderText;
@@ -119,6 +120,7 @@ public class CurrentRequestFragment extends Fragment implements FirebaseManager.
         suggestedFareText = view.findViewById(R.id.user_fare);
         rideStatus = view.findViewById(R.id.ride_status);
         confirmPickup =  view.findViewById(R.id.confirm_pickup);
+        confirmArrival = view.findViewById(R.id.confirm_arrival);
 
         if (OfflineCache.getReference().retrieveCurrentRideRequest() != null && !isDriver) {
             cancelBtn.setOnClickListener(new View.OnClickListener() {
@@ -144,7 +146,7 @@ public class CurrentRequestFragment extends Fragment implements FirebaseManager.
             updateUIDriver(OfflineCache.getReference().retrieveCurrentRideRequest());
         }
     }
-    private void updateUIDriver(RideRequest request) {
+    private void updateUIDriver(final RideRequest request) {
         if (request != null) {
             FirebaseManager.getReference().fetchRiderInfo(request.getRiderUID(), new FirebaseManager.ReturnValueListener<Rider>() {
                 @Override
@@ -171,15 +173,23 @@ public class CurrentRequestFragment extends Fragment implements FirebaseManager.
             rideStatus.setText(getResources().getString(R.string.request_status, request.getStatus().toString()));
             if (request.getStatus().toString().equals("Confirmed")) {
                 confirmPickup.setVisibility(View.VISIBLE);
+                confirmPickup.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        FirebaseManager.getReference().confirmPickup(request);
+                    }
+                });
+            }
+            if (request.getStatus().toString().equals("En Route")) {
+                confirmPickup.setVisibility(View.GONE);
             }
             suggestedFareText.setText(String.format("$%.2f", request.getOfferedFare()));
         } else {
             rideStatus.setText(getResources().getString(R.string.request_status, ' '));
         }
-
     }
 
-    private void updateUIRider(RideRequest request) {
+    private void updateUIRider(final RideRequest request) {
         if (request != null) {
             if (request.getDriverUID() == null) {
                 driverText.setText("Driver Unavailable");
@@ -212,6 +222,16 @@ public class CurrentRequestFragment extends Fragment implements FirebaseManager.
             }
             rideStatus.setText(getResources().getString(R.string.request_status, request.getStatus().toString()));
             suggestedFareText.setText(String.format("$%.2f", request.getOfferedFare()));
+
+            if (request.getStatus().toString().equals("En Route")) {
+                confirmArrival.setVisibility(View.VISIBLE);
+                confirmArrival.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        FirebaseManager.getReference().confirmArrival(request);
+                    }
+                });
+            }
         } else {
             rideStatus.setText(getResources().getString(R.string.request_status, ' '));
         }

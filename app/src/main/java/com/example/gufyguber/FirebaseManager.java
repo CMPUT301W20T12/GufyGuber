@@ -658,4 +658,24 @@ public class FirebaseManager {
             }
         });
     }
+
+    /**
+     *
+     * @param request
+     */
+    public void confirmPickup(RideRequest request) {
+        request.setStatus(RideRequest.Status.EN_ROUTE);
+        storeRideRequest(request);
+        OfflineCache.getReference().cacheCurrentRideRequest(request);
+    }
+
+    /**
+     *
+     * @param request
+     */
+    public void confirmArrival(RideRequest request) {
+        request.setStatus(RideRequest.Status.ARRIVED);
+        storeRideRequest(request);
+        OfflineCache.getReference().cacheCurrentRideRequest(request);
+    }
 }
