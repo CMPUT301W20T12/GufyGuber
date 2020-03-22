@@ -70,9 +70,9 @@ public class CurrentRequestFragment extends Fragment implements FirebaseManager.
                 ViewModelProviders.of(this).get(CurrentRequestViewModel.class);
 
         isDriver = (OfflineCache.getReference().retrieveCurrentUser() instanceof Driver);
-        rideRequestListener = FirebaseManager.getReference().listenToRideRequest(OfflineCache.getReference().retrieveCurrentRideRequest().getRiderUID(), this);
 
         if (OfflineCache.getReference().retrieveCurrentRideRequest() != null && !isDriver) {
+            rideRequestListener = FirebaseManager.getReference().listenToRideRequest(OfflineCache.getReference().retrieveCurrentRideRequest().getRiderUID(), this);
             View root = inflater.inflate(R.layout.fragment_current_requests_rider, container, false);
             //final TextView textView = root.findViewById(R.id.text_current_requests);
             currentRequestViewModel.getText().observe(getViewLifecycleOwner(), new Observer<String>() {
@@ -83,6 +83,7 @@ public class CurrentRequestFragment extends Fragment implements FirebaseManager.
             });
             return root;
         } else if (OfflineCache.getReference().retrieveCurrentRideRequest() != null && isDriver) {
+            rideRequestListener = FirebaseManager.getReference().listenToRideRequest(OfflineCache.getReference().retrieveCurrentRideRequest().getRiderUID(), this);
             View root = inflater.inflate(R.layout.fragment_current_requests_driver, container, false);
             //final TextView textView = root.findViewById(R.id.text_current_requests);
             currentRequestViewModel.getText().observe(getViewLifecycleOwner(), new Observer<String>() {
@@ -238,11 +239,14 @@ public class CurrentRequestFragment extends Fragment implements FirebaseManager.
 
     @Override
     public void onRideRequestUpdated(RideRequest updatedRequest) {
-        Log.d("UPDATEPLS", "update UI for driver");
-        if (isDriver){
-            updateUIDriver(updatedRequest);
+        if (updatedRequest != null) {
+            if (isDriver) {
+                updateUIDriver(updatedRequest);
+            } else {
+                updateUIRider(updatedRequest);
+            }
         } else {
-            updateUIRider(updatedRequest);
+            getActivity().onBackPressed();
         }
     }
 }
