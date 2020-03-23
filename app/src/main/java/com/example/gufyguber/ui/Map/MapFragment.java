@@ -29,6 +29,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
 import com.example.gufyguber.CreateRideRequestFragment;
+import com.example.gufyguber.DirectionsManager;
 import com.example.gufyguber.Driver;
 import com.example.gufyguber.FirebaseManager;
 import com.example.gufyguber.LocationInfo;
@@ -363,6 +364,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
                     .add(pickupMarker.getPosition())
                     .add(dropoffMarker.getPosition())
                     .color(0xFFFF0000));
+            //Log.i(TAG, DirectionsManager.getDirectionsResponse(DirectionsManager.buildDirectionsURL(new LocationInfo(pickupMarker.getPosition(), dropoffMarker.getPosition()))));
+            DirectionsManager.DownloadTask task = new DirectionsManager.DownloadTask();
+            task.execute(DirectionsManager.buildDirectionsURL(new LocationInfo(pickupMarker.getPosition(), dropoffMarker.getPosition())));
         }
     }
 
