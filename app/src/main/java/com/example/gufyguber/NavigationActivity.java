@@ -229,8 +229,13 @@ public class NavigationActivity extends AppCompatActivity implements RideRequest
                 }
                 break;
             case COMPLETED:
-                toast.setText("Payment complete.");
-                toast.show();
+                if (OfflineCache.getReference().retrieveCurrentUser() instanceof Rider) {
+                    toast.setText("Payment complete.");
+                    toast.show();
+                } else {
+                    toast.setText("Payment received.");
+                    toast.show();
+                }
                 break;
             case CANCELLED:
                 if (OfflineCache.getReference().retrieveCurrentUser() instanceof Driver) {
@@ -248,5 +253,6 @@ public class NavigationActivity extends AppCompatActivity implements RideRequest
         Intent intent = new Intent(this, SignInActivity.class);
         startActivity(intent);
     }
+
 
 }

@@ -693,16 +693,16 @@ public class FirebaseManager {
         });
     }
 
-    public void completeRide(RideRequest request, final ReturnValueListener<Boolean> returnFunction) {
+    public void completeRide(RideRequest request, final ReturnValueListener<RideRequest> returnFunction) {
         request.setStatus(RideRequest.Status.COMPLETED);
         storeRideRequest(request);
         fetchRideRequest(request.getRiderUID(), new ReturnValueListener<RideRequest>() {
             @Override
             public void returnValue(RideRequest value) {
                 if(value.getStatus().toString().equals("Completed")) {
-                    returnFunction.returnValue(Boolean.TRUE);
+                    returnFunction.returnValue(value);
                 } else {
-                    returnFunction.returnValue(Boolean.FALSE);
+                    returnFunction.returnValue(null);
                 }
             }
         });

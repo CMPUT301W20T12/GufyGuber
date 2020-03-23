@@ -117,21 +117,9 @@ public class Scan extends AppCompatActivity {
             public void receiveDetections(Detector.Detections<Barcode> detections) {
                 final SparseArray<Barcode> barcodes = detections.getDetectedItems();
                 if (barcodes.size() > 0) {
-                    final Toast toast = new Toast(getApplicationContext());
                     Intent intent = new Intent();
                     intent.putExtra("barcode", barcodes.valueAt(0));
                     setResult(RESULT_OK, intent);
-                    FirebaseManager.getReference().completeRide(OfflineCache.getReference().retrieveCurrentRideRequest(), new FirebaseManager.ReturnValueListener<Boolean>() {
-                        @Override
-                        public void returnValue(Boolean value) {
-                            if (value) {
-                                OfflineCache.getReference().cacheCurrentRideRequest(OfflineCache.getReference().retrieveCurrentRideRequest());
-                                toast.setText("Payment received!");
-                                toast.setDuration(Toast.LENGTH_LONG);
-                                toast.show();
-                            }
-                        }
-                    });
                     finish();
                 }
             }

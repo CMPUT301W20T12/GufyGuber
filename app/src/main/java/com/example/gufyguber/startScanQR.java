@@ -80,5 +80,4 @@ public class startScanQR extends AppCompatActivity {
             }
         }
     }
-
 }
