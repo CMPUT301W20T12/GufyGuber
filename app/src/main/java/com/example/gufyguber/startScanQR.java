@@ -74,6 +74,7 @@ public class startScanQR extends AppCompatActivity {
                     @Override
                     public void run() {
                         result.setText(barcode.displayValue);
+                        finish();
                     }
                 });
             }

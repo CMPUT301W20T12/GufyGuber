@@ -244,7 +244,14 @@ public class CurrentRequestFragment extends Fragment implements FirebaseManager.
                 confirmArrival.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        FirebaseManager.getReference().confirmArrival(request);
+                        FirebaseManager.getReference().confirmArrival(request, new FirebaseManager.ReturnValueListener<Boolean>() {
+                            @Override
+                            public void returnValue(Boolean value) {
+                                if (value) {
+                                    OfflineCache.getReference().cacheCurrentRideRequest(request);
+                                }
+                            }
+                        });
                     }
                 });
             }

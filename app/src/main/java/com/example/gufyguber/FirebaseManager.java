@@ -678,10 +678,19 @@ public class FirebaseManager {
      *
      * @param request
      */
-    public void confirmArrival(RideRequest request) {
+    public void confirmArrival(RideRequest request, final ReturnValueListener<Boolean> returnFunction) {
         request.setStatus(RideRequest.Status.ARRIVED);
         storeRideRequest(request);
-        OfflineCache.getReference().cacheCurrentRideRequest(request);
+        fetchRideRequest(request.getRiderUID(), new ReturnValueListener<RideRequest>() {
+            @Override
+            public void returnValue(RideRequest value) {
+                if(value.getStatus().toString().equals("Arrived")) {
+                    returnFunction.returnValue(Boolean.TRUE);
+                } else {
+                    returnFunction.returnValue(Boolean.FALSE);
+                }
+            }
+        });
     }
 
     public void completeRide(RideRequest request) {
