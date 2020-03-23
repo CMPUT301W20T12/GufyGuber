@@ -295,7 +295,9 @@ public class CurrentRequestFragment extends Fragment implements FirebaseManager.
                 updateUIRider(updatedRequest);
             }
         } else {
-            getActivity().onBackPressed();
+            if (getActivity() != null) {
+                getActivity().onBackPressed();
+            }
         }
     }
 }
