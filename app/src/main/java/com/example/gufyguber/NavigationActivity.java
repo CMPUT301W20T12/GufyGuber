@@ -236,6 +236,17 @@ public class NavigationActivity extends AppCompatActivity implements RideRequest
                 } else {
                     toast.setText("Payment received.");
                     toast.show();
+                    FirebaseManager.getReference().deleteRideRequest(OfflineCache.getReference().retrieveCurrentRideRequest().getRiderUID(), new FirebaseManager.ReturnValueListener<Boolean>() {
+                        @Override
+                        public void returnValue(Boolean value) {
+                            if(value){
+                                OfflineCache.getReference().clearCurrentRideRequest();
+                            }
+                            else{
+                                Log.w(TAG, "Error deleting completed ride request.");
+                            }
+                        }
+                    });
                 }
                 break;
             case CANCELLED:
@@ -268,7 +279,6 @@ public class NavigationActivity extends AppCompatActivity implements RideRequest
                         }
                     }
                 });
-
             }
        }
     }
