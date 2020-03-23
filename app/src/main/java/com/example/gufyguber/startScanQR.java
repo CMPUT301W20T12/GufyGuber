@@ -74,7 +74,15 @@ public class startScanQR extends AppCompatActivity {
                     @Override
                     public void run() {
                         result.setText(barcode.displayValue);
-                        finish();
+                        FirebaseManager.getReference().completeRide(OfflineCache.getReference().retrieveCurrentRideRequest(), new FirebaseManager.ReturnValueListener<RideRequest>() {
+                            @Override
+                            public void returnValue(RideRequest value) {
+                                if (value != null) {
+                                    OfflineCache.getReference().cacheCurrentRideRequest(value);
+                                    finish();
+                                }
+                            }
+                        });
                     }
                 });
             }

@@ -23,6 +23,7 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.MenuItem;
 
+import androidx.annotation.Nullable;
 import androidx.core.view.GravityCompat;
 import androidx.fragment.app.FragmentManager;
 import androidx.navigation.NavController;
@@ -254,5 +255,21 @@ public class NavigationActivity extends AppCompatActivity implements RideRequest
         startActivity(intent);
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if(OfflineCache.getReference().retrieveCurrentUser() instanceof Driver){
+            if(OfflineCache.getReference().retrieveCurrentRideRequest() != null) {
+                FirebaseManager.getReference().fetchRideRequest(OfflineCache.getReference().retrieveCurrentRideRequest().getRiderUID(), new FirebaseManager.ReturnValueListener<RideRequest>() {
+                    @Override
+                    public void returnValue(RideRequest value) {
+                        if (value != null) {
+                            onStatusChanged(value.getStatus());
+                        }
+                    }
+                });
 
+            }
+       }
+    }
 }
