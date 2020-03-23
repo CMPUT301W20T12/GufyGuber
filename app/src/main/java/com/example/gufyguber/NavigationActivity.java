@@ -79,7 +79,7 @@ public class NavigationActivity extends AppCompatActivity implements RideRequest
 
         OfflineCache.getReference().addRideRequestStatusChangedListener(this);
     }
-
+    
     @Override
     public void onDestroy() {
         OfflineCache.getReference().removeRideRequestStatusChangedListener(this);

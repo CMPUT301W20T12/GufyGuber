@@ -40,8 +40,8 @@ import com.example.gufyguber.OfflineCache;
 import com.example.gufyguber.R;
 import com.example.gufyguber.RideRequest;
 import com.example.gufyguber.Rider;
-import com.example.gufyguber.Scan;
 import com.example.gufyguber.startScanQR;
+import com.example.gufyguber.User;
 import com.example.gufyguber.ui.Profile.UserContactInformationFragment;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.ListenerRegistration;
@@ -163,6 +163,7 @@ public class CurrentRequestFragment extends Fragment implements FirebaseManager.
                         riderText.setText("Rider Unavailable");
                     } else {
                         riderText.setText(String.format("%s %s", value.getFirstName(), value.getLastName()));
+                        makeNameClickable(value, riderText);
                     }
                 }
             });
@@ -273,13 +274,13 @@ public class CurrentRequestFragment extends Fragment implements FirebaseManager.
 
     }
 
-    private void makeNameClickable(final Driver driver, TextView driverText){
+    private void makeNameClickable(final User user, TextView driverText){
         driverText.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Bundle bundle = new Bundle();
-                bundle.putString("email", driver.getEmail());
-                bundle.putString("phone", driver.getPhoneNumber());
+                bundle.putString("email", user.getEmail());
+                bundle.putString("phone", user.getPhoneNumber());
                 UserContactInformationFragment infoFragment = new UserContactInformationFragment();
                 infoFragment.setArguments(bundle);
                 infoFragment.show(getFragmentManager(), "user_contact_information");
