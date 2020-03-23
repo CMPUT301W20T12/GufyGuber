@@ -232,7 +232,6 @@ public class CurrentRequestFragment extends Fragment implements FirebaseManager.
             } else {
                 pickupTimeText.setText("Time Unavailable");
             }
-            //pickupTimeText.setText(String.format("%t", request.getTimeInfo().getRequestOpenTime()));
             if (request.getTimeInfo().getRequestAcceptedTime() != null) {
                 arrivalTimeText.setText(request.getTimeInfo().getRequestAcceptedTime().toString());
             } else {
@@ -299,5 +298,14 @@ public class CurrentRequestFragment extends Fragment implements FirebaseManager.
                 getActivity().onBackPressed();
             }
         }
+    }
+
+    @Override
+    public void onDestroy() {
+        if (rideRequestListener != null) {
+            rideRequestListener.remove();
+            rideRequestListener = null;
+        }
+        super.onDestroy();
     }
 }

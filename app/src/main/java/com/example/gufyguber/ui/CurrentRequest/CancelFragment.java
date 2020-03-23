@@ -47,7 +47,6 @@ public class CancelFragment extends DialogFragment {
             @Override
             public void onClick(View v) {
                 getFragmentManager().beginTransaction().remove(CancelFragment.this).commit();
-                getActivity().onBackPressed();
             }
         });
 
