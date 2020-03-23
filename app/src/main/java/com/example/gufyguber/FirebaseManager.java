@@ -682,6 +682,5 @@ public class FirebaseManager {
     public void completeRide(RideRequest request) {
         request.setStatus(RideRequest.Status.COMPLETED);
         storeRideRequest(request);
-        OfflineCache.getReference().cacheCurrentRideRequest(request);
     }
 }
