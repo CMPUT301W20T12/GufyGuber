@@ -58,6 +58,7 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:paddingLeft="10dp"
                 android:orientation="vertical">
 
                 <LinearLayout
@@ -68,10 +69,9 @@
                     android:padding="10dp">
 
                     <TextView
-                        android:layout_width="0dp"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="Your Driver:"
+                        android:text="Driver: "
                         android:textSize="20sp" />
 
                     <TextView
@@ -80,14 +80,13 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="2"
                         android:textSize="20sp" />
+                    <Button
+                        android:id="@+id/driver_contact_button"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:theme="@style/ThemeOverlay.LightButton"
+                        android:text="Contact" />
                 </LinearLayout>
-                <Button
-                    android:id="@+id/driver_contact_button"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="20dp"
-                    android:theme="@style/ThemeOverlay.LightButton"
-                    android:text="Contact" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -98,10 +97,9 @@
                     android:padding="10dp">
 
                     <TextView
-                        android:layout_width="0dp"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="Opened:"
+                        android:text="Opened: "
                         android:textSize="20sp" />
 
                     <TextView
@@ -122,10 +120,9 @@
                     android:padding="10dp">
 
                     <TextView
-                        android:layout_width="0dp"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="Accepted:"
+                        android:text="Accepted: "
                         android:textSize="20sp" />
 
                     <TextView
@@ -146,10 +143,9 @@
                     android:padding="10dp">
 
                     <TextView
-                        android:layout_width="0dp"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="Pick Up:"
+                        android:text="Pick Up: "
                         android:textSize="20sp" />
 
                     <TextView
@@ -170,10 +166,9 @@
                     android:padding="10dp">
 
                     <TextView
-                        android:layout_width="0dp"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="Drop Off:"
+                        android:text="Drop Off: "
                         android:textSize="20sp" />
 
                     <TextView
@@ -194,10 +189,9 @@
                     android:padding="10dp">
 
                     <TextView
-                        android:layout_width="0dp"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="Fare:"
+                        android:text="Fare: "
                         android:textSize="20sp" />
 
                     <TextView
