@@ -70,7 +70,9 @@ public class UserContactInformationFragment extends DialogFragment {
         contactPhone = view.findViewById(R.id.contact_phone);
 
         contactEmail.setText(email);
-        contactPhone.setText(phoneNumber);
+
+        String formattedPhone = String.format("%s-%s-%s", phoneNumber.substring(0,3), phoneNumber.substring(3,6), phoneNumber.substring(6,10));
+        contactPhone.setText(formattedPhone);
 
         Paint paint = new Paint();
         paint.setFlags(Paint.UNDERLINE_TEXT_FLAG);
