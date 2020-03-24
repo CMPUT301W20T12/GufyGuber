@@ -40,41 +40,40 @@
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:paddingBottom="10dp"
+        android:layout_marginTop="10dp"
         android:orientation="horizontal">
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="32sp"
-            android:paddingLeft="10dp"
-            android:paddingRight="10dp"
+            android:textSize="20sp"
+            android:padding="15dp"
+            android:layout_marginLeft="20dp"
             android:text="Email: "
             />
         <TextView
             android:id="@+id/contact_email"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="32sp"/>
+            android:textSize="20sp"/>
     </LinearLayout>
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:paddingBottom="10dp"
         android:textSize="15dp">
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="32sp"
-            android:paddingLeft="10dp"
-            android:paddingRight="10dp"
+            android:textSize="20sp"
+            android:padding="15dp"
+            android:layout_marginLeft="20dp"
             android:text="Phone: "
             />
         <TextView
             android:id="@+id/contact_phone"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="32sp"/>
+            android:textSize="20sp"/>
     </LinearLayout>
 
     <LinearLayout
@@ -82,13 +81,14 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:textSize="15dp"
+        android:layout_marginTop="20dp"
         android:layout_gravity="center"
         android:paddingBottom="10dp"
         >
 
         <ImageView
-            android:layout_width="50dp"
-            android:layout_height="50dp"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
             app:srcCompat="@drawable/thumbsup" />
 
         <TextView
@@ -96,23 +96,25 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:paddingEnd="15dp"
+            android:paddingStart="10dp"
+            android:paddingEnd="20dp"
             android:text="XX%"
-            android:textSize="32sp"/>
+            android:textSize="20sp"/>
 
         <ImageView
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_marginTop="17dp"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginTop="13.7dp"
             app:srcCompat="@drawable/thumbsdown" />
 
         <TextView
             android:id="@+id/contact_rating_neg"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:paddingStart="10dp"
             android:layout_gravity="center"
             android:text="XX%"
-            android:textSize="32sp"/>
+            android:textSize="20sp"/>
 
     </LinearLayout>
 
