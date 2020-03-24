@@ -30,6 +30,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
 import com.example.gufyguber.CreateRideRequestFragment;
+import com.example.gufyguber.DirectionsManager;
 import com.example.gufyguber.Driver;
 import com.example.gufyguber.FirebaseManager;
 import com.example.gufyguber.LocationInfo;
@@ -405,11 +406,26 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
             routeLine.remove();
             routeLine = null;
         }
-        if (pickupMarker != null && dropoffMarker != null) {
-            routeLine = mMap.addPolyline(new PolylineOptions()
-                    .add(pickupMarker.getPosition())
-                    .add(dropoffMarker.getPosition())
-                    .color(0xFFFF0000));
+        if (pickupMarker != null && dropoffMarker != null && mMap != null) {
+            DirectionsManager.drawDirectionsPolyline(new LocationInfo(pickupMarker.getPosition(), dropoffMarker.getPosition()), mMap,
+                    new FirebaseManager.ReturnValueListener<Polyline>() {
+                        @Override
+                        public void returnValue(Polyline value) {
+                            if (value != null) {
+                                // Handles the edge case where another navline is calculated before the first one finishes
+                                if (routeLine != null) {
+                                    routeLine.remove();
+                                }
+                                routeLine = value;
+                            } else {
+                                // Fallback in case of null return
+                                routeLine = mMap.addPolyline(new PolylineOptions()
+                                        .add(pickupMarker.getPosition())
+                                        .add(dropoffMarker.getPosition())
+                                        .color(0xFFFF0000));
+                            }
+                        }
+                    });
         }
     }
 
