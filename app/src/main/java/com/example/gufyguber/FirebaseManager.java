@@ -101,6 +101,11 @@ public class FirebaseManager {
     public static final String SEAT_NUMBER_KEY = "seat_number";
     public static final String PLATE_NUMBER_KEY = "plate_number";
 
+    //Rating Keys
+    public static final String RATING_COLLECTION = "ratings";
+    public static final String POSITIVE_KEY = "positive";
+    public static final String NEGATIVE_KEY = "negative";
+
     // Ride Request Keys
     public static final String RIDE_REQUEST_COLLECTION = "ride_requests";
     public static final String STATUS_KEY = "status";
@@ -463,9 +468,19 @@ public class FirebaseManager {
                         final String phoneNumber = String.valueOf(docData.get(PHONE_NUMBER_KEY));
                         fetchVehicleInfo(driverUID, new ReturnValueListener<Vehicle>() {
                             @Override
-                            public void returnValue(Vehicle value) {
+                            public void returnValue(final Vehicle value) {
                                 if (value != null) {
-                                    returnFunction.returnValue(new Driver(driverUID, email, firstName, lastName, phoneNumber, value));
+                                    fetchRatingInfo(driverUID, new ReturnValueListener<Rating>() {
+                                        @Override
+                                        public void returnValue(Rating value2) {
+                                            if (value2 != null) {
+                                                returnFunction.returnValue(new Driver(driverUID, email, firstName, lastName, phoneNumber, value, value2));
+                                            } else {
+                                                Log.w(TAG, String.format("Failed to fetch rating for driver [%s]", driverUID));
+                                                returnFunction.returnValue(null);
+                                            }
+                                        }
+                                    });
                                 } else {
                                     Log.w(TAG, String.format("Failed to fetch vehicle for driver [%s]", driverUID));
                                     returnFunction.returnValue(null);
@@ -550,6 +565,53 @@ public class FirebaseManager {
                 } else {
                     Log.e(TAG, "Fetching vehicle info failed. Issue communicating with Firestore.");
                     returnFunction.returnValue(null);
+                }
+            }
+        });
+    }
+
+    public void storeRatingInfo(String driverUID, Rating rating) {
+        CollectionReference ratings = FirebaseFirestore.getInstance().collection(RATING_COLLECTION);
+        HashMap<String, Object> ratingData = new HashMap<>();
+
+        ratingData.put(POSITIVE_KEY, rating.getPositive());
+        ratingData.put(NEGATIVE_KEY, rating.getNegative());
+        ratings.document(driverUID)
+                .set(ratingData)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Log.d(TAG, "Rating addition successful");
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.d(TAG, "Rating addition failed" + e.toString());
+                    }
+                });
+    }
+
+    public void fetchRatingInfo(final String driverUID, final ReturnValueListener<Rating> returnValueListener) {
+        DocumentReference ratingDoc = FirebaseFirestore.getInstance().collection(RATING_COLLECTION).document(driverUID);
+        ratingDoc.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.isSuccessful()) {
+                    DocumentSnapshot snapshot = task.getResult();
+                    if(snapshot.exists()) {
+                        int positive = snapshot.getLong(POSITIVE_KEY).intValue();
+                        int negative = snapshot.getLong(NEGATIVE_KEY).intValue();
+                        returnValueListener.returnValue(new Rating(positive, negative));
+                    }
+                    else {
+                        Log.w(TAG, String.format("Rating for driver [%s] not found on Firestore.", driverUID));
+                        returnValueListener.returnValue(null);
+                    }
+                }
+                else {
+                    Log.e(TAG, "Fetching rating failed. Issue communicating with Firestore.");
+                    returnValueListener.returnValue(null);
                 }
             }
         });

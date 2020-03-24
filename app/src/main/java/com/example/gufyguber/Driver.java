@@ -35,6 +35,7 @@ public class Driver extends User{
     //TODO: reference to a Rating
 
     private Vehicle vehicle;
+    private Rating rating;
 
     /**
      * This is the constructor method that sets the drivers attributes by calling the superclass
@@ -49,9 +50,10 @@ public class Driver extends User{
      *  The rider's phone number
      */
     public Driver(String UID, String email, String firstName, String lastName,
-                  String phoneNumber, Vehicle vehicle) {
+                  String phoneNumber, Vehicle vehicle, Rating rating) {
         super(UID, email, firstName, lastName, phoneNumber);
         this.setVehicle(vehicle);
+        this.setRating(rating);
     }
 
     public void setVehicle(Vehicle vehicle) {
@@ -61,4 +63,9 @@ public class Driver extends User{
     public Vehicle getVehicle() {
         return vehicle;
     }
+
+    public void setRating(Rating rating) { this.rating = rating; }
+
+    public Rating getRating() { return rating; }
+
 }

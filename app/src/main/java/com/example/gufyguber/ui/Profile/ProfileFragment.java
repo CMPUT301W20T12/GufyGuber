@@ -36,17 +36,23 @@ import com.example.gufyguber.FirebaseManager;
 import com.example.gufyguber.NavigationActivity;
 import com.example.gufyguber.OfflineCache;
 import com.example.gufyguber.R;
+import com.example.gufyguber.Rating;
 import com.example.gufyguber.Rider;
 import com.example.gufyguber.SignInActivity;
 import com.example.gufyguber.Vehicle;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.squareup.picasso.Picasso;
 
 import java.net.URI;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ProfileFragment extends Fragment {
 
@@ -67,6 +73,9 @@ public class ProfileFragment extends Fragment {
     private Button editProfile;
     private Button saveProfile;
     private ImageView profilePicture;
+    private TextView positive;
+    private TextView negative;
+
     // simple boolean to check if the user is a driver or rider so we know
     private boolean driver;
 
@@ -107,6 +116,8 @@ public class ProfileFragment extends Fragment {
         editProfile = view.findViewById(R.id.edit_profile_button);
         saveProfile = view.findViewById(R.id.save_profile_button);
         profilePicture = view.findViewById(R.id.user_image);
+        positive = view.findViewById(R.id.positive);
+        negative = view.findViewById(R.id.negative);
 
 
         // Use firebase manager to get the user profile info to auto pop the fields
@@ -192,7 +203,8 @@ public class ProfileFragment extends Fragment {
                                 new Vehicle(modelText.getText().toString(),     // Driver needs a Vehicle in the input as well
                                         makeText.getText().toString(),
                                         plateText.getText().toString(),
-                                        Integer.parseInt(seatText.getText().toString()))));
+                                        Integer.parseInt(seatText.getText().toString())),
+                                new Rating(Integer.parseInt(positive.getText().toString()), Integer.parseInt(negative.getText().toString()))));
                         // update the vehicle as well via the manager
                         FirebaseManager.getReference().storeVehicleInfo(FirebaseAuth.getInstance().getCurrentUser().getUid(),
                                 new Vehicle(modelText.getText().toString(),
@@ -218,6 +230,7 @@ public class ProfileFragment extends Fragment {
                                 OfflineCache.getReference().cacheCurrentUser(value);
                             }
                         });
+
                     } else {
                         // Same as above, but this time for a rider...
                         FirebaseManager.getReference().storeRiderInfo(new
