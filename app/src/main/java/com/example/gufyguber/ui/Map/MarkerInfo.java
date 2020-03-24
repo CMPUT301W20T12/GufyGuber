@@ -13,6 +13,7 @@
 
 package com.example.gufyguber.ui.Map;
 
+import com.example.gufyguber.LocationInfo;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
@@ -44,7 +45,7 @@ public class MarkerInfo {
                 marker = mMap.addMarker(new MarkerOptions()
                         .position(point)
                         .title(title)
-                        .snippet(point.toString())
+                        .snippet(LocationInfo.latlngToString(point))
                         .icon(BitmapDescriptorFactory.defaultMarker(startPoint ? BitmapDescriptorFactory.HUE_AZURE : BitmapDescriptorFactory.HUE_ROSE))
                 );
 
