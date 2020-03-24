@@ -281,6 +281,7 @@ public class CurrentRequestFragment extends Fragment implements FirebaseManager.
     }
 
     private void activateContactButton(final User user, Button contactBtn){
+        contactBtn.setVisibility(View.VISIBLE);
         contactBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
