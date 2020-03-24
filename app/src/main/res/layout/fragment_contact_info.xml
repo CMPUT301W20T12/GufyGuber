@@ -96,13 +96,14 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:paddingEnd="10dp"
+            android:paddingEnd="15dp"
             android:text="XX%"
             android:textSize="32sp"/>
 
         <ImageView
             android:layout_width="50dp"
             android:layout_height="50dp"
+            android:layout_marginTop="17dp"
             app:srcCompat="@drawable/thumbsdown" />
 
         <TextView
