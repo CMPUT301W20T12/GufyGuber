@@ -42,14 +42,4 @@
         android:label="Sign Out"
         tools:layout="@layout/sign_out_dialog"/>
 
-    <dialog
-        android:id="@+id/nav_generateQR"
-        android:name="com.example.gufyguber.GenerateQrFragment"
-        android:label="Generate" />
-
-    <dialog
-        android:id="@+id/nav_scan"
-        android:name="com.example.gufyguber.ScanQrFragment"
-        android:label="Scan" />
-
 </navigation>
