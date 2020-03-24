@@ -58,6 +58,9 @@ public class CurrentRequestFragment extends Fragment implements FirebaseManager.
     private Button confirmArrival;
     private Button makePayment;
     private Button takePayment;
+    private Button driverContactBtn;
+    private Button riderContactBtn;
+
 
     private TextView driverText;
     private TextView riderText;
@@ -129,6 +132,8 @@ public class CurrentRequestFragment extends Fragment implements FirebaseManager.
         confirmArrival = view.findViewById(R.id.confirm_arrival);
         makePayment = view.findViewById(R.id.make_payment);
         takePayment = view.findViewById(R.id.take_payment);
+        driverContactBtn = view.findViewById(R.id.driver_contact_button);
+        riderContactBtn = view.findViewById(R.id.rider_contact_button);
 
         if (OfflineCache.getReference().retrieveCurrentRideRequest() != null && !isDriver) {
             cancelBtn.setOnClickListener(new View.OnClickListener() {
@@ -163,7 +168,7 @@ public class CurrentRequestFragment extends Fragment implements FirebaseManager.
                         riderText.setText("Rider Unavailable");
                     } else {
                         riderText.setText(String.format("%s %s", value.getFirstName(), value.getLastName()));
-                        makeNameClickable(value, riderText);
+                        activateContactButton(value, riderContactBtn);
                     }
                 }
             });
@@ -220,7 +225,7 @@ public class CurrentRequestFragment extends Fragment implements FirebaseManager.
                             driverText.setText("Driver Unavailable");
                         } else {
                             driverText.setText(String.format("%s %s", value.getFirstName(), value.getLastName()));
-                            makeNameClickable(value, driverText);
+                            activateContactButton(value, driverContactBtn);
                         }
                     }
 
@@ -275,8 +280,8 @@ public class CurrentRequestFragment extends Fragment implements FirebaseManager.
 
     }
 
-    private void makeNameClickable(final User user, TextView driverText){
-        driverText.setOnClickListener(new View.OnClickListener() {
+    private void activateContactButton(final User user, Button contactBtn){
+        contactBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Bundle bundle = new Bundle();
@@ -287,10 +292,6 @@ public class CurrentRequestFragment extends Fragment implements FirebaseManager.
                 infoFragment.show(getFragmentManager(), "user_contact_information");
             }
         });
-        driverText.setTextColor(Color.BLUE);
-        Paint paint = new Paint();
-        paint.setFlags(Paint.UNDERLINE_TEXT_FLAG);
-        driverText.setPaintFlags(paint.getFlags());
 
     }
 

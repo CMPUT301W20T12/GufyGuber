@@ -20,6 +20,7 @@
 
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -40,7 +41,7 @@
             android:textSize="20sp"
             android:textStyle="bold" />
 
-        <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+        <ScrollView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1">
@@ -69,8 +70,14 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="2"
-                        android:text="Rider Name"
+                        android:text="Contact"
                         android:textSize="20sp" />
+
+                    <Button
+                        android:id="@+id/rider_contact_button"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Contact" />
 
                 </LinearLayout>
 
@@ -94,7 +101,6 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="2"
-                        android:text="Your Pick Up Time:"
                         android:textSize="20sp" />
 
 
@@ -119,7 +125,6 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="2"
-                        android:text="Your Arrival Time:"
                         android:textSize="20sp" />
 
 
@@ -144,7 +149,6 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="2"
-                        android:text="Your Pick Up Location:"
                         android:textSize="20sp" />
 
 
@@ -169,7 +173,6 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="2"
-                        android:text="Your Drop Off Location:"
                         android:textSize="20sp" />
 
 
@@ -194,7 +197,6 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="2"
-                        android:text="Your Estimated Fare:"
                         android:textSize="20sp" />
 
                 </LinearLayout>
