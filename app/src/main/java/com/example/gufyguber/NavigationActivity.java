@@ -269,9 +269,11 @@ public class NavigationActivity extends AppCompatActivity implements RideRequest
     @Override
     protected void onResume() {
         super.onResume();
-        if(OfflineCache.getReference().retrieveCurrentUser() instanceof Driver){
-            if(OfflineCache.getReference().retrieveCurrentRideRequest() != null) {
-                FirebaseManager.getReference().fetchRideRequest(OfflineCache.getReference().retrieveCurrentRideRequest().getRiderUID(), new FirebaseManager.ReturnValueListener<RideRequest>() {
+        User user = OfflineCache.getReference().retrieveCurrentUser();
+        RideRequest request = OfflineCache.getReference().retrieveCurrentRideRequest();
+        if(user instanceof Driver){
+            if(request != null) {
+                FirebaseManager.getReference().fetchRideRequest(request.getRiderUID(), new FirebaseManager.ReturnValueListener<RideRequest>() {
                     @Override
                     public void returnValue(RideRequest value) {
                         if (value != null) {
