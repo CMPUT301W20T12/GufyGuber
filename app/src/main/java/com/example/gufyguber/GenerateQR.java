@@ -23,6 +23,7 @@
 package com.example.gufyguber;
 
 import android.app.ActionBar;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.widget.ImageView;
@@ -96,6 +97,12 @@ public class GenerateQR extends AppCompatActivity implements FirebaseManager.Rid
             rideRequestListener = null;
         }
         super.onDestroy();
+    }
+
+    @Override
+    public void onBackPressed() {
+        Intent intent = new Intent(this, NavigationActivity.class);
+        startActivity(intent);
     }
 
     @Override

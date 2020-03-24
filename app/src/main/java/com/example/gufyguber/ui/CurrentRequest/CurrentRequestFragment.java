@@ -265,6 +265,7 @@ public class CurrentRequestFragment extends Fragment implements FirebaseManager.
                     public void onClick(View v) {
                         Intent qrIntent = new Intent(getActivity(), GenerateQR.class);
                         startActivity(qrIntent);
+                        getActivity().finish();
                     }
                 });
             }
