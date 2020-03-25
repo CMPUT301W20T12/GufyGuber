@@ -158,6 +158,12 @@ public class RideRequest {
         this.timeInfo = timeInfo;
     }
 
+    @Override
+    public String toString() {
+        return String.format("Rider UID: %s\nDriver UID: %s\nStatus: %s\nFare: %.2f\nPickup: %s\nDrop Off: %s\nOpen Time: %tc\nAccepted Time: %tc\nClosed Time: %tc\n",
+                getRiderUID(), getDriverUID(), getStatus().name(), getOfferedFare(), LocationInfo.latlngToString(getLocationInfo().getPickup()), LocationInfo.latlngToString(getLocationInfo().getDropoff()), getTimeInfo().getRequestOpenTime(), getTimeInfo().getRequestAcceptedTime(), getTimeInfo().getRequestClosedTime());
+    }
+
     /**
      * Cancels this ride request and initiates related cleanup
      */

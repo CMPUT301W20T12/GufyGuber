@@ -16,6 +16,8 @@
 
 package com.example.gufyguber;
 
+import android.util.Log;
+
 import com.google.firebase.firestore.ListenerRegistration;
 
 import java.util.ArrayList;
@@ -31,14 +33,24 @@ public class OfflineCache implements FirebaseManager.RideRequestListener{
     public static OfflineCache getReference() {
         if (reference == null) {
             reference = new OfflineCache();
+            Log.d(TAG, "Offline cache lazy instantiation");
         }
         return reference;
     }
+
+    private static final String TAG = "OfflineCache";
 
     private ArrayList<RideRequest.StatusChangedListener> statusChangedListeners;
 
     private RideRequest currentRideRequest;
     private ListenerRegistration rideRequestListener;
+
+    // This will ignore Firestore callbacks. Primarily used for testing.
+    private boolean ignoreFirestore = false;
+    /**
+     * @param ignoreFirestore Whether or not to ignore Firestore callbacks
+     */
+    public void setIgnoreFirestore(boolean ignoreFirestore) { this.ignoreFirestore = ignoreFirestore; }
 
     /**
      * Caches a RideRequest instance and initiates any necessary callbacks. Prefer using this
@@ -48,6 +60,9 @@ public class OfflineCache implements FirebaseManager.RideRequestListener{
     public void cacheCurrentRideRequest(RideRequest request) {
         RideRequest temp = currentRideRequest;
         currentRideRequest = request;
+
+        String rrString = currentRideRequest == null ? "Null" : currentRideRequest.toString();
+        Log.d(TAG, "Ride request cached:\n" + rrString);
 
         if (temp != null) {
             if (currentRideRequest != null) {
@@ -82,9 +97,9 @@ public class OfflineCache implements FirebaseManager.RideRequestListener{
     }
 
     public void clearCurrentRideRequest(){
-        currentRideRequest = null;
-        return;
+        cacheCurrentRideRequest(null);
     }
+
     public RideRequest retrieveCurrentRideRequest() {
         return currentRideRequest;
     }
@@ -139,6 +154,12 @@ public class OfflineCache implements FirebaseManager.RideRequestListener{
     }
 
     public void onRideRequestUpdated(RideRequest updatedRideRequest) {
+        if (ignoreFirestore) {
+            return;
+        }
+
+        String rrString = updatedRideRequest == null ? "Null" : updatedRideRequest.toString();
+        Log.d(TAG, "Ride request updated from Firestore to:\n" + rrString);
         cacheCurrentRideRequest(updatedRideRequest);
     }
 
@@ -151,5 +172,6 @@ public class OfflineCache implements FirebaseManager.RideRequestListener{
             rideRequestListener.remove();
             rideRequestListener = null;
         }
+        Log.d(TAG, "Offline cache cleared" );
     }
 }

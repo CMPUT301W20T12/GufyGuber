@@ -38,6 +38,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.test.espresso.contrib.NavigationViewActions;
 import androidx.test.rule.ActivityTestRule;
 
+import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.model.LatLng;
 
 /**
@@ -63,12 +64,13 @@ public class DriverInstrumentedTests {
         testRider = new Rider("4321", "test@user.com", "FNTest", "LNTest", "(098)765-4321");
         testFare = 13.0f;
         testStatus = RideRequest.Status.CONFIRMED;
-        testLocation = new LocationInfo(new LatLng(13, 13), new LatLng(31, 31));
+        testLocation = new LocationInfo();
         testTime = new TimeInfo();
         testTime.setRequestAcceptedTime();
         testRideRequest = new RideRequest(testRider.getUID(), testDriver.getUID(), testStatus,
                 testFare, testLocation, testTime);
 
+        OfflineCache.getReference().setIgnoreFirestore(true);
         OfflineCache.getReference().cacheCurrentUser(testDriver);
         OfflineCache.getReference().cacheCurrentRideRequest(testRideRequest);
 
@@ -84,37 +86,44 @@ public class DriverInstrumentedTests {
 
     @Test
     public void testProfileScreen() {
-        //TODO: Verify that we're on the map
+        // Waits until the map fragment opens and tests that it actually opened
+        onView(withId(R.id.driver_map))
+                .check(matches(withId(R.id.driver_map)));
 
+        // Makes sure the drawer menu is closed, then opens it
         onView(withId(R.id.drawer_layout))
-                // Is the drawer closed?
                 .check(matches(isClosed(Gravity.LEFT)))
-                // Open the drawer
                 .perform(DrawerActions.open());
 
         // TODO: Verify that our info is displayed properly in the drawer
 
+        // Use the drawer menu to go to the user's profile screen
         onView(withId(R.id.nav_view))
-                // Click on profile menu item
                 .perform(NavigationViewActions.navigateTo(R.id.nav_profile));
+
+        // Waits until we get to the driver profile screen and tests that we actually get there
+        onView(withId(R.id.driver_profile))
+                .check(matches(withId(R.id.driver_profile)));
+
 
         // TODO: Verify that our info is displayed properly in the profile
 
+        // Makes sure the drawer menu is closed, then opens it
         onView(withId(R.id.drawer_layout))
-                // Is the drawer closed?
                 .check(matches(isClosed(Gravity.LEFT)))
-                // Open the drawer
                 .perform(DrawerActions.open());
 
+        // Use the drawer menu to go to the map screen
         onView(withId(R.id.nav_view))
-                // Click on map menu item
                 .perform(NavigationViewActions.navigateTo(R.id.nav_map));
 
-        // TODO: Verify that we're on the map
+        // Waits until we get back to the map and tests that we actually get there before finishing the test
+        onView(withId(R.id.driver_map))
+                .check(matches(withId(R.id.driver_map)));
     }
 
     @Test
     public void testEditProfileScreen() {
-        // TODO: Test editing info on the profile screen
+        //TODO: Test editing info on the profile screen
     }
 }

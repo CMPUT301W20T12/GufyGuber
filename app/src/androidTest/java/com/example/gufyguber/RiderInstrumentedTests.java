@@ -60,6 +60,7 @@ public class RiderInstrumentedTests {
         testRideRequest = new RideRequest(testRider.getUID(), testDriver.getUID(), testStatus,
                 testFare, testLocation, testTime);
 
+        OfflineCache.getReference().setIgnoreFirestore(true);
         OfflineCache.getReference().cacheCurrentUser(testRider);
         OfflineCache.getReference().cacheCurrentRideRequest(testRideRequest);
 
