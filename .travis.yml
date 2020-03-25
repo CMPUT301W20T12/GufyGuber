@@ -3,8 +3,7 @@ dist: trusty
 
 env:
   global:
-    - ANDROID_TARGET=android-29
-    - ANDROID_EMULATOR_TARGET=android-21
+    - ANDROID_TARGET=android-21
     - ANDROID_ABI=armeabi-v7a
 
 android:
@@ -39,14 +38,12 @@ before_install:
   - yes | sdkmanager "platforms;android-29"
 
   # Get gradle
-  #- chmod +x gradlew
-  #- wget https://services.gradle.org/distributions/gradle-5.3-bin.zip
-  #- unzip -qq gradle-5.3-bin.zip
-  #- export GRADLE_HOME=$PWD/gradle-5.3
-  #- export PATH=$GRADLE_HOME/bin:$PATH
-  
-  # Build the project
-  #- gradle -v
+  - chmod +x gradlew
+  - wget https://services.gradle.org/distributions/gradle-6.3-bin.zip
+  - unzip -qq gradle-6.3-bin.zip
+  - export GRADLE_HOME=$PWD/gradle-6.3
+  - export PATH=$GRADLE_HOME/bin:$PATH
+  - gradle -v
   
   # Start the emulator
   - echo no | android create avd --force -n test -t $ANDROID_TARGET --abi $ANDROID_ABI -c 100M
