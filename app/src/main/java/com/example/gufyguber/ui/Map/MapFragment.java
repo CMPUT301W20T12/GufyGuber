@@ -93,78 +93,83 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         isDriver = (OfflineCache.getReference().retrieveCurrentUser() instanceof Driver);
 
-        // Start by syncing any current requests with Firebase in case the app was closed and opened
-        if (isDriver) {
-            // For the driver, having the Rider UID will be enough to keep it synced later on with a cheaper query
-            FirebaseManager.getReference().fetchRideRequestsWithStatus(RideRequest.Status.ACCEPTED, new FirebaseManager.ReturnValueListener<ArrayList<RideRequest>>() {
-                @Override
-                public void returnValue(ArrayList<RideRequest> value) {
-                    if (value == null) {
-                        return;
-                    }
-
-                    for (RideRequest request : value) {
-                        if (request.getDriverUID().equalsIgnoreCase(FirebaseAuth.getInstance().getCurrentUser().getUid())) {
-                            OfflineCache.getReference().cacheCurrentRideRequest(request);
-                            onRideRequestUpdated(request);
-                        }
-                    }
-                }
-            });
-            FirebaseManager.getReference().fetchRideRequestsWithStatus(RideRequest.Status.CONFIRMED, new FirebaseManager.ReturnValueListener<ArrayList<RideRequest>>() {
-                @Override
-                public void returnValue(ArrayList<RideRequest> value) {
-                    if (value == null) {
-                        return;
-                    }
-
-                    for (RideRequest request : value) {
-                        if (request.getDriverUID().equalsIgnoreCase(FirebaseAuth.getInstance().getCurrentUser().getUid())) {
-                            OfflineCache.getReference().cacheCurrentRideRequest(request);
-                            onRideRequestUpdated(request);
-                        }
-                    }
-                }
-            });
-            FirebaseManager.getReference().fetchRideRequestsWithStatus(RideRequest.Status.EN_ROUTE, new FirebaseManager.ReturnValueListener<ArrayList<RideRequest>>() {
-                @Override
-                public void returnValue(ArrayList<RideRequest> value) {
-                    if (value == null) {
-                        return;
-                    }
-
-                    for (RideRequest request : value) {
-                        if (request.getDriverUID().equalsIgnoreCase(FirebaseAuth.getInstance().getCurrentUser().getUid())) {
-                            OfflineCache.getReference().cacheCurrentRideRequest(request);
-                            onRideRequestUpdated(request);
-                        }
-                    }
-                }
-            });
-            FirebaseManager.getReference().fetchRideRequestsWithStatus(RideRequest.Status.ARRIVED, new FirebaseManager.ReturnValueListener<ArrayList<RideRequest>>() {
-                @Override
-                public void returnValue(ArrayList<RideRequest> value) {
-                    if (value == null) {
-                        return;
-                    }
-
-                    for (RideRequest request : value) {
-                        if (request.getDriverUID().equalsIgnoreCase(FirebaseAuth.getInstance().getCurrentUser().getUid())) {
-                            OfflineCache.getReference().cacheCurrentRideRequest(request);
-                            onRideRequestUpdated(request);
-                        }
-                    }
-                }
-            });
-
+        // Have cached request, no need to refresh
+        if (OfflineCache.getReference().retrieveCurrentRideRequest() != null) {
+            onRideRequestUpdated(OfflineCache.getReference().retrieveCurrentRideRequest());
         } else {
-            FirebaseManager.getReference().fetchRideRequest(FirebaseAuth.getInstance().getCurrentUser().getUid(), new FirebaseManager.ReturnValueListener<RideRequest>() {
-                @Override
-                public void returnValue(RideRequest value) {
-                    OfflineCache.getReference().cacheCurrentRideRequest(value);
-                    onRideRequestUpdated(value);
-                }
-            });
+            // Start by syncing any current requests with Firebase in case the app was closed and opened
+            if (isDriver) {
+                // For the driver, having the Rider UID will be enough to keep it synced later on with a cheaper query
+                FirebaseManager.getReference().fetchRideRequestsWithStatus(RideRequest.Status.ACCEPTED, new FirebaseManager.ReturnValueListener<ArrayList<RideRequest>>() {
+                    @Override
+                    public void returnValue(ArrayList<RideRequest> value) {
+                        if (value == null) {
+                            return;
+                        }
+
+                        for (RideRequest request : value) {
+                            if (request.getDriverUID().equalsIgnoreCase(FirebaseAuth.getInstance().getCurrentUser().getUid())) {
+                                OfflineCache.getReference().cacheCurrentRideRequest(request);
+                                onRideRequestUpdated(request);
+                            }
+                        }
+                    }
+                });
+                FirebaseManager.getReference().fetchRideRequestsWithStatus(RideRequest.Status.CONFIRMED, new FirebaseManager.ReturnValueListener<ArrayList<RideRequest>>() {
+                    @Override
+                    public void returnValue(ArrayList<RideRequest> value) {
+                        if (value == null) {
+                            return;
+                        }
+
+                        for (RideRequest request : value) {
+                            if (request.getDriverUID().equalsIgnoreCase(FirebaseAuth.getInstance().getCurrentUser().getUid())) {
+                                OfflineCache.getReference().cacheCurrentRideRequest(request);
+                                onRideRequestUpdated(request);
+                            }
+                        }
+                    }
+                });
+                FirebaseManager.getReference().fetchRideRequestsWithStatus(RideRequest.Status.EN_ROUTE, new FirebaseManager.ReturnValueListener<ArrayList<RideRequest>>() {
+                    @Override
+                    public void returnValue(ArrayList<RideRequest> value) {
+                        if (value == null) {
+                            return;
+                        }
+
+                        for (RideRequest request : value) {
+                            if (request.getDriverUID().equalsIgnoreCase(FirebaseAuth.getInstance().getCurrentUser().getUid())) {
+                                OfflineCache.getReference().cacheCurrentRideRequest(request);
+                                onRideRequestUpdated(request);
+                            }
+                        }
+                    }
+                });
+                FirebaseManager.getReference().fetchRideRequestsWithStatus(RideRequest.Status.ARRIVED, new FirebaseManager.ReturnValueListener<ArrayList<RideRequest>>() {
+                    @Override
+                    public void returnValue(ArrayList<RideRequest> value) {
+                        if (value == null) {
+                            return;
+                        }
+
+                        for (RideRequest request : value) {
+                            if (request.getDriverUID().equalsIgnoreCase(FirebaseAuth.getInstance().getCurrentUser().getUid())) {
+                                OfflineCache.getReference().cacheCurrentRideRequest(request);
+                                onRideRequestUpdated(request);
+                            }
+                        }
+                    }
+                });
+
+            } else {
+                FirebaseManager.getReference().fetchRideRequest(FirebaseAuth.getInstance().getCurrentUser().getUid(), new FirebaseManager.ReturnValueListener<RideRequest>() {
+                    @Override
+                    public void returnValue(RideRequest value) {
+                        OfflineCache.getReference().cacheCurrentRideRequest(value);
+                        onRideRequestUpdated(value);
+                    }
+                });
+            }
         }
 
         if (isDriver) {
@@ -460,8 +465,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
     }
 
     public void onRideRequestUpdated(RideRequest updatedValue) {
-        OfflineCache.getReference().cacheCurrentRideRequest(updatedValue);
-
         if (mMap == null) {
             Log.e(TAG, "Map shouldn't be null.");
             return;

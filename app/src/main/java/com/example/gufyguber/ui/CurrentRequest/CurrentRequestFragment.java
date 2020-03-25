@@ -136,33 +136,27 @@ public class CurrentRequestFragment extends Fragment implements FirebaseManager.
         driverContactBtn = view.findViewById(R.id.driver_contact_button);
         riderContactBtn = view.findViewById(R.id.rider_contact_button);
 
-        if (OfflineCache.getReference().retrieveCurrentRideRequest() != null && !isDriver) {
-            cancelBtn.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (GlobalDoubleClickHandler.isDoubleClick()) {
-                        return;
-                    }
-
-                    new CancelRequestFragment().show(getFragmentManager(), "cancel_request_fragment");
-                }
-            });
-            if (FirebaseManager.getReference().isOnline(getContext())) {
-                FirebaseManager.getReference().fetchRideRequest(FirebaseAuth.getInstance().getCurrentUser().getUid(), new FirebaseManager.ReturnValueListener<RideRequest>() {
+        if (OfflineCache.getReference().retrieveCurrentRideRequest() != null) {
+            if (isDriver) {
+                updateUIDriver(OfflineCache.getReference().retrieveCurrentRideRequest());
+            } else {
+                cancelBtn.setOnClickListener(new View.OnClickListener() {
                     @Override
-                    public void returnValue(RideRequest value) {
-                        // Cache latest version of request (might be null, but this corresponds to a delete)
-                        OfflineCache.getReference().cacheCurrentRideRequest(value);
-                        updateUIRider(value);
+                    public void onClick(View v) {
+                        if (GlobalDoubleClickHandler.isDoubleClick()) {
+                            return;
+                        }
+
+                        new CancelRequestFragment().show(getFragmentManager(), "cancel_request_fragment");
                     }
                 });
-            } else {
                 updateUIRider(OfflineCache.getReference().retrieveCurrentRideRequest());
             }
         } else {
-            updateUIDriver(OfflineCache.getReference().retrieveCurrentRideRequest());
+            updateUIDriver(null);
         }
     }
+
     private void updateUIDriver(final RideRequest request) {
         if (request != null) {
             FirebaseManager.getReference().fetchRiderInfo(request.getRiderUID(), new FirebaseManager.ReturnValueListener<Rider>() {
