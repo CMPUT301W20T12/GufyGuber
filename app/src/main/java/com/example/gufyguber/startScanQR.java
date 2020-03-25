@@ -23,6 +23,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
@@ -38,7 +39,6 @@ import com.google.android.gms.vision.barcode.Barcode;
  */
 
 public class startScanQR extends AppCompatActivity {
-    Button scan;
     TextView result;
 
     public static final int REQUEST_CODE = 100;
@@ -51,20 +51,14 @@ public class startScanQR extends AppCompatActivity {
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        scan = findViewById(R.id.scan);
         result = findViewById(R.id.result);
 
         if(ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String [] {Manifest.permission.CAMERA}, PERMISSION_REQUEST);
         }
 
-        scan.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(startScanQR.this, Scan.class);
-                startActivityForResult(intent, REQUEST_CODE);
-            }
-        });
+        Intent intent = new Intent(startScanQR.this, Scan.class);
+        startActivityForResult(intent, REQUEST_CODE);
     }
 
     /**
@@ -80,10 +74,18 @@ public class startScanQR extends AppCompatActivity {
                     @Override
                     public void run() {
                         result.setText(barcode.displayValue);
+                        FirebaseManager.getReference().completeRide(OfflineCache.getReference().retrieveCurrentRideRequest(), new FirebaseManager.ReturnValueListener<RideRequest>() {
+                            @Override
+                            public void returnValue(RideRequest value) {
+                                if (value != null) {
+                                    OfflineCache.getReference().cacheCurrentRideRequest(value);
+                                    finish();
+                                }
+                            }
+                        });
                     }
                 });
             }
         }
     }
-
 }

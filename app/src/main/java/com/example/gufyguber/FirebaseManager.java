@@ -41,6 +41,7 @@ import com.google.firebase.firestore.QuerySnapshot;
 
 import org.w3c.dom.Document;
 
+import java.io.BufferedOutputStream;
 import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Date;
@@ -103,6 +104,7 @@ public class FirebaseManager {
 
     // Ride Request Keys
     public static final String RIDE_REQUEST_COLLECTION = "ride_requests";
+    public static final String DRIVER_ACCEPTED_REQUESTS = "driver_accepted_requests";
     public static final String STATUS_KEY = "status";
     public static final String DRIVER_KEY = "driver_uid";
     public static final String FARE_KEY = "fare";
@@ -243,17 +245,21 @@ public class FirebaseManager {
      * Deletes a Ride Request record from our cloud Firestore
      * @param riderUID The Rider UID associated with the ride request to be deleted
      */
-    public void deleteRideRequest(final String riderUID) {
+    public void deleteRideRequest(final String riderUID, final ReturnValueListener<Boolean> returnFunction) {
         DocumentReference requestDoc = FirebaseFirestore.getInstance().collection(RIDE_REQUEST_COLLECTION).document(riderUID);
-        requestDoc.delete();
+        requestDoc.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                returnFunction.returnValue(Boolean.TRUE);
+            }
+        });
     }
-
     /**
      * Allows a driver to accept a ride request if it hasn't already been accepted
      * @param driverUID The UID of the driver user that is attempting to accept this ride request
      * @return True if the request acceptance succeeded, false otherwise
      */
-    public void driverAcceptRideRequest(final String driverUID, RideRequest request, final ReturnValueListener<Boolean> returnFunction) {
+    public void driverAcceptRideRequest(final String driverUID, final RideRequest request, final ReturnValueListener<Boolean> returnFunction) {
         fetchRideRequest(request.getRiderUID(), new ReturnValueListener<RideRequest>() {
             @Override
             public void returnValue(RideRequest value) {
@@ -283,6 +289,45 @@ public class FirebaseManager {
                 storeRideRequest(value);
                 OfflineCache.getReference().cacheCurrentRideRequest(value);
 
+                returnFunction.returnValue(true);
+                return;
+            }
+        });
+    }
+
+    /**
+     *
+     * @param riderUID
+     * @param request
+     * @param returnFunction
+     */
+    public void riderAcceptDriverOffer(String riderUID, RideRequest request, final ReturnValueListener<Boolean> returnFunction) {
+        fetchRideRequest(riderUID, new ReturnValueListener<RideRequest>() {
+            @Override
+            public void returnValue(RideRequest value) {
+                value.setStatus(value.getDriverUID() == null ? RideRequest.Status.ACCEPTED : RideRequest.Status.CONFIRMED);
+                storeRideRequest(value);
+                OfflineCache.getReference().cacheCurrentRideRequest(value);
+                returnFunction.returnValue(true);
+                return;
+            }
+        });
+    }
+
+    /**
+     *
+     * @param riderUID
+     * @param request
+     * @param returnFunction
+     */
+    public void riderDeclineDriverOffer(String riderUID, RideRequest request, final ReturnValueListener<Boolean> returnFunction) {
+        fetchRideRequest(riderUID, new ReturnValueListener<RideRequest>() {
+            @Override
+            public void returnValue(RideRequest value) {
+                value.setDriverUID(null);
+                value.setStatus(value.getDriverUID() == null ? RideRequest.Status.PENDING : RideRequest.Status.ACCEPTED);
+                storeRideRequest(value);
+                OfflineCache.getReference().cacheCurrentRideRequest(value);
                 returnFunction.returnValue(true);
                 return;
             }
@@ -614,6 +659,50 @@ public class FirebaseManager {
                         Log.d(TAG, "Document does not exist");
                         returnFunction.returnValue(Boolean.FALSE);
                     }
+                }
+            }
+        });
+    }
+
+    /**
+     *
+     * @param request
+     */
+    public void confirmPickup(RideRequest request) {
+        request.setStatus(RideRequest.Status.EN_ROUTE);
+        storeRideRequest(request);
+        OfflineCache.getReference().cacheCurrentRideRequest(request);
+    }
+
+    /**
+     *
+     * @param request
+     */
+    public void confirmArrival(RideRequest request, final ReturnValueListener<Boolean> returnFunction) {
+        request.setStatus(RideRequest.Status.ARRIVED);
+        storeRideRequest(request);
+        fetchRideRequest(request.getRiderUID(), new ReturnValueListener<RideRequest>() {
+            @Override
+            public void returnValue(RideRequest value) {
+                if(value.getStatus().toString().equals("Arrived")) {
+                    returnFunction.returnValue(Boolean.TRUE);
+                } else {
+                    returnFunction.returnValue(Boolean.FALSE);
+                }
+            }
+        });
+    }
+
+    public void completeRide(RideRequest request, final ReturnValueListener<RideRequest> returnFunction) {
+        request.setStatus(RideRequest.Status.COMPLETED);
+        storeRideRequest(request);
+        fetchRideRequest(request.getRiderUID(), new ReturnValueListener<RideRequest>() {
+            @Override
+            public void returnValue(RideRequest value) {
+                if(value.getStatus().toString().equals("Completed")) {
+                    returnFunction.returnValue(value);
+                } else {
+                    returnFunction.returnValue(null);
                 }
             }
         });

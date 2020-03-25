@@ -35,6 +35,7 @@ import androidx.fragment.app.DialogFragment;
  * This activity is the fragment for the end of the ride for the Driver.
  *
  * @author kenzbauer
+ * @deprecated
  */
 
 public class ScanQrFragment extends DialogFragment {

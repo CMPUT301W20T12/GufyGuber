@@ -23,6 +23,7 @@
 package com.example.gufyguber;
 
 import android.app.ActionBar;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.widget.ImageView;
@@ -30,6 +31,7 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.firebase.firestore.ListenerRegistration;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.MultiFormatWriter;
 import com.google.zxing.WriterException;
@@ -43,18 +45,19 @@ import com.journeyapps.barcodescanner.BarcodeEncoder;
  *      and the cost of the ride.
  */
 
-public class GenerateQR extends AppCompatActivity {
+public class GenerateQR extends AppCompatActivity implements FirebaseManager.RideRequestListener {
     BitMatrix matrix;
     Bitmap map;
     String codeMessage;
     ImageView qrCode;
     TextView qrMessage;
+    ListenerRegistration rideRequestListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.generate_qr);
-
+        rideRequestListener = FirebaseManager.getReference().listenToRideRequest(OfflineCache.getReference().retrieveCurrentRideRequest().getRiderUID(), this);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         qrCode = findViewById(R.id.qrCode);
@@ -87,4 +90,27 @@ public class GenerateQR extends AppCompatActivity {
         }
     }
 
+    @Override
+    protected void onDestroy() {
+        if(rideRequestListener != null) {
+            rideRequestListener.remove();
+            rideRequestListener = null;
+        }
+        super.onDestroy();
+    }
+
+    @Override
+    public void onBackPressed() {
+        Intent intent = new Intent(this, NavigationActivity.class);
+        startActivity(intent);
+    }
+
+    @Override
+    public void onRideRequestUpdated(RideRequest updatedRequest) {
+        if(updatedRequest != null){
+            if(updatedRequest.getStatus() != RideRequest.Status.ARRIVED) {
+                onBackPressed();
+            }
+        }
+    }
 }
