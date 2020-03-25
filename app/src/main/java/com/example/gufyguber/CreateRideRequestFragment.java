@@ -21,6 +21,7 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -138,6 +139,10 @@ public class CreateRideRequestFragment extends DialogFragment {
         positiveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (GlobalDoubleClickHandler.isDoubleClick()) {
+                    return;
+                }
+
                 if (validateEntries()) {
                     RideRequest newRequest = new RideRequest(FirebaseAuth.getInstance().getCurrentUser().getUid(),
                             Float.parseFloat(fareEditText.getText().toString().replaceAll("[$]","")),
@@ -155,6 +160,10 @@ public class CreateRideRequestFragment extends DialogFragment {
         negativeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (GlobalDoubleClickHandler.isDoubleClick()) {
+                    return;
+                }
+
                 if (onCreationCancelledListener != null) {
                     onCreationCancelledListener.onRideRequestCreationCancelled();
                 }
@@ -165,6 +174,10 @@ public class CreateRideRequestFragment extends DialogFragment {
         startLocationEditText.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (GlobalDoubleClickHandler.isDoubleClick()) {
+                    return;
+                }
+
                 settingStart = true;
                 if (fareEditText.getText().length() > 0) {
                     tempFare = Float.parseFloat(fareEditText.getText().toString().replaceAll("[$]", ""));
@@ -176,6 +189,10 @@ public class CreateRideRequestFragment extends DialogFragment {
         endLocationEditText.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (GlobalDoubleClickHandler.isDoubleClick()) {
+                    return;
+                }
+
                 settingEnd = true;
                 if (fareEditText.getText().length() > 0) {
                     tempFare = Float.parseFloat(fareEditText.getText().toString().replaceAll("[$]", ""));

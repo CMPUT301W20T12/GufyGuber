@@ -97,6 +97,10 @@ public class SignInActivity extends AppCompatActivity {
         signInButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (GlobalDoubleClickHandler.isDoubleClick()) {
+                    return;
+                }
+
                 signIn();
             }
         });

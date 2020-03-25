@@ -66,6 +66,10 @@ public class DriverAcceptFragment extends DialogFragment {
         accept.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (GlobalDoubleClickHandler.isDoubleClick()) {
+                    return;
+                }
+
                 if (OfflineCache.getReference().retrieveCurrentRideRequest() != null) {
                     OfflineCache.getReference().retrieveCurrentRideRequest().setStatus(RideRequest.Status.ACCEPTED);
                     FirebaseManager.getReference().storeRideRequest(OfflineCache.getReference().retrieveCurrentRideRequest());
@@ -86,6 +90,10 @@ public class DriverAcceptFragment extends DialogFragment {
         decline.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (GlobalDoubleClickHandler.isDoubleClick()) {
+                    return;
+                }
+
                 FirebaseManager.getReference().riderDeclineDriverOffer(OfflineCache.getReference().retrieveCurrentUser().getUID(), OfflineCache.getReference().retrieveCurrentRideRequest(), new FirebaseManager.ReturnValueListener<Boolean>() {
                     @Override
                     public void returnValue(Boolean value) {

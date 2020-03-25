@@ -35,6 +35,7 @@ import androidx.lifecycle.ViewModelProviders;
 
 import com.example.gufyguber.Driver;
 import com.example.gufyguber.FirebaseManager;
+import com.example.gufyguber.GlobalDoubleClickHandler;
 import com.example.gufyguber.NavigationActivity;
 import com.example.gufyguber.OfflineCache;
 import com.example.gufyguber.R;
@@ -154,6 +155,10 @@ public class ProfileFragment extends Fragment {
         editProfile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (GlobalDoubleClickHandler.isDoubleClick()) {
+                    return;
+                }
+
                 // when user clicks the edit button, change the fields to be editable
                 firstNameText.setEnabled(true);
                 lastNameText.setEnabled(true);
@@ -174,6 +179,10 @@ public class ProfileFragment extends Fragment {
         saveProfile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (GlobalDoubleClickHandler.isDoubleClick()) {
+                    return;
+                }
+
                 if(validateForm()) {    // check that all fields are filled in
                     String userEmail = emailText.getText().toString().toLowerCase();
                     String userFirstName = firstNameText.getText().toString();

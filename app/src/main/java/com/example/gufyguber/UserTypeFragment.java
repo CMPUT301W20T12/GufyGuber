@@ -72,6 +72,10 @@ public class UserTypeFragment extends DialogFragment {
         riderButton.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v){
+                if (GlobalDoubleClickHandler.isDoubleClick()) {
+                    return;
+                }
+
                 userType = "Rider";
                 Intent intent  = new Intent(getActivity(), RegisterUserActivity.class);
                 // pass account info into fragment to auto-pop some details in registration form
@@ -90,6 +94,10 @@ public class UserTypeFragment extends DialogFragment {
         driverButton.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v){
+                if (GlobalDoubleClickHandler.isDoubleClick()) {
+                    return;
+                }
+
                 userType = "Driver";
                 Intent intent  = new Intent(getActivity(), RegisterUserActivity.class);
                 Bundle bundle = new Bundle();

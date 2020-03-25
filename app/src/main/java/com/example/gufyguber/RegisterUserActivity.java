@@ -103,6 +103,10 @@ public class RegisterUserActivity extends AppCompatActivity {
         register.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (GlobalDoubleClickHandler.isDoubleClick()) {
+                    return;
+                }
+
                 if(validateForm()) {        // check that all User fields filled in
                     if(userType.equals("Rider")) {
                         newUser = new Rider(UID, email.getText().toString().toLowerCase(),

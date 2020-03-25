@@ -33,6 +33,7 @@ import com.example.gufyguber.CreateRideRequestFragment;
 import com.example.gufyguber.DirectionsManager;
 import com.example.gufyguber.Driver;
 import com.example.gufyguber.FirebaseManager;
+import com.example.gufyguber.GlobalDoubleClickHandler;
 import com.example.gufyguber.LocationInfo;
 import com.example.gufyguber.OfflineCache;
 import com.example.gufyguber.R;
@@ -192,6 +193,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                if (GlobalDoubleClickHandler.isDoubleClick()) {
+                    return;
+                }
+
                 if (requestDialog == null) {
                     requestDialog = new CreateRideRequestFragment();
                 }
