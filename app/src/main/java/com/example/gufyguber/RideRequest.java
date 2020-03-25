@@ -140,6 +140,15 @@ public class RideRequest {
         timeInfo = new TimeInfo();
     }
 
+    /**
+     * Greedy constructor for the RideRequest class
+     * @param riderUID The UID of the rider user that created the request
+     * @param driverUID The UID of the driver user that accepted the request
+     * @param status The current status of the request
+     * @param offeredFare The fare that the rider offered for this request
+     * @param locationInfo The location info for the pickup and dropoff of the request
+     * @param timeInfo The timestamps for important events related to the request
+     */
     public RideRequest(String riderUID, String driverUID, Status status, float offeredFare, LocationInfo locationInfo, TimeInfo timeInfo) {
         setRiderUID(riderUID);
         setDriverUID(driverUID);

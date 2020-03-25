@@ -29,18 +29,39 @@ import static androidx.test.espresso.matcher.ViewMatchers.*;
 
 import androidx.test.rule.ActivityTestRule;
 
+import com.google.android.gms.maps.model.LatLng;
+
 /**
  * Handle some simple instrumented tests that we can do for Riders without Google authentication
  * @author Robert MacGillivray | Mar.24.2020
  */
 public class RiderInstrumentedTests {
+    private Driver testDriver;
+    private Rider testRider;
+    private float testFare;
+    private RideRequest.Status testStatus;
+    private LocationInfo testLocation;
+    private TimeInfo testTime;
+    private RideRequest testRideRequest;
+
     @Rule
     public ActivityTestRule<NavigationActivity> navigationActivityRule = new ActivityTestRule<>(NavigationActivity.class, false, false);
 
     @Before
     public void init() {
-        OfflineCache.getReference().cacheCurrentUser(new Rider("1234", "user@test.com",
-                "TestFN", "TestLN", "(123)456-7890"));
+        testDriver = new Driver("1234", "user@test.com", "TestFN", "TestLN", "(123)456-7890",
+                new Vehicle("TestModel", "TestMake", "TestPlate", 1));
+        testRider = new Rider("4321", "test@user.com", "FNTest", "LNTest", "(098)765-4321");
+        testFare = 13.0f;
+        testStatus = RideRequest.Status.CONFIRMED;
+        testLocation = new LocationInfo(new LatLng(13, 13), new LatLng(31, 31));
+        testTime = new TimeInfo();
+        testTime.setRequestAcceptedTime();
+        testRideRequest = new RideRequest(testRider.getUID(), testDriver.getUID(), testStatus,
+                testFare, testLocation, testTime);
+
+        OfflineCache.getReference().cacheCurrentUser(testRider);
+        OfflineCache.getReference().cacheCurrentRideRequest(testRideRequest);
 
         Intent intent = new Intent(Intent.ACTION_PICK);
         navigationActivityRule.launchActivity(intent);
