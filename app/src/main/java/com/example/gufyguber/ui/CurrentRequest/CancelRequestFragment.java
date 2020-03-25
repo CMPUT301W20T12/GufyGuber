@@ -15,6 +15,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 
 import com.example.gufyguber.FirebaseManager;
+import com.example.gufyguber.GlobalDoubleClickHandler;
 import com.example.gufyguber.LoginActivity;
 import com.example.gufyguber.NavigationActivity;
 import com.example.gufyguber.R;
@@ -48,6 +49,10 @@ public class CancelRequestFragment extends DialogFragment {
         noBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (GlobalDoubleClickHandler.isDoubleClick()) {
+                    return;
+                }
+
                 getFragmentManager().beginTransaction().remove(CancelRequestFragment.this).commit();
             }
         });
@@ -55,6 +60,10 @@ public class CancelRequestFragment extends DialogFragment {
         yesBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (GlobalDoubleClickHandler.isDoubleClick()) {
+                    return;
+                }
+
                 new com.example.gufyguber.ui.CurrentRequest.CancelFragment().show(getFragmentManager(), "cancel_fragment");
                 getFragmentManager().beginTransaction().remove(CancelRequestFragment.this).commit();
                 FirebaseManager.getReference().fetchRideRequest(FirebaseAuth.getInstance().getCurrentUser().getUid(), new FirebaseManager.ReturnValueListener<RideRequest>() {

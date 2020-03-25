@@ -45,6 +45,10 @@ public class LoginActivity extends AppCompatActivity {
         registerButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (GlobalDoubleClickHandler.isDoubleClick()) {
+                    return;
+                }
+
                 new UserTypeFragment().show(getSupportFragmentManager(), "USER_TYPE");
             }
         });
@@ -52,6 +56,10 @@ public class LoginActivity extends AppCompatActivity {
         loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (GlobalDoubleClickHandler.isDoubleClick()) {
+                    return;
+                }
+
                 //Or Use the Navigation activity as base, and the navigation menu to select map fragment.
                 Intent openNavigation = new Intent(LoginActivity.this,NavigationActivity.class);
                 startActivity(openNavigation);

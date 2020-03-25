@@ -35,6 +35,7 @@ import androidx.lifecycle.ViewModelProviders;
 import com.example.gufyguber.Driver;
 import com.example.gufyguber.FirebaseManager;
 import com.example.gufyguber.GenerateQR;
+import com.example.gufyguber.GlobalDoubleClickHandler;
 import com.example.gufyguber.LocationInfo;
 import com.example.gufyguber.OfflineCache;
 import com.example.gufyguber.R;
@@ -139,8 +140,11 @@ public class CurrentRequestFragment extends Fragment implements FirebaseManager.
             cancelBtn.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    new CancelRequestFragment().show(getFragmentManager(), "cancel_request_fragment");
+                    if (GlobalDoubleClickHandler.isDoubleClick()) {
+                        return;
+                    }
 
+                    new CancelRequestFragment().show(getFragmentManager(), "cancel_request_fragment");
                 }
             });
             if (FirebaseManager.getReference().isOnline(getContext())) {
@@ -190,6 +194,10 @@ public class CurrentRequestFragment extends Fragment implements FirebaseManager.
                 confirmPickup.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
+                        if (GlobalDoubleClickHandler.isDoubleClick()) {
+                            return;
+                        }
+
                         FirebaseManager.getReference().confirmPickup(request);
                     }
                 });
@@ -202,6 +210,10 @@ public class CurrentRequestFragment extends Fragment implements FirebaseManager.
                 takePayment.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
+                        if (GlobalDoubleClickHandler.isDoubleClick()) {
+                            return;
+                        }
+
                         Intent qrIntent = new Intent(getActivity(), startScanQR.class);
                         startActivity(qrIntent);
                     }
@@ -250,6 +262,10 @@ public class CurrentRequestFragment extends Fragment implements FirebaseManager.
                 confirmArrival.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
+                        if (GlobalDoubleClickHandler.isDoubleClick()) {
+                            return;
+                        }
+
                         FirebaseManager.getReference().confirmArrival(request, new FirebaseManager.ReturnValueListener<Boolean>() {
                             @Override
                             public void returnValue(Boolean value) {
@@ -268,6 +284,9 @@ public class CurrentRequestFragment extends Fragment implements FirebaseManager.
                 makePayment.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
+                        if (GlobalDoubleClickHandler.isDoubleClick()) {
+                            return;
+                        }
                         Intent qrIntent = new Intent(getActivity(), GenerateQR.class);
                         startActivity(qrIntent);
                         getActivity().finish();
@@ -285,6 +304,10 @@ public class CurrentRequestFragment extends Fragment implements FirebaseManager.
         contactBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (GlobalDoubleClickHandler.isDoubleClick()) {
+                    return;
+                }
+
                 Bundle bundle = new Bundle();
                 bundle.putString("email", user.getEmail());
                 bundle.putString("phone", user.getPhoneNumber());

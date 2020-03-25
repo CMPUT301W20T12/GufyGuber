@@ -48,6 +48,10 @@ public class ScanQrFragment extends DialogFragment {
         builder.setPositiveButton("CONFIRM PAYMENT", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
+                if (GlobalDoubleClickHandler.isDoubleClick()) {
+                    return;
+                }
+
                 Intent qrIntent = new Intent(getActivity(), startScanQR.class);
                 startActivity(qrIntent);
             }

@@ -38,6 +38,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 
+import com.example.gufyguber.GlobalDoubleClickHandler;
 import com.example.gufyguber.R;
 
 
@@ -85,25 +86,33 @@ public class UserContactInformationFragment extends DialogFragment {
         contactPhone.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                    Intent intent = new Intent(Intent.ACTION_DIAL);
-                    intent.setData(Uri.parse("tel:" + phoneNumber));
-                    if (intent.resolveActivity(getActivity().getPackageManager()) != null) {
-                        startActivity(intent);
-                    }
+                if (GlobalDoubleClickHandler.isDoubleClick()) {
+                    return;
+                }
+
+                Intent intent = new Intent(Intent.ACTION_DIAL);
+                intent.setData(Uri.parse("tel:" + phoneNumber));
+                if (intent.resolveActivity(getActivity().getPackageManager()) != null) {
+                    startActivity(intent);
+                }
             }
         });
 
         contactEmail.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                    String [] recipient = {email};
-                    Intent intent = new Intent(Intent.ACTION_SENDTO);
-                    intent.setData(Uri.parse("mailto:")); // only email apps should handle this
-                    intent.putExtra(Intent.EXTRA_EMAIL, recipient);
-                    intent.putExtra(Intent.EXTRA_SUBJECT, "GufyGuber Ride Request Inquiry");
-                    if (intent.resolveActivity(getActivity().getPackageManager()) != null) {
-                        startActivity(intent);
-                    }
+                if (GlobalDoubleClickHandler.isDoubleClick()) {
+                    return;
+                }
+
+                String [] recipient = {email};
+                Intent intent = new Intent(Intent.ACTION_SENDTO);
+                intent.setData(Uri.parse("mailto:")); // only email apps should handle this
+                intent.putExtra(Intent.EXTRA_EMAIL, recipient);
+                intent.putExtra(Intent.EXTRA_SUBJECT, "GufyGuber Ride Request Inquiry");
+                if (intent.resolveActivity(getActivity().getPackageManager()) != null) {
+                    startActivity(intent);
+                }
             }
         });
 
