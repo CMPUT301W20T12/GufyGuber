@@ -221,7 +221,7 @@ public class NavigationActivity extends AppCompatActivity implements RideRequest
                 break;
             case CANCELLED:
                 if (OfflineCache.getReference().retrieveCurrentUser() instanceof Driver) {
-                    toast.setText("Your ride offer was rejected.");
+                    toast.setText("The ride request was canceled.");
                     toast.show();
                 }
                 break;
