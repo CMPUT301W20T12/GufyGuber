@@ -58,6 +58,7 @@ public class DriverInstrumentedTests {
 
     @After
     public void cleanup() {
+        OfflineCache.getReference().clearCache();
         navigationActivityRule.finishActivity();
     }
 
