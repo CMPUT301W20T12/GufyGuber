@@ -207,17 +207,19 @@ public class ProfileFragment extends Fragment {
                         OfflineCache.getReference().cacheCurrentUser(updatedRider);
                         FirebaseManager.getReference().storeRiderInfo(updatedRider);
                         // update the authentication email for the firebase project
-                        FirebaseAuth.getInstance().getCurrentUser().updateEmail(userEmail)
-                                .addOnCompleteListener(new OnCompleteListener<Void>() {
-                                    @Override
-                                    public void onComplete(@NonNull Task<Void> task) {
-                                        if (task.isSuccessful()) {
-                                            Log.d(TAG, "User email address updated.");
-                                        } else {
-                                            Log.d(TAG, "Failed to update user email address.");
+                        if (FirebaseAuth.getInstance() != null && FirebaseAuth.getInstance().getCurrentUser() != null) {
+                            FirebaseAuth.getInstance().getCurrentUser().updateEmail(userEmail)
+                                    .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                        @Override
+                                        public void onComplete(@NonNull Task<Void> task) {
+                                            if (task.isSuccessful()) {
+                                                Log.d(TAG, "User email address updated.");
+                                            } else {
+                                                Log.d(TAG, "Failed to update user email address.");
+                                            }
                                         }
-                                    }
-                                });
+                                    });
+                        }
                     }
                     Toast.makeText(getContext(), "Profile successfully updated", Toast.LENGTH_LONG).show();
                     closeFragment();// head back to map after updated
