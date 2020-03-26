@@ -210,7 +210,7 @@ public class ProfileFragment extends Fragment {
                                 makeText.getText().toString(),
                                 plateText.getText().toString(),
                                 Integer.parseInt(seatText.getText().toString())));
-                        // update the authentication email for the firebase projec
+                        // update the authentication email for the firebase project
                         FirebaseAuth.getInstance().getCurrentUser().updateEmail(userEmail)
                                 .addOnCompleteListener(new OnCompleteListener<Void>() {
                                     @Override

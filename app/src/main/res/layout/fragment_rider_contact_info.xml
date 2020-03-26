@@ -14,9 +14,9 @@
   ~  See the License for the specific language governing permissions and
   ~  limitations under the License.
   ~
-  ~ fragment_contact_info.xml
+  ~ fragment_rider_contact_info.xml
   ~
-  ~ Last edit: hmp, 18/03/20 4:42 PM
+  ~ Last edit: homie, 25/03/20 6:27 PM
   ~
   ~ Version
   -->
@@ -37,25 +37,35 @@
         android:textStyle="bold"
         android:background="@color/colorPrimaryDark"/>
 
+    <ImageView
+        android:id="@+id/driver_image"
+        android:layout_width="85dp"
+        android:layout_height="64dp"
+        android:layout_gravity="center"
+        android:layout_margin="20sp"
+        android:src="@drawable/ic_menu_profile" />
+
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
         android:orientation="horizontal">
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="20sp"
-            android:padding="15dp"
             android:layout_marginLeft="20dp"
+            android:padding="15dp"
             android:text="Email: "
-            />
+            android:textSize="20sp" />
+
         <TextView
             android:id="@+id/contact_email"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="20sp"/>
     </LinearLayout>
+
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -67,14 +77,15 @@
             android:textSize="20sp"
             android:padding="15dp"
             android:layout_marginLeft="20dp"
-            android:text="Phone: "
-            />
+            android:text="Phone: "/>
+
         <TextView
             android:id="@+id/contact_phone"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="20sp"/>
     </LinearLayout>
+
 
     <LinearLayout
         android:layout_width="wrap_content"
@@ -119,4 +130,3 @@
     </LinearLayout>
 
 </LinearLayout>
-
