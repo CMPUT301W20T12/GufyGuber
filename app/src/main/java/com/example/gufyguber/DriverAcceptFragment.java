@@ -70,10 +70,7 @@ public class DriverAcceptFragment extends DialogFragment {
                     return;
                 }
 
-                if (OfflineCache.getReference().retrieveCurrentRideRequest() != null) {
-                    OfflineCache.getReference().retrieveCurrentRideRequest().setStatus(RideRequest.Status.ACCEPTED);
-                    FirebaseManager.getReference().storeRideRequest(OfflineCache.getReference().retrieveCurrentRideRequest());
-                }
+                // Attempt to accept the request. Show an error popup if it fails.
                 FirebaseManager.getReference().riderAcceptDriverOffer(OfflineCache.getReference().retrieveCurrentUser().getUID(), OfflineCache.getReference().retrieveCurrentRideRequest(), new FirebaseManager.ReturnValueListener<Boolean>() {
                     @Override
                     public void returnValue(Boolean value) {

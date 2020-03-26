@@ -20,6 +20,7 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -44,6 +45,9 @@ public class startScanQR extends AppCompatActivity {
     public static final int REQUEST_CODE = 100;
     public static final int PERMISSION_REQUEST = 200;
 
+    private static final String TAG = "startScanQR";
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -52,13 +56,42 @@ public class startScanQR extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         result = findViewById(R.id.result);
-        
-        if(ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String [] {Manifest.permission.CAMERA}, PERMISSION_REQUEST);
-        }
 
-        Intent intent = new Intent(startScanQR.this, Scan.class);
-        startActivityForResult(intent, REQUEST_CODE);
+        if(ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
+                    Manifest.permission.CAMERA)) {
+                // Show an explanation to the user *asynchronously*
+                new CameraRationaleFragment().show(getSupportFragmentManager(), "camera_rationale");
+            }else {
+                // request the permission
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, PERMISSION_REQUEST);
+            }
+        } else{
+            // permission already granted
+            // proceed to receive payment
+            Intent intent = new Intent(startScanQR.this, Scan.class);
+            startActivityForResult(intent, REQUEST_CODE);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String[] permissions, int[] grantResults) {
+        switch (requestCode) {
+            case PERMISSION_REQUEST: {
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // permission granted
+                    // proceed to receive payment
+                    Intent intent = new Intent(startScanQR.this, Scan.class);
+                    startActivityForResult(intent, REQUEST_CODE);
+                } else {
+                    // permission is denied
+                    // return back to navigation activity
+                    finish();
+                }
+            }
+        }
     }
 
     /**
@@ -74,11 +107,12 @@ public class startScanQR extends AppCompatActivity {
                     @Override
                     public void run() {
                         result.setText(barcode.displayValue);
-                        FirebaseManager.getReference().completeRide(OfflineCache.getReference().retrieveCurrentRideRequest(), new FirebaseManager.ReturnValueListener<RideRequest>() {
+                        FirebaseManager.getReference().completeRide(OfflineCache.getReference().retrieveCurrentRideRequest(), new FirebaseManager.ReturnValueListener<Boolean>() {
                             @Override
-                            public void returnValue(RideRequest value) {
-                                if (value != null) {
-                                    OfflineCache.getReference().cacheCurrentRideRequest(value);
+                            public void returnValue(Boolean value) {
+                                if (value == null) {
+                                    Log.e(TAG, "Setting ride request to complete failed.");
+                                } else {
                                     finish();
                                 }
                             }

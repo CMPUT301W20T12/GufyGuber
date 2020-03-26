@@ -144,7 +144,7 @@ public class CreateRideRequestFragment extends DialogFragment {
                 }
 
                 if (validateEntries()) {
-                    RideRequest newRequest = new RideRequest(FirebaseAuth.getInstance().getCurrentUser().getUid(),
+                    RideRequest newRequest = new RideRequest(OfflineCache.getReference().retrieveCurrentUser().getUID(),
                             Float.parseFloat(fareEditText.getText().toString().replaceAll("[$]","")),
                             tempLocationInfo);
                     if (onCreatedListener != null) {
@@ -242,5 +242,19 @@ public class CreateRideRequestFragment extends DialogFragment {
         return (!TextUtils.isEmpty(fareEditText.getText().toString()) &&
                 !TextUtils.isEmpty(startLocationEditText.getText().toString()) &&
                 !TextUtils.isEmpty(endLocationEditText.getText().toString()));
+    }
+
+    /**
+     * @return True if this dialog already had a pickup location
+     */
+    public boolean hasPickupData() {
+        return (tempLocationInfo != null && tempLocationInfo.getPickup() != null);
+    }
+
+    /**
+     * @return True if this dialog already has a dropoff location
+     */
+    public boolean hasDropoffData() {
+        return (tempLocationInfo != null && tempLocationInfo.getDropoff() != null);
     }
 }

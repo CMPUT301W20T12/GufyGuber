@@ -77,7 +77,11 @@ public class LocationInfo {
     }
 
     public static String latlngToString(LatLng latlng) {
-        return String.format("(%f, %f)", latlng.latitude, latlng.longitude);
+        if (latlng != null) {
+            return String.format("(%f, %f)", latlng.latitude, latlng.longitude);
+        } else {
+            return "(null, null)";
+        }
     }
 
     /**

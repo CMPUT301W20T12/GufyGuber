@@ -16,6 +16,7 @@ package com.example.gufyguber.ui.CurrentRequest;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -49,8 +50,8 @@ import com.google.firebase.firestore.ListenerRegistration;
  * @author Nahome
  */
 public class CurrentRequestFragment extends Fragment implements FirebaseManager.RideRequestListener {
+    private static final String TAG = "CurrentRequestFragment";
 
-    private CurrentRequestViewModel currentRequestViewModel;
     private Button cancelBtn;
     private Button confirmPickup;
     private Button confirmArrival;
@@ -72,45 +73,18 @@ public class CurrentRequestFragment extends Fragment implements FirebaseManager.
 
     private boolean isDriver;
 
-    public View onCreateView(@NonNull LayoutInflater inflater,
-                             ViewGroup container, Bundle savedInstanceState) {
-        currentRequestViewModel =
-                ViewModelProviders.of(this).get(CurrentRequestViewModel.class);
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
         isDriver = (OfflineCache.getReference().retrieveCurrentUser() instanceof Driver);
-
-        if (OfflineCache.getReference().retrieveCurrentRideRequest() != null && !isDriver) {
+        if (OfflineCache.getReference().retrieveCurrentRideRequest() != null) {
             rideRequestListener = FirebaseManager.getReference().listenToRideRequest(OfflineCache.getReference().retrieveCurrentRideRequest().getRiderUID(), this);
-            View root = inflater.inflate(R.layout.fragment_current_requests_rider, container, false);
-            //final TextView textView = root.findViewById(R.id.text_current_requests);
-            currentRequestViewModel.getText().observe(getViewLifecycleOwner(), new Observer<String>() {
-                @Override
-                public void onChanged(@Nullable String s) {
-                    //textView.setText(s);
-                }
-            });
-            return root;
-        } else if (OfflineCache.getReference().retrieveCurrentRideRequest() != null && isDriver) {
-            rideRequestListener = FirebaseManager.getReference().listenToRideRequest(OfflineCache.getReference().retrieveCurrentRideRequest().getRiderUID(), this);
-            View root = inflater.inflate(R.layout.fragment_current_requests_driver, container, false);
-            //final TextView textView = root.findViewById(R.id.text_current_requests);
-            currentRequestViewModel.getText().observe(getViewLifecycleOwner(), new Observer<String>() {
-                @Override
-                public void onChanged(@Nullable String s) {
-                    //textView.setText(s);
-                }
-            });
-            return root;
+            if (isDriver) {
+                return inflater.inflate(R.layout.fragment_current_requests_driver, container, false);
+            } else {
+                return inflater.inflate(R.layout.fragment_current_requests_rider, container, false);
+            }
         } else {
-            View root = inflater.inflate(R.layout.no_current_request, container, false);
-            //final TextView textView = root.findViewById(R.id.text_current_requests);
-            currentRequestViewModel.getText().observe(getViewLifecycleOwner(), new Observer<String>() {
-                @Override
-                public void onChanged(@Nullable String s) {
-                    //textView.setText(s);
-                }
-            });
-            return root;
+            return inflater.inflate(R.layout.no_current_request, container, false);
         }
     }
 
@@ -133,40 +107,34 @@ public class CurrentRequestFragment extends Fragment implements FirebaseManager.
         driverContactBtn = view.findViewById(R.id.driver_contact_button);
         riderContactBtn = view.findViewById(R.id.rider_contact_button);
 
-        if (OfflineCache.getReference().retrieveCurrentRideRequest() != null && !isDriver) {
-            cancelBtn.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (GlobalDoubleClickHandler.isDoubleClick()) {
-                        return;
-                    }
-
-                    new CancelRequestFragment().show(getFragmentManager(), "cancel_request_fragment");
-                }
-            });
-            if (FirebaseManager.getReference().isOnline(getContext())) {
-                FirebaseManager.getReference().fetchRideRequest(FirebaseAuth.getInstance().getCurrentUser().getUid(), new FirebaseManager.ReturnValueListener<RideRequest>() {
+        if (OfflineCache.getReference().retrieveCurrentRideRequest() != null) {
+            if (isDriver) {
+                updateUIDriver(OfflineCache.getReference().retrieveCurrentRideRequest());
+            } else {
+                cancelBtn.setOnClickListener(new View.OnClickListener() {
                     @Override
-                    public void returnValue(RideRequest value) {
-                        // Cache latest version of request (might be null, but this corresponds to a delete)
-                        OfflineCache.getReference().cacheCurrentRideRequest(value);
-                        updateUIRider(value);
+                    public void onClick(View v) {
+                        if (GlobalDoubleClickHandler.isDoubleClick()) {
+                            return;
+                        }
+
+                        new CancelRequestFragment().show(getChildFragmentManager(), "cancel_request_fragment");
                     }
                 });
-            } else {
                 updateUIRider(OfflineCache.getReference().retrieveCurrentRideRequest());
             }
         } else {
-            updateUIDriver(OfflineCache.getReference().retrieveCurrentRideRequest());
+            updateUIDriver(null);
         }
     }
+
     private void updateUIDriver(final RideRequest request) {
         if (request != null) {
             FirebaseManager.getReference().fetchRiderInfo(request.getRiderUID(), new FirebaseManager.ReturnValueListener<Rider>() {
                 @Override
                 public void returnValue(Rider value) {
                     if (value == null) {
-                        riderText.setText("Rider Unavailable");
+                        riderText.setText("Rider Info Unavailable");
                     } else {
                         riderText.setText(String.format("%s %s", value.getFirstName(), value.getLastName()));
                         activateRiderContactButton(value, riderContactBtn);
@@ -196,7 +164,14 @@ public class CurrentRequestFragment extends Fragment implements FirebaseManager.
                             return;
                         }
 
-                        FirebaseManager.getReference().confirmPickup(request);
+                        FirebaseManager.getReference().confirmPickup(request, new FirebaseManager.ReturnValueListener<Boolean>() {
+                            @Override
+                            public void returnValue(Boolean value) {
+                                if (!value) {
+                                    Log.e(TAG, "Confirm pickup failed.");
+                                }
+                            }
+                        });
                     }
                 });
             }
@@ -226,13 +201,13 @@ public class CurrentRequestFragment extends Fragment implements FirebaseManager.
     private void updateUIRider(final RideRequest request) {
         if (request != null) {
             if (request.getDriverUID() == null) {
-                driverText.setText("Driver Unavailable");
+                driverText.setText("No Driver");
             } else {
                 FirebaseManager.getReference().fetchDriverInfo(request.getDriverUID(), new FirebaseManager.ReturnValueListener<Driver>() {
                     @Override
                     public void returnValue(Driver value) {
                         if (value == null) {
-                            driverText.setText("Driver Unavailable");
+                            driverText.setText("Driver Info Unavailable");
                         } else {
                             driverText.setText(String.format("%s %s", value.getFirstName(), value.getLastName()));
                             activateDriverContactButton(value, driverContactBtn);
@@ -268,8 +243,8 @@ public class CurrentRequestFragment extends Fragment implements FirebaseManager.
                         FirebaseManager.getReference().confirmArrival(request, new FirebaseManager.ReturnValueListener<Boolean>() {
                             @Override
                             public void returnValue(Boolean value) {
-                                if (value) {
-                                    OfflineCache.getReference().cacheCurrentRideRequest(request);
+                                if (!value) {
+                                    Log.e(TAG, "Arrival confirmation failed.");
                                 }
                             }
                         });
@@ -333,7 +308,7 @@ public class CurrentRequestFragment extends Fragment implements FirebaseManager.
                 bundle.putString("phone", user.getPhoneNumber());
                 RiderContactInformationFragment infoFragment = new RiderContactInformationFragment();
                 infoFragment.setArguments(bundle);
-                infoFragment.show(getFragmentManager(), "user_contact_information");
+                infoFragment.show(getChildFragmentManager(), "user_contact_information");
             }
         });
 
