@@ -168,6 +168,22 @@ public class ProfileFragment extends Fragment {
             }
         });
 
+        FirebaseManager.getReference().fetchRatingInfo(FirebaseAuth.getInstance().getCurrentUser().getUid(),
+                new FirebaseManager.ReturnValueListener<Rating>() {
+                    @Override
+                    public void returnValue(Rating value) {
+                        if(value != null) {
+                            int pos = value.getPosPercent(value.getPositive(), value.getNegative());
+                            int neg = value.getNegPercent(value.getPositive(), value.getNegative());
+                            String posPer = pos + "%";
+                            String negPer = neg + "%";
+
+                            positive.setText(posPer);
+                            negative.setText(negPer);
+                        }
+                    }
+                });
+
         editProfile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

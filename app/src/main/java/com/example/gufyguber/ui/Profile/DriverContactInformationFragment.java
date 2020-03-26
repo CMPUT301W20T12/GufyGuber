@@ -91,7 +91,7 @@ public class DriverContactInformationFragment extends DialogFragment {
         FirebaseManager.getReference().fetchRatingInfo("UID", new FirebaseManager.ReturnValueListener<Rating>() {
             @Override
             public void returnValue(Rating value) {
-                if(value != null) {
+                if (value != null) {
                     positive = value.getPositive();
                     negative = value.getNegative();
                 }

@@ -82,6 +82,44 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_margin="25dp"
+                    android:orientation="horizontal"
+                    android:gravity="center_horizontal">
+
+                    <ImageView
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        app:srcCompat="@drawable/thumbsup" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="2"
+                        android:enabled="false"
+                        android:textColor="#000"
+                        android:textSize="30sp"
+                        android:id="@+id/positive"/>
+
+                    <ImageView
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:layout_marginTop="13.7dp"
+                        app:srcCompat="@drawable/thumbsdown" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="2"
+                        android:enabled="false"
+                        android:textColor="#000"
+                        android:textSize="30sp"
+                        android:id="@+id/negative"/>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="25dp"
                     android:orientation="horizontal">
 
                     <TextView
@@ -146,63 +184,6 @@
                         android:autoSizeMaxTextSize="30sp"
                         android:inputType="phone"/>
                         <!--android:textSize="25sp" /> -->
-
-                </LinearLayout>
-
-                <LinearLayout
-                    android:id="@+id/rating_info"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="25dp"
-                    android:orientation="horizontal">
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1"
-                        android:text="Rating info:"
-                        android:textSize="20sp"/>
-
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="25dp"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="Positive"
-                        android:textSize="20sp" />
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="2"
-                        android:enabled="false"
-                        android:textColor="#000"
-                        android:textSize="30sp"
-                        android:text="0"
-                        android:id="@+id/positive"/>
-
-                    <TextView
-                        android:layout_width="54dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="Negative"
-                        android:textSize="20sp" />
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="2"
-                        android:enabled="false"
-                        android:textColor="#000"
-                        android:textSize="30sp"
-                        android:text="0"
-                        android:id="@+id/negative"/>
 
                 </LinearLayout>
 

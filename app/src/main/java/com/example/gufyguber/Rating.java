@@ -31,11 +31,37 @@ public class Rating {
         this.setNegative(negative);
     }
 
-    public void setPositive(Integer positive) { this.positive = positive; }
+    public void setPositive(int positive) { this.positive = positive; }
 
-    public void setNegative(Integer negative) { this.negative = negative; }
+    public void setNegative(int negative) { this.negative = negative; }
 
     public Integer getPositive() { return positive; }
 
     public Integer getNegative() { return  negative; }
+
+    public Integer getPosPercent(int positive, int negative) {
+        int total = positive + negative;
+
+        int posPercent;
+        if(total != 0) {
+            posPercent = (positive / total) * 100;
+        } else {
+            posPercent = 0;
+        }
+
+        return posPercent;
+    }
+
+    public Integer getNegPercent(int positive, int negative) {
+        int total = positive + negative;
+
+        int negPercent;
+        if(total != 0) {
+            negPercent = (negative / total) * 100;
+        } else {
+            negPercent = 0;
+        }
+
+        return negPercent;
+    }
 }
