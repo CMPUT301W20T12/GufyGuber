@@ -176,23 +176,15 @@ public class ProfileFragment extends Fragment {
                             userLastName,
                             userEmail);
                     if (driver) {       // if they are a driver, store the new Driver object in FB via the manager
-                        FirebaseManager.getReference().storeDriverInfo(new
-                                Driver(FirebaseAuth.getInstance().getCurrentUser().getUid(),
-                                userEmail,
-                                userFirstName,
-                                userLastName,
-                                userPhone,
-                                new Vehicle(modelText.getText().toString(),     // Driver needs a Vehicle in the input as well
-                                        makeText.getText().toString(),
-                                        plateText.getText().toString(),
-                                        Integer.parseInt(seatText.getText().toString()))));
-                        // update the vehicle as well via the manager
-                        FirebaseManager.getReference().storeVehicleInfo(FirebaseAuth.getInstance().getCurrentUser().getUid(),
-                                new Vehicle(modelText.getText().toString(),
-                                makeText.getText().toString(),
-                                plateText.getText().toString(),
-                                Integer.parseInt(seatText.getText().toString())));
-                        // update the authentication email for the firebase projec
+                        Driver updatedDriver = new Driver(OfflineCache.getReference().retrieveCurrentUser().getUID(),
+                                userEmail, userFirstName, userLastName, userPhone,
+                                new Vehicle(modelText.getText().toString(), makeText.getText().toString(),
+                                        plateText.getText().toString(), Integer.parseInt(seatText.getText().toString())));
+
+                        OfflineCache.getReference().cacheCurrentUser(updatedDriver);
+                        FirebaseManager.getReference().storeDriverInfo(updatedDriver);
+                        FirebaseManager.getReference().storeVehicleInfo(updatedDriver.getUID(), updatedDriver.getVehicle());
+                        // update the authentication email for the firebase project
                         FirebaseAuth.getInstance().getCurrentUser().updateEmail(userEmail)
                                 .addOnCompleteListener(new OnCompleteListener<Void>() {
                                     @Override
@@ -204,21 +196,14 @@ public class ProfileFragment extends Fragment {
                                         }
                                     }
                                 });
-                        // get the newly updated Driver object to store in the offline cache
-                        FirebaseManager.getReference().fetchDriverInfo(FirebaseAuth.getInstance().getCurrentUser().getUid(), new FirebaseManager.ReturnValueListener<Driver>() {
-                            @Override
-                            public void returnValue(Driver value) {
-                                OfflineCache.getReference().cacheCurrentUser(value);
-                            }
-                        });
                     } else {
                         // Same as above, but this time for a rider...
-                        FirebaseManager.getReference().storeRiderInfo(new
-                                Rider(FirebaseAuth.getInstance().getCurrentUser().getUid(),
-                                userEmail,
-                                userFirstName,
-                                userLastName,
-                                userPhone));
+                        Rider updatedRider = new Rider(OfflineCache.getReference().retrieveCurrentUser().getUID(),
+                                userEmail, userFirstName, userLastName, userPhone);
+
+                        OfflineCache.getReference().cacheCurrentUser(updatedRider);
+                        FirebaseManager.getReference().storeRiderInfo(updatedRider);
+                        // update the authentication email for the firebase project
                         FirebaseAuth.getInstance().getCurrentUser().updateEmail(userEmail)
                                 .addOnCompleteListener(new OnCompleteListener<Void>() {
                                     @Override
@@ -230,12 +215,6 @@ public class ProfileFragment extends Fragment {
                                         }
                                     }
                                 });
-                        FirebaseManager.getReference().fetchRiderInfo(FirebaseAuth.getInstance().getCurrentUser().getUid(), new FirebaseManager.ReturnValueListener<Rider>() {
-                            @Override
-                            public void returnValue(Rider value) {
-                                OfflineCache.getReference().cacheCurrentUser(value); 
-                            }
-                        });
                     }
                     Toast.makeText(getContext(), "Profile successfully updated", Toast.LENGTH_LONG).show();
                     closeFragment();// head back to map after updated

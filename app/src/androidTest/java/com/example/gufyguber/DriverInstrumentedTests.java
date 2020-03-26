@@ -28,14 +28,13 @@ import org.junit.Test;
 import static androidx.test.espresso.Espresso.*;
 import static androidx.test.espresso.action.ViewActions.*;
 import static androidx.test.espresso.assertion.ViewAssertions.*;
+
+import androidx.test.espresso.action.ViewActions;
 import androidx.test.espresso.contrib.DrawerActions;
 import static androidx.test.espresso.contrib.DrawerMatchers.*;
 import static androidx.test.espresso.matcher.ViewMatchers.*;
-import static org.hamcrest.core.AllOf.allOf;
+import static com.example.gufyguber.InstrumentedTestHelpers.*;
 
-import androidx.appcompat.widget.AppCompatImageButton;
-import androidx.appcompat.widget.Toolbar;
-import androidx.test.espresso.contrib.NavigationViewActions;
 import androidx.test.rule.ActivityTestRule;
 
 import com.google.android.gms.maps.MapFragment;
@@ -47,6 +46,7 @@ import com.google.android.gms.maps.model.LatLng;
  */
 public class DriverInstrumentedTests {
     private Driver testDriver;
+    private Vehicle testVehicle;
     private Rider testRider;
     private float testFare;
     private RideRequest.Status testStatus;
@@ -59,8 +59,8 @@ public class DriverInstrumentedTests {
 
     @Before
     public void init() {
-        testDriver = new Driver("1234", "user@test.com", "TestFN", "TestLN", "(123)456-7890",
-                new Vehicle("TestModel", "TestMake", "TestPlate", 1));
+        testVehicle =  new Vehicle("TestModel", "TestMake", "TestPlate", 1);
+        testDriver = new Driver("1234", "user@test.com", "TestFN", "TestLN", "(123)456-7890", testVehicle);
         testRider = new Rider("4321", "test@user.com", "FNTest", "LNTest", "(098)765-4321");
         testFare = 13.0f;
         testStatus = RideRequest.Status.CONFIRMED;
@@ -76,6 +76,8 @@ public class DriverInstrumentedTests {
 
         Intent intent = new Intent(Intent.ACTION_PICK);
         navigationActivityRule.launchActivity(intent);
+
+        checkMapLoaded();
     }
 
     @After
@@ -85,45 +87,169 @@ public class DriverInstrumentedTests {
     }
 
     @Test
+    public void testDrawerInfoDisplay() {
+        // Makes sure the drawer menu is closed, then opens it
+        onView(withId(R.id.drawer_layout))
+                .check(matches(isClosed(Gravity.LEFT)))
+                .perform(DrawerActions.open());
+
+        // Check the displayed name for accuracy
+        onView(withId(R.id.display_name))
+                .check(matches(withText(String.format("%s %s", testDriver.getFirstName(), testDriver.getLastName()))));
+
+        // Check the displayed email for accuracy
+        onView(withId(R.id.display_email))
+                .check(matches(withText(testDriver.getEmail())));
+
+        // Close the drawer and make sure it's closed
+        onView(withId(R.id.drawer_layout))
+                .perform(DrawerActions.close())
+                .check(matches(isClosed(Gravity.LEFT)));
+    }
+
+    @Test
     public void testProfileScreen() {
-        // Waits until the map fragment opens and tests that it actually opened
-        onView(withId(R.id.driver_map))
-                .check(matches(withId(R.id.driver_map)));
+        goToProfileScreenFromAnyScreen();
 
-        // Makes sure the drawer menu is closed, then opens it
-        onView(withId(R.id.drawer_layout))
-                .check(matches(isClosed(Gravity.LEFT)))
-                .perform(DrawerActions.open());
+        // Make sure first name is auto-populated correctly
+        onView(withId(R.id.user_first_name))
+                .check(matches(withText(testDriver.getFirstName())));
 
-        // TODO: Verify that our info is displayed properly in the drawer
+        // Make sure last name is auto-populated correctly
+        onView(withId(R.id.user_last_name))
+                .check(matches(withText(testDriver.getLastName())));
 
-        // Use the drawer menu to go to the user's profile screen
-        onView(withId(R.id.nav_view))
-                .perform(NavigationViewActions.navigateTo(R.id.nav_profile));
+        // Make sure phone number is auto-populated correctly
+        onView(withId(R.id.rider_phone))
+                .check(matches(withText(testDriver.getPhoneNumber())));
 
-        // Waits until we get to the driver profile screen and tests that we actually get there
-        onView(withId(R.id.driver_profile))
-                .check(matches(withId(R.id.driver_profile)));
+        // Make sure email is auto-populated correctly
+        onView(withId(R.id.rider_email))
+                .check(matches(withText(testDriver.getEmail())));
 
+        // Make sure vehicle make is auto-populated correctly
+        onView(withId(R.id.make))
+                .check(matches(withText(testVehicle.getMake())));
 
-        // TODO: Verify that our info is displayed properly in the profile
+        // Make sure vehicle model is auto-populated correctly
+        onView(withId(R.id.model))
+                .check(matches(withText(testVehicle.getModel())));
 
-        // Makes sure the drawer menu is closed, then opens it
-        onView(withId(R.id.drawer_layout))
-                .check(matches(isClosed(Gravity.LEFT)))
-                .perform(DrawerActions.open());
+        // Make sure vehicle plate number is auto-populated correctly
+        onView(withId(R.id.plate))
+                .check(matches(withText(testVehicle.getPlateNumber())));
 
-        // Use the drawer menu to go to the map screen
-        onView(withId(R.id.nav_view))
-                .perform(NavigationViewActions.navigateTo(R.id.nav_map));
+        // Make sure vehicle seat number is auto-populated correctly
+        onView(withId(R.id.seats))
+                .check(matches(withText(testVehicle.getSeatNumber().toString())));
 
-        // Waits until we get back to the map and tests that we actually get there before finishing the test
-        onView(withId(R.id.driver_map))
-                .check(matches(withId(R.id.driver_map)));
+        goToMapScreenFromAnyScreen();
+    }
+
+    @Test
+    public void testMapToMap() {
+        goToMapScreenFromAnyScreen();
+    }
+
+    @Test
+    public void testProfileToProfile() {
+        goToProfileScreenFromAnyScreen();
+        goToProfileScreenFromAnyScreen();
     }
 
     @Test
     public void testEditProfileScreen() {
-        //TODO: Test editing info on the profile screen
+        goToProfileScreenFromAnyScreen();
+
+        // Enable editing the fields
+        onView(withId(R.id.edit_profile_button))
+                .perform(click());
+
+        String newFirstName = "2" + testDriver.getFirstName() + "2";
+        String newLastName = "2" + testDriver.getLastName() + "2";
+        String newPhone = "2" + testDriver.getPhoneNumber() + "2";
+        String newEmail = "2" + testDriver.getEmail() + "2";
+        String newMake = "2" + testVehicle.getMake() + "2";
+        String newModel = "2" + testVehicle.getModel() + "2";
+        String newPlate = "2" + testVehicle.getPlateNumber() + "2";
+        int newSeats = 2 + testVehicle.getSeatNumber() + 2;
+
+        // Edit the driver's first name
+        onView(withId(R.id.user_first_name))
+                .perform(clearText())
+                .perform(typeText(newFirstName))
+                .perform(ViewActions.closeSoftKeyboard())
+                .check(matches(withText(newFirstName)));
+        // Edit the driver's last name
+        onView(withId(R.id.user_last_name))
+                .perform(clearText())
+                .perform(typeText(newLastName))
+                .perform(ViewActions.closeSoftKeyboard())
+                .check(matches(withText(newLastName)));
+        // Edit the driver's phone number
+        onView(withId(R.id.rider_phone))
+                .perform(clearText())
+                .perform(typeText(newPhone))
+                .perform(ViewActions.closeSoftKeyboard())
+                .check(matches(withText(newPhone)));
+        // Edit the driver's email
+        onView(withId(R.id.rider_email))
+                .perform(clearText())
+                .perform(typeText(newEmail))
+                .perform(ViewActions.closeSoftKeyboard())
+                .check(matches(withText(newEmail)));
+        // Edit the driver's vehicle's make
+        onView(withId(R.id.make))
+                .perform(clearText())
+                .perform(typeText(newMake))
+                .perform(ViewActions.closeSoftKeyboard())
+                .check(matches(withText(newMake)));
+        // Edit the driver's vehicle's model
+        onView(withId(R.id.model))
+                .perform(clearText())
+                .perform(typeText(newModel))
+                .perform(ViewActions.closeSoftKeyboard())
+                .check(matches(withText(newModel)));
+        // Edit the driver's vehicle's plate number
+        onView(withId(R.id.plate))
+                .perform(clearText())
+                .perform(typeText(newPlate))
+                .perform(ViewActions.closeSoftKeyboard())
+                .check(matches(withText(newPlate)));
+        // Edit the driver's vehicle's seat count
+        onView(withId(R.id.seats))
+                .perform(clearText())
+                .perform(typeText(String.format("%d", newSeats)))
+                .perform(ViewActions.closeSoftKeyboard())
+                .check(matches(withText(String.format("%d", newSeats))));
+
+        // Save the new profile information
+        onView(withId(R.id.save_profile_button))
+                .perform(click());
+
+        // Clicking the saved button sends us back to the map
+        checkMapLoaded();
+
+        // See if new values were saved to the cache properly
+        Driver cachedDriver = (Driver)OfflineCache.getReference().retrieveCurrentUser();
+        assert(cachedDriver.getFirstName().equalsIgnoreCase(newFirstName));
+        assert(cachedDriver.getLastName().equalsIgnoreCase(newLastName));
+        assert(cachedDriver.getPhoneNumber().equalsIgnoreCase(newPhone));
+        assert(cachedDriver.getEmail().equalsIgnoreCase(newEmail));
+        assert(cachedDriver.getVehicle().getMake().equalsIgnoreCase(newMake));
+        assert(cachedDriver.getVehicle().getModel().equalsIgnoreCase(newModel));
+        assert(cachedDriver.getVehicle().getPlateNumber().equalsIgnoreCase(newPlate));
+        assert(cachedDriver.getVehicle().getSeatNumber() == newSeats);
+
+        // Redundancy test to make sure that the following tests still pass after editing
+        testDriver = cachedDriver;
+        testVehicle = testDriver.getVehicle();
+        testDrawerInfoDisplay();
+        testProfileScreen();
+    }
+
+    @Test
+    public void testRideRequestScreen() {
+        
     }
 }
