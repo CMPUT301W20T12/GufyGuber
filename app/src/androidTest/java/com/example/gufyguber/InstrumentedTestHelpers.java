@@ -24,24 +24,35 @@ package com.example.gufyguber;
 
 import android.util.Log;
 import android.view.Gravity;
+import android.view.View;
 
+import androidx.test.espresso.UiController;
+import androidx.test.espresso.ViewAction;
 import androidx.test.espresso.contrib.DrawerActions;
 import androidx.test.espresso.contrib.NavigationViewActions;
+
+import org.hamcrest.Matcher;
 
 import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.assertion.ViewAssertions.matches;
 import static androidx.test.espresso.contrib.DrawerMatchers.isClosed;
-import static androidx.test.espresso.matcher.ViewMatchers.withId;
+import static androidx.test.espresso.matcher.ViewMatchers.*;
 
 public class InstrumentedTestHelpers {
     private static final String TAG = "InstrumentedTestHelpers";
 
+    /**
+     * Waits until the map fragment is opened (typically used to make sure cleanup happens properly)
+     */
     public static void checkMapLoaded() {
         // Waits until the map fragment opens and tests that it actually opened
         onView(withId(R.id.driver_map))
                 .check(matches(withId(R.id.driver_map)));
     }
 
+    /**
+     * Uses the navigation drawer menu to go to the profile screen
+     */
     public static void goToProfileScreenFromAnyScreen() {
         // Makes sure the drawer menu is closed, then opens it
         onView(withId(R.id.drawer_layout))
@@ -53,10 +64,13 @@ public class InstrumentedTestHelpers {
                 .perform(NavigationViewActions.navigateTo(R.id.nav_profile));
 
         // Waits until we get to the driver profile screen and tests that we actually get there
-        onView(withId(R.id.driver_profile))
-                .check(matches(withId(R.id.driver_profile)));
+        onView(withId(R.id.profile))
+                .check(matches(withId(R.id.profile)));
     }
 
+    /**
+     * Uses the navigation drawer menu to go to the map screen
+     */
     public static void goToMapScreenFromAnyScreen() {
         // Makes sure the drawer menu is closed, then opens it
         onView(withId(R.id.drawer_layout))
@@ -67,16 +81,62 @@ public class InstrumentedTestHelpers {
         onView(withId(R.id.nav_view))
                 .perform(NavigationViewActions.navigateTo(R.id.nav_map));
 
-        // Waits until we get back to the map and tests that we actually got there
+        // Waits until we get to the map and tests that we actually got there
         onView(withId(R.id.driver_map))
                 .check(matches(withId(R.id.driver_map)));
     }
 
-    public static void waitForSeconds(float seconds) {
+    /**
+     * Uses the navigation drawer menu to go to the current request screen
+     */
+    public static void goToRideRequestScreenFromAnyScreen() {
+        // Makes sure the drawer menu is closed, then opens it
+        onView(withId(R.id.drawer_layout))
+                .check(matches(isClosed(Gravity.LEFT)))
+                .perform(DrawerActions.open());
+
+        // Use the drawer menu to go to the Current Ride Request Screen
+        onView(withId(R.id.nav_view))
+                .perform(NavigationViewActions.navigateTo(R.id.nav_current_requests));
+
+        // Waits until we get to the request screen and tests that we actually got there
+        onView(withId(R.id.current_request))
+                .check(matches(withId(R.id.current_request)));
+    }
+
+    /**
+     * Puts the thread to sleep in order to pause testing. Typically used temporarily
+     * to make the tests viewable by human eyes
+     * @param seconds The number of seconds to pause testing for
+     */
+    public static void waitForSeconds(UiController controller, float seconds) {
         try{
             Thread.sleep((long)(seconds * 1000));
         } catch (Exception e) {
             Log.e(TAG, "Error waiting: ", e);
         }
+    }
+
+    /**
+     * Perform action of waiting for a specific time.
+     * @author Hesam | https://stackoverflow.com/a/35924943
+     */
+    public static ViewAction waitFor(final long millis) {
+        return new ViewAction() {
+            @Override
+            public Matcher<View> getConstraints() {
+                return isRoot();
+            }
+
+            @Override
+            public String getDescription() {
+                return "Wait for " + millis + " milliseconds.";
+            }
+
+            @Override
+            public void perform(UiController uiController, final View view) {
+                uiController.loopMainThreadForAtLeast(millis);
+            }
+        };
     }
 }

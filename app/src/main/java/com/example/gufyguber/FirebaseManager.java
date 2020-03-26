@@ -84,6 +84,10 @@ public class FirebaseManager {
     // Tag for logging purposes
     private static final String TAG = "FirebaseManager";
 
+    // True when instrument testing
+    private boolean testMode;
+    public void setTestMode(boolean testMode) { this.testMode = testMode; }
+
     // Firestore keys
 
     // User Keys
@@ -222,6 +226,10 @@ public class FirebaseManager {
      * @return A ListenerRegistration object that should be used to remove the listener when no longer needed
      */
     public ListenerRegistration listenToRideRequest(final String riderUID, final RideRequestListener onChangedListener) {
+        if (testMode) {
+            return null;
+        }
+
         DocumentReference requestDoc = FirebaseFirestore.getInstance().collection(RIDE_REQUEST_COLLECTION).document(riderUID);
         return requestDoc.addSnapshotListener(new EventListener<DocumentSnapshot>() {
             @Override
@@ -363,6 +371,10 @@ public class FirebaseManager {
     }
 
     public ListenerRegistration listenToAllRideRequests(final DriverRideRequestCollectionListener onChangedListener) {
+        if (testMode) {
+            return null;
+        }
+
         CollectionReference collectionReference = FirebaseFirestore.getInstance().collection(RIDE_REQUEST_COLLECTION);
         return collectionReference.addSnapshotListener(new EventListener<QuerySnapshot>() {
             @Override

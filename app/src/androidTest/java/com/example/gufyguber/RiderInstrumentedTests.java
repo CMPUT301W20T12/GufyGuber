@@ -60,7 +60,7 @@ public class RiderInstrumentedTests {
         testRideRequest = new RideRequest(testRider.getUID(), testDriver.getUID(), testStatus,
                 testFare, testLocation, testTime);
 
-        OfflineCache.getReference().setIgnoreFirestore(true);
+        FirebaseManager.getReference().setTestMode(true);
         OfflineCache.getReference().cacheCurrentUser(testRider);
         OfflineCache.getReference().cacheCurrentRideRequest(testRideRequest);
 
@@ -70,6 +70,8 @@ public class RiderInstrumentedTests {
 
     @After
     public void cleanup() {
+        OfflineCache.getReference().clearCache();
+        FirebaseManager.getReference().setTestMode(false);
         navigationActivityRule.finishActivity();
     }
 

@@ -184,18 +184,21 @@ public class ProfileFragment extends Fragment {
                         OfflineCache.getReference().cacheCurrentUser(updatedDriver);
                         FirebaseManager.getReference().storeDriverInfo(updatedDriver);
                         FirebaseManager.getReference().storeVehicleInfo(updatedDriver.getUID(), updatedDriver.getVehicle());
+
                         // update the authentication email for the firebase project
-                        FirebaseAuth.getInstance().getCurrentUser().updateEmail(userEmail)
-                                .addOnCompleteListener(new OnCompleteListener<Void>() {
-                                    @Override
-                                    public void onComplete(@NonNull Task<Void> task) {
-                                        if (task.isSuccessful()) {
-                                            Log.d(TAG, "User email address updated.");
-                                        } else {
-                                            Log.d(TAG, "Failed to update user email address.");
+                        if (FirebaseAuth.getInstance() != null && FirebaseAuth.getInstance().getCurrentUser() != null) {
+                            FirebaseAuth.getInstance().getCurrentUser().updateEmail(userEmail)
+                                    .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                        @Override
+                                        public void onComplete(@NonNull Task<Void> task) {
+                                            if (task.isSuccessful()) {
+                                                Log.d(TAG, "User email address updated.");
+                                            } else {
+                                                Log.d(TAG, "Failed to update user email address.");
+                                            }
                                         }
-                                    }
-                                });
+                                    });
+                        }
                     } else {
                         // Same as above, but this time for a rider...
                         Rider updatedRider = new Rider(OfflineCache.getReference().retrieveCurrentUser().getUID(),

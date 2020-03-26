@@ -70,7 +70,7 @@ public class DriverInstrumentedTests {
         testRideRequest = new RideRequest(testRider.getUID(), testDriver.getUID(), testStatus,
                 testFare, testLocation, testTime);
 
-        OfflineCache.getReference().setIgnoreFirestore(true);
+        FirebaseManager.getReference().setTestMode(true);
         OfflineCache.getReference().cacheCurrentUser(testDriver);
         OfflineCache.getReference().cacheCurrentRideRequest(testRideRequest);
 
@@ -83,6 +83,7 @@ public class DriverInstrumentedTests {
     @After
     public void cleanup() {
         OfflineCache.getReference().clearCache();
+        FirebaseManager.getReference().setTestMode(false);
         navigationActivityRule.finishActivity();
     }
 
@@ -148,12 +149,16 @@ public class DriverInstrumentedTests {
 
     @Test
     public void testMapToMap() {
+        // Extra time for weird test that involves rapid menu switching
+        onView(isRoot()).perform(waitFor(1000));
         goToMapScreenFromAnyScreen();
     }
 
     @Test
     public void testProfileToProfile() {
         goToProfileScreenFromAnyScreen();
+        // Extra time for weird test that involves rapid menu switching
+        onView(isRoot()).perform(waitFor(1000));
         goToProfileScreenFromAnyScreen();
     }
 
@@ -250,6 +255,6 @@ public class DriverInstrumentedTests {
 
     @Test
     public void testRideRequestScreen() {
-        
+        goToRideRequestScreenFromAnyScreen();
     }
 }
