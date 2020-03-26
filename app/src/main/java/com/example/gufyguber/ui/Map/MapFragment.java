@@ -387,6 +387,41 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
     public View driverOnCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
         View v = inflater.inflate(R.layout.fragment_driver_map, container, false);
+        //______________________________________ AutoComplete Widget ______________________________________
+
+        // need to initialize places
+        if (!Places.isInitialized()) {
+            Places.initialize(getActivity(), getString(R.string.api_key), Locale.CANADA);
+            PlacesClient placesClient = Places.createClient(getActivity());
+        }
+
+        AutocompleteSupportFragment autocompleteFragment;
+        autocompleteFragment = (AutocompleteSupportFragment) getChildFragmentManager().findFragmentById(R.id.autocomplete_fragment);
+
+        //Bias in Edmonton (SE,NW)
+        autocompleteFragment.setLocationBias(RectangularBounds.newInstance(
+                new LatLng(53.415299,-113.674242),
+                new LatLng(53.654777, -113.328740)));
+
+        // gives suggestions in Canada in general
+        autocompleteFragment.setCountries("CA");
+
+        //specify the types of place data to return
+        autocompleteFragment.setPlaceFields(Arrays.asList(Place.Field.ID, Place.Field.NAME, Place.Field.ADDRESS,Place.Field.ID,Place.Field.ADDRESS_COMPONENTS));
+
+        autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
+            @Override
+            public void onPlaceSelected(@NonNull Place place) {
+                Log.i(TAG, "Place: + place.getName()" + ", " + place.getId());
+                geoLocate();
+            }
+
+            @Override
+            public void onError(@NonNull Status status) {
+                Log.i(TAG, "And error occurred: " + status);
+
+            }
+        });
 
         // for current location feature
         mGps = v.findViewById(R.id.ic_gps);
