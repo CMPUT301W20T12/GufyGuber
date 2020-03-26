@@ -615,6 +615,11 @@ public class FirebaseManager {
         });
     }
 
+    /**
+     * Adds or updates a Driver's rating in our cloud Firestore
+     * @param driverUID This is the driver the rider is rating
+     * @param rating The rating that the rider is assigning
+     */
     public void storeRatingInfo(String driverUID, Rating rating) {
         CollectionReference ratings = FirebaseFirestore.getInstance().collection(RATING_COLLECTION);
         HashMap<String, Object> ratingData = new HashMap<>();
@@ -637,6 +642,11 @@ public class FirebaseManager {
                 });
     }
 
+    /**
+     * Retrieves Rating information from our cloud Firestore
+     * @param driverUID The UID of the Driver that belongs to the rating
+     * @param returnValueListener The callback to use once we've finished retrieving a Rating
+     */
     public void fetchRatingInfo(final String driverUID, final ReturnValueListener<Rating> returnValueListener) {
         DocumentReference ratingDoc = FirebaseFirestore.getInstance().collection(RATING_COLLECTION).document(driverUID);
         ratingDoc.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
@@ -698,6 +708,10 @@ public class FirebaseManager {
         vehicleDoc.delete();
     }
 
+    /**
+     * Deletes a rating record from our cloud Firestore
+     * @param driverUID The UID associated with the driver that belongs to the rating
+     */
     public void deleteRatingInfo(final String driverUID) {
         DocumentReference ratingDoc = FirebaseFirestore.getInstance().collection(RATING_COLLECTION).document(driverUID);
         ratingDoc.delete();
