@@ -109,10 +109,9 @@ public class NavigationActivity extends AppCompatActivity implements RideRequest
 
         displayName.setText(firstName + " " + lastName);
         displayEmail.setText(email);
-
-        return;
     }
 
+    @Override
     public void onStatusChanged(RideRequest.Status status) {
         final Toast toast = Toast.makeText(this, "Error In Navigation Activity Status Callback", Toast.LENGTH_LONG);
         toast.setGravity(Gravity.CENTER, 0, 0);
@@ -125,27 +124,22 @@ public class NavigationActivity extends AppCompatActivity implements RideRequest
         ((TextView)toastView.findViewById(android.R.id.message)).setTextColor(0xFFFFFFFF);
         switch (status) {
             case PENDING:
-                Log.w(TAG, "Status changed to PENDING... which shouldn't be possible."); // It is now
+                // When a driver sees a pending request, it's because the rider has rejected them
                 if (OfflineCache.getReference().retrieveCurrentUser() instanceof Driver) {
-                    FirebaseManager.getReference().fetchDriverInfo(OfflineCache.getReference().retrieveCurrentUser().getUID(), new FirebaseManager.ReturnValueListener<Driver>() {
+                    FirebaseManager.getReference().fetchRiderInfo(OfflineCache.getReference().retrieveCurrentRideRequest().getRiderUID(), new FirebaseManager.ReturnValueListener<Rider>() {
                         @Override
-                        public void returnValue(Driver value) {
+                        public void returnValue(Rider value) {
                             if (value != null) {
-                                toast.setText(String.format("Your offer was declined."));
+                                toast.setText(String.format("Your offer was declined by %s %s.",
+                                        value.getFirstName(), value.getLastName()));
                                 toast.show();
-                                OfflineCache.getReference().clearCurrentRideRequest();
-                                //Maybe change this
-                                //This restarts the navigation activity to clear the map
-                                Intent mIntent = getIntent();
-                                finish();
-                                startActivity(mIntent);
-
                             }
                         }
                     });
                 }
                 break;
             case ACCEPTED:
+                // When a rider sees an accepted request, it is because a driver is offering a ride
                 if (OfflineCache.getReference().retrieveCurrentUser() instanceof Rider) {
                     FirebaseManager.getReference().fetchDriverInfo(OfflineCache.getReference().retrieveCurrentRideRequest().getDriverUID(), new FirebaseManager.ReturnValueListener<Driver>() {
                         @Override
@@ -164,6 +158,7 @@ public class NavigationActivity extends AppCompatActivity implements RideRequest
                 }
                 break;
             case CONFIRMED:
+                // When a driver sees a confirmed request, a rider has accepted their offer
                 if (OfflineCache.getReference().retrieveCurrentUser() instanceof Driver) {
                     FirebaseManager.getReference().fetchRiderInfo(OfflineCache.getReference().retrieveCurrentRideRequest().getRiderUID(), new FirebaseManager.ReturnValueListener<Rider>() {
                         @Override
@@ -177,12 +172,14 @@ public class NavigationActivity extends AppCompatActivity implements RideRequest
                 }
                 break;
             case EN_ROUTE:
+                // When a rider sees an En Route request, their driver has arrived at the pickup
                 if (OfflineCache.getReference().retrieveCurrentUser() instanceof Rider) {
                     toast.setText("Your driver is waiting for you!");
                     toast.show();
                 }
                 break;
             case ARRIVED:
+                // When either user sees an arrived request, they are at the destination
                 if (OfflineCache.getReference().retrieveCurrentUser() instanceof Rider) {
                     toast.setText("You have arrived. Please offer payment.");
                     toast.show();
@@ -192,6 +189,7 @@ public class NavigationActivity extends AppCompatActivity implements RideRequest
                 }
                 break;
             case COMPLETED:
+                // When either user sees a completed request, payment has been verified
                 if (OfflineCache.getReference().retrieveCurrentUser() instanceof Rider) {
                     toast.setText("Payment complete.");
                     toast.show();
@@ -212,6 +210,7 @@ public class NavigationActivity extends AppCompatActivity implements RideRequest
                 }
                 break;
             case CANCELLED:
+                // Whenever a request is deleted by the rider and it's not rejected or complete
                 if (OfflineCache.getReference().retrieveCurrentUser() instanceof Driver) {
                     toast.setText("The ride request was canceled.");
                     toast.show();
@@ -224,26 +223,8 @@ public class NavigationActivity extends AppCompatActivity implements RideRequest
      * This method starts a new sign in activity so that the user can sign in again
      */
     public void logout(){
-        Intent intent = new Intent(this, SignInActivity.class);
+        finish(); // Can't forget to finish this activity to clear the stack
+        Intent intent = new Intent(getApplicationContext(), SignInActivity.class);
         startActivity(intent);
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        User user = OfflineCache.getReference().retrieveCurrentUser();
-        RideRequest request = OfflineCache.getReference().retrieveCurrentRideRequest();
-        if(user instanceof Driver){
-            if(request != null) {
-                FirebaseManager.getReference().fetchRideRequest(request.getRiderUID(), new FirebaseManager.ReturnValueListener<RideRequest>() {
-                    @Override
-                    public void returnValue(RideRequest value) {
-                        if (value != null) {
-                            onStatusChanged(value.getStatus());
-                        }
-                    }
-                });
-            }
-       }
     }
 }

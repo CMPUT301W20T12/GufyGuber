@@ -66,7 +66,6 @@ public class ProfileFragment extends Fragment {
 
     // Declare variables for later; some are for the Vehicle object and will not
     // be used if the user is a rider
-    private ProfileViewModel profileViewModel;
     private TextView firstNameText;
     private TextView lastNameText;
     private TextView phoneText;
@@ -81,18 +80,10 @@ public class ProfileFragment extends Fragment {
     // simple boolean to check if the user is a driver or rider so we know
     private boolean driver;
 
-    public View onCreateView(@NonNull final LayoutInflater inflater,
-                             final ViewGroup container, Bundle savedInstanceState) {
-        profileViewModel = ViewModelProviders.of(this).get(ProfileViewModel.class);
+    public View onCreateView(@NonNull final LayoutInflater inflater, final ViewGroup container, Bundle savedInstanceState) {
 
         // get he driver boolean from the offline cache by checking if instance driver object
         driver = OfflineCache.getReference().retrieveCurrentUser() instanceof Driver;
-
-        profileViewModel.getText().observe(getViewLifecycleOwner(), new Observer<String>() {
-            @Override
-            public void onChanged(@Nullable String s) {
-            }
-        });
 
         // which layout file to inflate with
         if (driver) {
@@ -289,7 +280,6 @@ public class ProfileFragment extends Fragment {
 
         return isValid;  
     }
-
     
     /**
      * Populates the Profile form based on provided user information
@@ -321,6 +311,4 @@ public class ProfileFragment extends Fragment {
             Log.e(TAG, "Null rider passed to Profile Fragment.");
         }
     }
-
-
 }

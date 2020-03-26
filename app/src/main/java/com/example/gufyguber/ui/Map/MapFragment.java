@@ -63,7 +63,7 @@ import java.util.TimerTask;
 
 public class MapFragment extends Fragment implements OnMapReadyCallback, CreateRideRequestFragment.CreateRideRequestListener,
         CreateRideRequestFragment.CancelCreateRideRequestListener, GoogleMap.OnMarkerClickListener, FirebaseManager.RideRequestListener,
-        FirebaseManager.DriverRideRequestCollectionListener{
+        FirebaseManager.DriverRideRequestCollectionListener, RideRequest.StatusChangedListener{
 
     private GoogleMap mMap;
     private Marker pickupMarker;
@@ -88,7 +88,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
      * @return
      * returns what the user type is (rider/driver)
      */
-
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         isDriver = (OfflineCache.getReference().retrieveCurrentUser() instanceof Driver);
@@ -171,6 +170,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
                 });
             }
         }
+
+        OfflineCache.getReference().addRideRequestStatusChangedListener(this);
 
         if (isDriver) {
             return driverOnCreateView(inflater, container, savedInstanceState);
@@ -355,6 +356,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
     public void onDestroy() {
         offlineTestTimer.cancel();
         offlineTestTimer.purge();
+        OfflineCache.getReference().removeRideRequestStatusChangedListener(this);
 
         if (rideRequestListener != null) {
             rideRequestListener.remove();
@@ -479,6 +481,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
         }
     }
 
+    @Override
     public void onRideRequestUpdated(RideRequest updatedValue) {
         if (mMap == null) {
             Log.e(TAG, "Map shouldn't be null.");
@@ -524,6 +527,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
         }
     }
 
+    @Override
     public void onRideRequestsUpdated(ArrayList<RideRequest> rideRequests) {
         if (isDriver && OfflineCache.getReference().retrieveCurrentRideRequest() == null) {
             if (mMap == null) {
@@ -541,6 +545,21 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
             // Add a marker to the map for each pending ride request (at the request start location)
             for (final RideRequest request : rideRequests) {
                 new DriverRequestMarker(request).makeMarker(mMap);
+            }
+        }
+    }
+
+    @Override
+    public void onStatusChanged(RideRequest.Status newStatus) {
+        if (isDriver) {
+            if (newStatus == RideRequest.Status.CANCELLED || newStatus == RideRequest.Status.PENDING) {
+                FirebaseManager.getReference().fetchRideRequestsWithStatus(RideRequest.Status.PENDING, new FirebaseManager.ReturnValueListener<ArrayList<RideRequest>>() {
+                    @Override
+                    public void returnValue(ArrayList<RideRequest> value) {
+                        OfflineCache.getReference().clearCurrentRideRequest();
+                        onRideRequestsUpdated(value);
+                    }
+                });
             }
         }
     }

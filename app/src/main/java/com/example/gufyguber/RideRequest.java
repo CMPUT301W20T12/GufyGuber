@@ -173,7 +173,6 @@ public class RideRequest {
             @Override
             public void returnValue(Boolean value) {
                 if (value) {
-                    ;
                 }
             }
         });

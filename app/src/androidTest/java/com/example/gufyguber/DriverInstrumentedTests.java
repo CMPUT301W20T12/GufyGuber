@@ -22,6 +22,7 @@ import android.view.Gravity;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -58,11 +59,19 @@ public class DriverInstrumentedTests {
     @Rule
     public ActivityTestRule<NavigationActivity> navigationActivityRule = new ActivityTestRule<>(NavigationActivity.class, false, false);
 
+    @BeforeClass
+    public static void preInit() {
+        FirebaseManager.getReference().setTestMode(true);
+    }
+
     /**
      * Populate some test data, cache it in the OfflineCache, and bypass the login activity
      */
     @Before
     public void init() {
+        // Make sure the cache is clean. Tried to do it @After, but there are some known timing bugs
+        OfflineCache.getReference().clearCache();
+
         testVehicle =  new Vehicle("TestModel", "TestMake", "TestPlate", 1);
         testDriver = new Driver("1234", "user@test.com", "TestFN", "TestLN", "(123)456-7890", testVehicle);
         testRider = new Rider("4321", "test@user.com", "FNTest", "LNTest", "(098)765-4321");
@@ -74,23 +83,18 @@ public class DriverInstrumentedTests {
         testRideRequest = new RideRequest(testRider.getUID(), testDriver.getUID(), testStatus,
                 testFare, testLocation, testTime);
 
-        FirebaseManager.getReference().setTestMode(true);
         OfflineCache.getReference().cacheCurrentUser(testDriver);
         OfflineCache.getReference().cacheCurrentRideRequest(testRideRequest);
 
         Intent intent = new Intent(Intent.ACTION_PICK);
         navigationActivityRule.launchActivity(intent);
-
-        checkMapLoaded();
     }
 
     /**
-     * Clear the offline cache, turn off test mode, and shut down the activity
+     * Shut down the activity
      */
     @After
     public void cleanup() {
-        OfflineCache.getReference().clearCache();
-        FirebaseManager.getReference().setTestMode(false);
         navigationActivityRule.finishActivity();
     }
 
@@ -205,8 +209,7 @@ public class DriverInstrumentedTests {
 
         String newFirstName = "2" + testDriver.getFirstName() + "2";
         String newLastName = "2" + testDriver.getLastName() + "2";
-        String newPhone = "2" + testDriver.getPhoneNumber() + "2";
-        String newEmail = "2" + testDriver.getEmail() + "2";
+        String newPhone = "7 131-313-1313";
         String newMake = "2" + testVehicle.getMake() + "2";
         String newModel = "2" + testVehicle.getModel() + "2";
         String newPlate = "2" + testVehicle.getPlateNumber() + "2";
@@ -233,12 +236,6 @@ public class DriverInstrumentedTests {
                 .perform(typeText(newPhone))
                 .perform(ViewActions.closeSoftKeyboard())
                 .check(matches(withText(newPhone)));
-        // Edit the driver's email
-        onView(withId(R.id.rider_email))
-                .perform(clearText())
-                .perform(typeText(newEmail))
-                .perform(ViewActions.closeSoftKeyboard())
-                .check(matches(withText(newEmail)));
         // Edit the driver's vehicle's make
         onView(withId(R.id.make))
                 .perform(clearText())
@@ -276,7 +273,6 @@ public class DriverInstrumentedTests {
         assert(cachedDriver.getFirstName().equalsIgnoreCase(newFirstName));
         assert(cachedDriver.getLastName().equalsIgnoreCase(newLastName));
         assert(cachedDriver.getPhoneNumber().equalsIgnoreCase(newPhone));
-        assert(cachedDriver.getEmail().equalsIgnoreCase(newEmail));
         assert(cachedDriver.getVehicle().getMake().equalsIgnoreCase(newMake));
         assert(cachedDriver.getVehicle().getModel().equalsIgnoreCase(newModel));
         assert(cachedDriver.getVehicle().getPlateNumber().equalsIgnoreCase(newPlate));

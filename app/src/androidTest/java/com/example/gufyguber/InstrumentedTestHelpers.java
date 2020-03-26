@@ -51,12 +51,12 @@ public class InstrumentedTestHelpers {
      * Waits until the map fragment is opened (typically used to make sure cleanup happens properly)
      */
     public static void checkMapLoaded() {
-        // Buffer to let transition animations finish
-        onView(isRoot()).perform(waitFor(1000));
-
         // Waits until the map fragment opens and tests that it actually opened
         onView(withId(R.id.user_map))
                 .check(matches(withId(R.id.user_map)));
+
+        // Buffer to let transition animations finish
+        onView(isRoot()).perform(waitFor(1000));
     }
 
     /**

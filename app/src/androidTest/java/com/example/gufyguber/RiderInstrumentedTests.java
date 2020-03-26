@@ -190,8 +190,7 @@ public class RiderInstrumentedTests {
 
         String newFirstName = "2" + testRider.getFirstName() + "2";
         String newLastName = "2" + testRider.getLastName() + "2";
-        String newPhone = "2" + testRider.getPhoneNumber() + "2";
-        String newEmail = "2" + testRider.getEmail() + "2";
+        String newPhone = "7 131-313-1313";
 
         // Give some animations time to finish
         onView(isRoot()).perform(waitFor(1000));
@@ -214,12 +213,6 @@ public class RiderInstrumentedTests {
                 .perform(typeText(newPhone))
                 .perform(ViewActions.closeSoftKeyboard())
                 .check(matches(withText(newPhone)));
-        // Edit the rider's email
-        onView(withId(R.id.rider_email))
-                .perform(clearText())
-                .perform(typeText(newEmail))
-                .perform(ViewActions.closeSoftKeyboard())
-                .check(matches(withText(newEmail)));
 
         // Save the new profile information
         onView(withId(R.id.save_profile_button))
@@ -233,7 +226,6 @@ public class RiderInstrumentedTests {
         assert(cachedRider.getFirstName().equalsIgnoreCase(newFirstName));
         assert(cachedRider.getLastName().equalsIgnoreCase(newLastName));
         assert(cachedRider.getPhoneNumber().equalsIgnoreCase(newPhone));
-        assert(cachedRider.getEmail().equalsIgnoreCase(newEmail));
 
         // Redundancy test to make sure that the following tests still pass after editing
         testRider = cachedRider;

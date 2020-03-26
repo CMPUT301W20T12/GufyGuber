@@ -57,16 +57,17 @@ public class OfflineCache implements FirebaseManager.RideRequestListener{
         String rrString = currentRideRequest == null ? "Null" : currentRideRequest.toString();
         Log.d(TAG, "Ride request cached:\n" + rrString);
 
-        if (temp != null) {
-            if (currentRideRequest != null) {
-                if (temp.getStatus() != currentRideRequest.getStatus()) {
-                    notifyRideRequestStatusChangedListeners(currentRideRequest.getStatus());
-                }
-            } else if(temp.getStatus() != RideRequest.Status.COMPLETED) {
+        if (temp != null && currentRideRequest != null) {
+            if (temp.getStatus() != currentRideRequest.getStatus()) {
+                notifyRideRequestStatusChangedListeners(currentRideRequest.getStatus());
+            }
+        } else if (temp == null && currentRideRequest != null) {
+            notifyRideRequestStatusChangedListeners(currentRideRequest.getStatus());
+        } else if (temp != null && currentRideRequest == null) {
+            // Special case for rides cancelled after they're confirmed
+            if (temp.getStatus() != RideRequest.Status.PENDING && temp.getStatus() != RideRequest.Status.COMPLETED) {
                 notifyRideRequestStatusChangedListeners(RideRequest.Status.CANCELLED);
             }
-        } else if (currentRideRequest != null) {
-            notifyRideRequestStatusChangedListeners(currentRideRequest.getStatus());
         }
 
         // If the current ride request isn't null, we need to make sure we're listening to Firestore for updates
