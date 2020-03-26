@@ -24,10 +24,16 @@ package com.example.gufyguber;
 
 import android.util.Log;
 import android.view.Gravity;
+import android.view.InputDevice;
+import android.view.MotionEvent;
 import android.view.View;
 
 import androidx.test.espresso.UiController;
 import androidx.test.espresso.ViewAction;
+import androidx.test.espresso.action.CoordinatesProvider;
+import androidx.test.espresso.action.GeneralClickAction;
+import androidx.test.espresso.action.Press;
+import androidx.test.espresso.action.Tap;
 import androidx.test.espresso.contrib.DrawerActions;
 import androidx.test.espresso.contrib.NavigationViewActions;
 
@@ -45,9 +51,12 @@ public class InstrumentedTestHelpers {
      * Waits until the map fragment is opened (typically used to make sure cleanup happens properly)
      */
     public static void checkMapLoaded() {
+        // Buffer to let transition animations finish
+        onView(isRoot()).perform(waitFor(1000));
+
         // Waits until the map fragment opens and tests that it actually opened
-        onView(withId(R.id.driver_map))
-                .check(matches(withId(R.id.driver_map)));
+        onView(withId(R.id.user_map))
+                .check(matches(withId(R.id.user_map)));
     }
 
     /**
@@ -66,6 +75,9 @@ public class InstrumentedTestHelpers {
         // Waits until we get to the driver profile screen and tests that we actually get there
         onView(withId(R.id.profile))
                 .check(matches(withId(R.id.profile)));
+
+        // Buffer to let transition animations finish
+        onView(isRoot()).perform(waitFor(1000));
     }
 
     /**
@@ -82,8 +94,11 @@ public class InstrumentedTestHelpers {
                 .perform(NavigationViewActions.navigateTo(R.id.nav_map));
 
         // Waits until we get to the map and tests that we actually got there
-        onView(withId(R.id.driver_map))
-                .check(matches(withId(R.id.driver_map)));
+        onView(withId(R.id.user_map))
+                .check(matches(withId(R.id.user_map)));
+
+        // Buffer to let transition animations finish
+        onView(isRoot()).perform(waitFor(1000));
     }
 
     /**
@@ -102,6 +117,9 @@ public class InstrumentedTestHelpers {
         // Waits until we get to the request screen and tests that we actually got there
         onView(withId(R.id.current_request))
                 .check(matches(withId(R.id.current_request)));
+
+        // Buffer to let transition animations finish
+        onView(isRoot()).perform(waitFor(1000));
     }
 
     /**
@@ -139,4 +157,30 @@ public class InstrumentedTestHelpers {
             }
         };
     }
+
+    public static ViewAction clickPercent(final float pctX, final float pctY){
+        return new GeneralClickAction(
+                Tap.SINGLE,
+                new CoordinatesProvider() {
+                    @Override
+                    public float[] calculateCoordinates(View view) {
+
+                        final int[] screenPos = new int[2];
+                        view.getLocationOnScreen(screenPos);
+                        int w = view.getWidth();
+                        int h = view.getHeight();
+
+                        float x = w * pctX;
+                        float y = h * pctY;
+
+                        final float screenX = screenPos[0] + x;
+                        final float screenY = screenPos[1] + y;
+                        float[] coordinates = {screenX, screenY};
+
+                        return coordinates;
+                    }
+                },
+                Press.FINGER, InputDevice.SOURCE_ANY, MotionEvent.BUTTON_PRIMARY);
+    }
+
 }

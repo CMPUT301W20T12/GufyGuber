@@ -322,12 +322,20 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
                         boolean dirty = false;
 
                         if (requestDialog.settingStart) {
+                            // If we have an active request, it's confusing to show its pins while we do this
+                            if (!requestDialog.hasDropoffData()) {
+                                removeDropoffFromMap();
+                            }
                             requestDialog.setNewPickup(latLng);
                             addPickupToMap(latLng);
                             dirty = true;
                         }
 
                         if (requestDialog.settingEnd) {
+                            // If we have an active request, it's confusing to show its pins while we do this
+                            if (!requestDialog.hasPickupData()) {
+                                removePickupFromMap();
+                            }
                             requestDialog.setNewDropoff(latLng);
                             addDropoffToMap(latLng);
                             dirty = true;
@@ -378,6 +386,13 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
         removePickupFromMap();
         removeDropoffFromMap();
         requestDialog = null;
+
+        RideRequest cachedReference = OfflineCache.getReference().retrieveCurrentRideRequest();
+        if (cachedReference != null) {
+            addPickupToMap(cachedReference.getLocationInfo().getPickup());
+            addDropoffToMap(cachedReference.getLocationInfo().getDropoff());
+        }
+
     }
 
     private void addPickupToMap(LatLng location) {

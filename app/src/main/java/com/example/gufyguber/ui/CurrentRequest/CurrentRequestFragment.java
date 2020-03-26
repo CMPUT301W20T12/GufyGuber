@@ -73,18 +73,15 @@ public class CurrentRequestFragment extends Fragment implements FirebaseManager.
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
         isDriver = (OfflineCache.getReference().retrieveCurrentUser() instanceof Driver);
-
-        if (OfflineCache.getReference().retrieveCurrentRideRequest() != null && !isDriver) {
+        if (OfflineCache.getReference().retrieveCurrentRideRequest() != null) {
             rideRequestListener = FirebaseManager.getReference().listenToRideRequest(OfflineCache.getReference().retrieveCurrentRideRequest().getRiderUID(), this);
-            View root = inflater.inflate(R.layout.fragment_current_requests_rider, container, false);
-            return root;
-        } else if (OfflineCache.getReference().retrieveCurrentRideRequest() != null && isDriver) {
-            rideRequestListener = FirebaseManager.getReference().listenToRideRequest(OfflineCache.getReference().retrieveCurrentRideRequest().getDriverUID(), this);
-            View root = inflater.inflate(R.layout.fragment_current_requests_driver, container, false);
-            return root;
+            if (isDriver) {
+                return inflater.inflate(R.layout.fragment_current_requests_driver, container, false);
+            } else {
+                return inflater.inflate(R.layout.fragment_current_requests_rider, container, false);
+            }
         } else {
-            View root = inflater.inflate(R.layout.no_current_request, container, false);
-            return root;
+            return inflater.inflate(R.layout.no_current_request, container, false);
         }
     }
 

@@ -34,6 +34,7 @@ import androidx.test.espresso.contrib.DrawerActions;
 import static androidx.test.espresso.contrib.DrawerMatchers.*;
 import static androidx.test.espresso.matcher.ViewMatchers.*;
 import static com.example.gufyguber.InstrumentedTestHelpers.*;
+import static org.hamcrest.core.StringContains.containsString;
 
 import androidx.test.rule.ActivityTestRule;
 
@@ -57,6 +58,9 @@ public class DriverInstrumentedTests {
     @Rule
     public ActivityTestRule<NavigationActivity> navigationActivityRule = new ActivityTestRule<>(NavigationActivity.class, false, false);
 
+    /**
+     * Populate some test data, cache it in the OfflineCache, and bypass the login activity
+     */
     @Before
     public void init() {
         testVehicle =  new Vehicle("TestModel", "TestMake", "TestPlate", 1);
@@ -80,6 +84,9 @@ public class DriverInstrumentedTests {
         checkMapLoaded();
     }
 
+    /**
+     * Clear the offline cache, turn off test mode, and shut down the activity
+     */
     @After
     public void cleanup() {
         OfflineCache.getReference().clearCache();
@@ -87,6 +94,9 @@ public class DriverInstrumentedTests {
         navigationActivityRule.finishActivity();
     }
 
+    /**
+     * Test that makes sure the drawer menu displays the correct name and email
+     */
     @Test
     public void testDrawerInfoDisplay() {
         // Makes sure the drawer menu is closed, then opens it
@@ -108,6 +118,9 @@ public class DriverInstrumentedTests {
                 .check(matches(isClosed(Gravity.LEFT)));
     }
 
+    /**
+     * Test that makes sure the profile page displays the correct info
+     */
     @Test
     public void testProfileScreen() {
         goToProfileScreenFromAnyScreen();
@@ -147,6 +160,9 @@ public class DriverInstrumentedTests {
         goToMapScreenFromAnyScreen();
     }
 
+    /**
+     * Tests trying to navigate to the map from the map
+     */
     @Test
     public void testMapToMap() {
         // Extra time for weird test that involves rapid menu switching
@@ -154,6 +170,9 @@ public class DriverInstrumentedTests {
         goToMapScreenFromAnyScreen();
     }
 
+    /**
+     * Tests trying to navigate to the profile screen from the profile screen
+     */
     @Test
     public void testProfileToProfile() {
         goToProfileScreenFromAnyScreen();
@@ -162,6 +181,20 @@ public class DriverInstrumentedTests {
         goToProfileScreenFromAnyScreen();
     }
 
+    /**
+     * Tests trying to navigate to the request screen from the request screen
+     */
+    @Test
+    public void testRequestToRequest() {
+        goToRideRequestScreenFromAnyScreen();
+        // Extra time for weird test that involves rapid menu switching
+        onView(isRoot()).perform(waitFor(1000));
+        goToRideRequestScreenFromAnyScreen();
+    }
+
+    /**
+     * Tests editing the user profile
+     */
     @Test
     public void testEditProfileScreen() {
         goToProfileScreenFromAnyScreen();
@@ -178,6 +211,9 @@ public class DriverInstrumentedTests {
         String newModel = "2" + testVehicle.getModel() + "2";
         String newPlate = "2" + testVehicle.getPlateNumber() + "2";
         int newSeats = 2 + testVehicle.getSeatNumber() + 2;
+
+        // Give some animations time to finish
+        onView(isRoot()).perform(waitFor(1000));
 
         // Edit the driver's first name
         onView(withId(R.id.user_first_name))
@@ -253,8 +289,47 @@ public class DriverInstrumentedTests {
         testProfileScreen();
     }
 
+    /**
+     * Test that makes sure the current ride request screen opens and displays the correct info
+     */
     @Test
     public void testRideRequestScreen() {
         goToRideRequestScreenFromAnyScreen();
+
+        // Make sure the status message contains the right status
+        onView(withId(R.id.ride_status))
+                .check(matches(withText(containsString(testRideRequest.getStatus().toString()))));
+        // Make sure the request open time is correct
+        onView(withId(R.id.user_pickup_time))
+                .check(matches(withText(testRideRequest.getTimeInfo().getRequestOpenTime().toString())));
+        // Make sure the request accepted time is correct
+        onView(withId(R.id.user_arrival_time))
+                .check(matches(withText(testRideRequest.getTimeInfo().getRequestAcceptedTime().toString())));
+        // Make sure the pickup coordinates are correct
+        onView(withId(R.id.user_pickup_location))
+                .check(matches(withText(LocationInfo.latlngToString(testRideRequest.getLocationInfo().getPickup()))));
+        // Make sure the dropoff coordinates are correct
+        onView(withId(R.id.user_dropoff_location))
+                .check(matches(withText(LocationInfo.latlngToString(testRideRequest.getLocationInfo().getDropoff()))));
+        // Make sure the fare is correct
+        onView(withId(R.id.user_fare))
+                .check(matches(withText(String.format("$%.2f", testRideRequest.getOfferedFare()))));
+    }
+
+    /**
+     * Stress-tests switching between different menu screens
+     * Note that each test needs some extra time for animations to complete
+     */
+    @Test
+    public void testMenuSwitching() {
+        goToProfileScreenFromAnyScreen();
+        onView(isRoot()).perform(waitFor(1000));
+        goToRideRequestScreenFromAnyScreen();
+        onView(isRoot()).perform(waitFor(1000));
+        goToMapScreenFromAnyScreen();
+        onView(isRoot()).perform(waitFor(1000));
+        goToRideRequestScreenFromAnyScreen();
+        onView(isRoot()).perform(waitFor(1000));
+        goToProfileScreenFromAnyScreen();
     }
 }
