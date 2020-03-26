@@ -52,7 +52,7 @@ public class startScanQR extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         result = findViewById(R.id.result);
-
+        
         if(ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String [] {Manifest.permission.CAMERA}, PERMISSION_REQUEST);
         }
