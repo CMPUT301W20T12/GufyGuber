@@ -154,7 +154,14 @@ public class RideRequest {
      */
     public void cancelRideRequest() {
         setStatus(Status.CANCELLED);
-        FirebaseManager.getReference().deleteRideRequest(getRiderUID());
+        FirebaseManager.getReference().deleteRideRequest(getRiderUID(), new FirebaseManager.ReturnValueListener<Boolean>() {
+            @Override
+            public void returnValue(Boolean value) {
+                if (value) {
+                    ;
+                }
+            }
+        });
     }
 
     /**

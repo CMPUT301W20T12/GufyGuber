@@ -35,6 +35,7 @@ import androidx.fragment.app.DialogFragment;
  * This activity is the fragment for the end of the ride for the Driver.
  *
  * @author kenzbauer
+ * @deprecated
  */
 
 public class ScanQrFragment extends DialogFragment {
@@ -47,6 +48,10 @@ public class ScanQrFragment extends DialogFragment {
         builder.setPositiveButton("CONFIRM PAYMENT", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
+                if (GlobalDoubleClickHandler.isDoubleClick()) {
+                    return;
+                }
+
                 Intent qrIntent = new Intent(getActivity(), startScanQR.class);
                 startActivity(qrIntent);
             }

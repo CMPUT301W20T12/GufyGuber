@@ -8,6 +8,7 @@
         import android.content.Intent;
         import android.os.Build;
         import android.os.Bundle;
+        import android.provider.Settings;
         import android.view.LayoutInflater;
         import android.view.View;
         import android.widget.Button;
@@ -17,6 +18,7 @@
         import androidx.fragment.app.DialogFragment;
         import androidx.fragment.app.Fragment;
 
+        import com.example.gufyguber.GlobalDoubleClickHandler;
         import com.example.gufyguber.LoginActivity;
         import com.example.gufyguber.NavigationActivity;
         import com.example.gufyguber.R;
@@ -46,8 +48,11 @@ public class CancelFragment extends DialogFragment {
         okBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (GlobalDoubleClickHandler.isDoubleClick()){
+                    return;
+                }
+
                 getFragmentManager().beginTransaction().remove(CancelFragment.this).commit();
-                getActivity().onBackPressed();
             }
         });
 

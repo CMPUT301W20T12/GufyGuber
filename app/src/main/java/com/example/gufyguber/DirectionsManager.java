@@ -144,7 +144,7 @@ public class DirectionsManager {
             String jsonData = "";
             try{
                 jsonData = getDirectionsResponse(url[0]);
-                Log.d(TAG,"DownloadTask : " + jsonData);
+                Log.d(TAG,"Directions API Request Result: " + jsonData);
             }catch(Exception e){
                 Log.e(TAG,"Error fetching directions: ", e);
             }

@@ -51,10 +51,15 @@ public class OfflineCache {
                 if (temp.getStatus() != currentRideRequest.getStatus()) {
                     notifyRideRequestStatusChangedListeners(currentRideRequest.getStatus());
                 }
-            } else {
+            } else if(temp.getStatus() != RideRequest.Status.COMPLETED) {
                 notifyRideRequestStatusChangedListeners(RideRequest.Status.CANCELLED);
             }
         }
+    }
+
+    public void clearCurrentRideRequest(){
+        currentRideRequest = null;
+        return;
     }
     public RideRequest retrieveCurrentRideRequest() {
         return currentRideRequest;

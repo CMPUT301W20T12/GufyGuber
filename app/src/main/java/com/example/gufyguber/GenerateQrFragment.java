@@ -36,6 +36,7 @@ import androidx.fragment.app.DialogFragment;
  *      pay the driver.
  *
  * @author kenzbauer
+ * @deprecated
  */
 
 public class GenerateQrFragment extends DialogFragment {
@@ -49,6 +50,10 @@ public class GenerateQrFragment extends DialogFragment {
         builder.setPositiveButton("CONFIRM PAYMENT", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
+                if (GlobalDoubleClickHandler.isDoubleClick()) {
+                    return;
+                }
+
                 Intent qrIntent = new Intent(getActivity(), GenerateQR.class);
                 startActivity(qrIntent);
             }

@@ -16,12 +16,14 @@ package com.example.gufyguber;
 import android.content.Intent;
 import android.os.Bundle;
 
+import com.example.gufyguber.ui.CurrentRequest.CurrentRequestFragment;
 import com.example.gufyguber.ui.Map.MapFragment;
 
 import android.util.Log;
 import android.view.Gravity;
 import android.view.MenuItem;
 
+import androidx.annotation.Nullable;
 import androidx.core.view.GravityCompat;
 import androidx.fragment.app.FragmentManager;
 import androidx.navigation.NavController;
@@ -66,7 +68,7 @@ public class NavigationActivity extends AppCompatActivity implements RideRequest
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
         mAppBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.nav_map, R.id.nav_profile, R.id.nav_current_requests, R.id.nav_generateQR, R.id.nav_scan, R.id.nav_sign_out)
+                R.id.nav_map, R.id.nav_profile, R.id.nav_current_requests, R.id.nav_sign_out)
                 .setDrawerLayout(drawer)
                 .build();
         NavController navController = Navigation.findNavController(this, nav_host_fragment);
@@ -78,7 +80,7 @@ public class NavigationActivity extends AppCompatActivity implements RideRequest
 
         OfflineCache.getReference().addRideRequestStatusChangedListener(this);
     }
-
+    
     @Override
     public void onDestroy() {
         OfflineCache.getReference().removeRideRequestStatusChangedListener(this);
@@ -98,36 +100,6 @@ public class NavigationActivity extends AppCompatActivity implements RideRequest
         NavController navController = Navigation.findNavController(this, nav_host_fragment);
         return NavigationUI.navigateUp(navController, mAppBarConfiguration)
                 || super.onSupportNavigateUp();
-    }
-
-    /**
-     * This function directs the user to the correct fragment when the item is pressed.
-     * @param item
-     * @return
-     */
-    //@Override
-    public boolean onNavigationItemSelected(MenuItem item) {
-        int id = item.getItemId();
-
-        if(id == R.id.nav_map){
-            MapFragment mapFragment = new MapFragment();
-            FragmentManager manager = getSupportFragmentManager();
-            manager.beginTransaction().replace(id, mapFragment).commit();
-        }
-        if(id == R.id.nav_generateQR){
-            GenerateQrFragment qrFragment = new GenerateQrFragment();
-            FragmentManager manager = getSupportFragmentManager();
-            manager.beginTransaction().replace(id, qrFragment).commit();
-        }
-        if(id == R.id.nav_scan){
-            ScanQrFragment scanFragment = new ScanQrFragment();
-            FragmentManager manager = getSupportFragmentManager();
-            manager.beginTransaction().replace(id, scanFragment).commit();
-        }
-
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        drawer.closeDrawer(GravityCompat.START);
-        return true;
     }
 
     /**
@@ -161,7 +133,25 @@ public class NavigationActivity extends AppCompatActivity implements RideRequest
         ((TextView)toastView.findViewById(android.R.id.message)).setTextColor(0xFFFFFFFF);
         switch (status) {
             case PENDING:
-                Log.w(TAG, "Status changed to PENDING... which shouldn't be possible.");
+                Log.w(TAG, "Status changed to PENDING... which shouldn't be possible."); // It is now
+                if (OfflineCache.getReference().retrieveCurrentUser() instanceof Driver) {
+                    FirebaseManager.getReference().fetchDriverInfo(OfflineCache.getReference().retrieveCurrentUser().getUID(), new FirebaseManager.ReturnValueListener<Driver>() {
+                        @Override
+                        public void returnValue(Driver value) {
+                            if (value != null) {
+                                toast.setText(String.format("Your offer was declined."));
+                                toast.show();
+                                OfflineCache.getReference().clearCurrentRideRequest();
+                                //Maybe change this
+                                //This restarts the navigation activity to clear the map
+                                Intent mIntent = getIntent();
+                                finish();
+                                startActivity(mIntent);
+
+                            }
+                        }
+                    });
+                }
                 break;
             case ACCEPTED:
                 if (OfflineCache.getReference().retrieveCurrentUser() instanceof Rider) {
@@ -169,8 +159,13 @@ public class NavigationActivity extends AppCompatActivity implements RideRequest
                         @Override
                         public void returnValue(Driver value) {
                             if (value != null) {
-                                toast.setText(String.format("Request accepted by %s %s.", value.getFirstName(), value.getLastName()));
-                                toast.show();
+                                Bundle bundle = new Bundle();
+                                bundle.putString("first_name", value.getFirstName());
+                                bundle.putString("last_name", value.getLastName());
+                                bundle.putString("rating", "99"); //TODO: get driver rating
+                                DriverAcceptFragment acceptFragment = new DriverAcceptFragment();
+                                acceptFragment.setArguments(bundle);
+                                acceptFragment.show(getSupportFragmentManager(), "DRIVER_OFFER");
                             }
                         }
                     });
@@ -190,6 +185,10 @@ public class NavigationActivity extends AppCompatActivity implements RideRequest
                 }
                 break;
             case EN_ROUTE:
+                if (OfflineCache.getReference().retrieveCurrentUser() instanceof Rider) {
+                    toast.setText("Your driver is waiting for you!");
+                    toast.show();
+                }
                 break;
             case ARRIVED:
                 if (OfflineCache.getReference().retrieveCurrentUser() instanceof Rider) {
@@ -201,15 +200,58 @@ public class NavigationActivity extends AppCompatActivity implements RideRequest
                 }
                 break;
             case COMPLETED:
-                toast.setText("Payment complete.");
-                toast.show();
+                if (OfflineCache.getReference().retrieveCurrentUser() instanceof Rider) {
+                    toast.setText("Payment complete.");
+                    toast.show();
+                } else {
+                    toast.setText("Payment received.");
+                    toast.show();
+                    FirebaseManager.getReference().deleteRideRequest(OfflineCache.getReference().retrieveCurrentRideRequest().getRiderUID(), new FirebaseManager.ReturnValueListener<Boolean>() {
+                        @Override
+                        public void returnValue(Boolean value) {
+                            if(value){
+                                OfflineCache.getReference().clearCurrentRideRequest();
+                            }
+                            else{
+                                Log.w(TAG, "Error deleting completed ride request.");
+                            }
+                        }
+                    });
+                }
                 break;
             case CANCELLED:
                 if (OfflineCache.getReference().retrieveCurrentUser() instanceof Driver) {
-                    toast.setText("Your ride offer was rejected.");
+                    toast.setText("The ride request was canceled.");
                     toast.show();
                 }
                 break;
         }
+    }
+
+    /**
+     * This method starts a new sign in activity so that the user can sign in again
+     */
+    public void logout(){
+        Intent intent = new Intent(this, SignInActivity.class);
+        startActivity(intent);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        User user = OfflineCache.getReference().retrieveCurrentUser();
+        RideRequest request = OfflineCache.getReference().retrieveCurrentRideRequest();
+        if(user instanceof Driver){
+            if(request != null) {
+                FirebaseManager.getReference().fetchRideRequest(request.getRiderUID(), new FirebaseManager.ReturnValueListener<RideRequest>() {
+                    @Override
+                    public void returnValue(RideRequest value) {
+                        if (value != null) {
+                            onStatusChanged(value.getStatus());
+                        }
+                    }
+                });
+            }
+       }
     }
 }

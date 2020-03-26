@@ -13,14 +13,19 @@
 
 package com.example.gufyguber.ui.Profile;
 
+import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
+import android.telephony.PhoneNumberFormattingTextWatcher;
+import android.telephony.PhoneNumberUtils;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -33,6 +38,7 @@ import androidx.lifecycle.ViewModelProviders;
 
 import com.example.gufyguber.Driver;
 import com.example.gufyguber.FirebaseManager;
+import com.example.gufyguber.GlobalDoubleClickHandler;
 import com.example.gufyguber.NavigationActivity;
 import com.example.gufyguber.OfflineCache;
 import com.example.gufyguber.R;
@@ -53,6 +59,8 @@ import com.squareup.picasso.Picasso;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
+
+import static android.telephony.PhoneNumberUtils.formatNumber;
 
 public class ProfileFragment extends Fragment {
 
@@ -139,7 +147,7 @@ public class ProfileFragment extends Fragment {
                     firstNameText.setText(value.getFirstName());
                     lastNameText.setText(value.getLastName());
                     emailText.setText(value.getEmail());
-                    phoneText.setText(value.getPhoneNumber());
+                    phoneText.setText(formatNumber(value.getPhoneNumber(), "CA"));
                     if (driver) {
                         // if they are a driver we also need the vehicle info from firebase manager
                         FirebaseManager.getReference().fetchVehicleInfo(FirebaseAuth.getInstance().getUid(),
@@ -163,11 +171,15 @@ public class ProfileFragment extends Fragment {
         editProfile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (GlobalDoubleClickHandler.isDoubleClick()) {
+                    return;
+                }
+
                 // when user clicks the edit button, change the fields to be editable
                 firstNameText.setEnabled(true);
                 lastNameText.setEnabled(true);
-                emailText.setEnabled(true);
                 phoneText.setEnabled(true);
+                phoneText.addTextChangedListener(new PhoneNumberFormattingTextWatcher("CA"));
                 editProfile.setVisibility(View.GONE);
                 saveProfile.setVisibility(View.VISIBLE);
                 if (driver) {
@@ -183,6 +195,11 @@ public class ProfileFragment extends Fragment {
         saveProfile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (GlobalDoubleClickHandler.isDoubleClick()) {
+                    return;
+                }
+                phoneText.setText(PhoneNumberUtils.formatNumber(phoneText.getText().toString(), "CA"));
+
                 if(validateForm()) {    // check that all fields are filled in
                     String userEmail = emailText.getText().toString().toLowerCase();
                     String userFirstName = firstNameText.getText().toString();
@@ -211,7 +228,7 @@ public class ProfileFragment extends Fragment {
                                 makeText.getText().toString(),
                                 plateText.getText().toString(),
                                 Integer.parseInt(seatText.getText().toString())));
-                        // update the authentication email for the firebase projec
+                        // update the authentication email for the firebase project
                         FirebaseAuth.getInstance().getCurrentUser().updateEmail(userEmail)
                                 .addOnCompleteListener(new OnCompleteListener<Void>() {
                                     @Override
@@ -258,12 +275,21 @@ public class ProfileFragment extends Fragment {
                         });
                     }
                     Toast.makeText(getContext(), "Profile successfully updated", Toast.LENGTH_LONG).show();
-                    getActivity().onBackPressed(); // head back to map after updated
+                    closeFragment();// head back to map after updated
                 } else {
                     Toast.makeText(getContext(), "Missing Required Info", Toast.LENGTH_SHORT).show();
                 }
             }
         });
+    }
+
+    // https://stackoverflow.com/a/43061269
+    private void closeFragment(){
+        if (getActivity().getCurrentFocus() != null) {
+            InputMethodManager inputManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+            inputManager.hideSoftInputFromWindow(getActivity().getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+        }
+        getActivity().getSupportFragmentManager().popBackStack();
     }
 
     /**
@@ -272,20 +298,43 @@ public class ProfileFragment extends Fragment {
      *  Return true if all fields are filled, false if any are empty
      */
     private boolean validateForm() {
-        if (driver) {
-            return (!TextUtils.isEmpty(emailText.getText().toString()) &&
-                    !TextUtils.isEmpty(firstNameText.getText().toString()) &&
-                    !TextUtils.isEmpty(lastNameText.getText().toString()) &&
-                    !TextUtils.isEmpty(phoneText.getText().toString()) &&
-                    !TextUtils.isEmpty(makeText.getText().toString()) &&
-                    !TextUtils.isEmpty(modelText.getText().toString()) &&
-                    !TextUtils.isEmpty(plateText.getText().toString()) &&
-                    !TextUtils.isEmpty(seatText.getText().toString()));
-        } else {
-            return (!TextUtils.isEmpty(emailText.getText().toString()) &&
-                    !TextUtils.isEmpty(firstNameText.getText().toString()) &&
-                    !TextUtils.isEmpty(lastNameText.getText().toString()) &&
-                    !TextUtils.isEmpty(phoneText.getText().toString()));
+        String phoneRegex = "^(\\+?\\d{1,2}\\s)?\\(?\\d{3}\\)?[\\s.-]?\\d{3}[\\s.-]?\\d{4}$"; //https://stackoverflow.com/questions/16699007/regular-expression-to-match-standard-10-digit-phone-number
+
+        Boolean isValid = true;
+
+        HashMap<EditText, String> fields = new HashMap<>();
+
+        fields.put((EditText) firstNameText, firstNameText.getText().toString());
+        fields.put((EditText) lastNameText, lastNameText.getText().toString());
+        fields.put((EditText) phoneText, phoneText.getText().toString());
+        //fields.put((EditText) phoneText, phoneText.getText().toString());
+        if(driver){
+            fields.put((EditText) makeText, makeText.getText().toString());
+            fields.put((EditText) modelText, modelText.getText().toString());
+            fields.put((EditText) plateText, plateText.getText().toString());
+            fields.put((EditText) seatText, seatText.getText().toString());
         }
+
+        for (Map.Entry field : fields.entrySet()) {
+            /* iterate over Map and check all fields are filled in*/
+            if (TextUtils.isEmpty((String) field.getValue())) {
+                ((EditText) field.getKey()).setError("Required");   /* if not filled in, flag */
+                isValid = false;
+            } else {
+                ((EditText) field.getKey()).setError(null);                 /* else, update counter */
+            }
+        }
+
+        if(isValid){
+            if(!phoneText.getText().toString().matches(phoneRegex)) {
+                phoneText.setError("Invalid Phone Number");
+                isValid = false;
+            }
+        }
+
+        return isValid;
     }
+
+
+
 }

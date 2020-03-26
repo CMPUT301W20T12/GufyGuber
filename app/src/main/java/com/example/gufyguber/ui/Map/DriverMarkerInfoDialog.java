@@ -39,6 +39,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 
 import com.example.gufyguber.FirebaseManager;
+import com.example.gufyguber.GlobalDoubleClickHandler;
 import com.example.gufyguber.OfflineCache;
 import com.example.gufyguber.R;
 import com.example.gufyguber.RideRequest;
@@ -86,6 +87,10 @@ public class DriverMarkerInfoDialog extends DialogFragment {
         noBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (GlobalDoubleClickHandler.isDoubleClick()) {
+                    return;
+                }
+
                 dismiss();
             }
         });
@@ -93,6 +98,10 @@ public class DriverMarkerInfoDialog extends DialogFragment {
         yesBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (GlobalDoubleClickHandler.isDoubleClick()) {
+                    return;
+                }
+
                 if (OfflineCache.getReference().retrieveCurrentRideRequest() != null) {
                     OfflineCache.getReference().retrieveCurrentRideRequest().setStatus(RideRequest.Status.PENDING);
                     FirebaseManager.getReference().storeRideRequest(OfflineCache.getReference().retrieveCurrentRideRequest());

@@ -20,6 +20,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -32,6 +33,7 @@ import com.example.gufyguber.CreateRideRequestFragment;
 import com.example.gufyguber.DirectionsManager;
 import com.example.gufyguber.Driver;
 import com.example.gufyguber.FirebaseManager;
+import com.example.gufyguber.GlobalDoubleClickHandler;
 import com.example.gufyguber.LocationInfo;
 import com.example.gufyguber.OfflineCache;
 import com.example.gufyguber.R;
@@ -68,7 +70,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
     private Marker dropoffMarker;
     private Polyline routeLine;
     private CreateRideRequestFragment requestDialog;
-    private FloatingActionButton fab;
+    private Button fab;
     private TextView offlineText;
     private Timer offlineTestTimer;
     private boolean isDriver;
@@ -109,6 +111,52 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
                     }
                 }
             });
+            FirebaseManager.getReference().fetchRideRequestsWithStatus(RideRequest.Status.CONFIRMED, new FirebaseManager.ReturnValueListener<ArrayList<RideRequest>>() {
+                @Override
+                public void returnValue(ArrayList<RideRequest> value) {
+                    if (value == null) {
+                        return;
+                    }
+
+                    for (RideRequest request : value) {
+                        if (request.getDriverUID().equalsIgnoreCase(FirebaseAuth.getInstance().getCurrentUser().getUid())) {
+                            OfflineCache.getReference().cacheCurrentRideRequest(request);
+                            onRideRequestUpdated(request);
+                        }
+                    }
+                }
+            });
+            FirebaseManager.getReference().fetchRideRequestsWithStatus(RideRequest.Status.EN_ROUTE, new FirebaseManager.ReturnValueListener<ArrayList<RideRequest>>() {
+                @Override
+                public void returnValue(ArrayList<RideRequest> value) {
+                    if (value == null) {
+                        return;
+                    }
+
+                    for (RideRequest request : value) {
+                        if (request.getDriverUID().equalsIgnoreCase(FirebaseAuth.getInstance().getCurrentUser().getUid())) {
+                            OfflineCache.getReference().cacheCurrentRideRequest(request);
+                            onRideRequestUpdated(request);
+                        }
+                    }
+                }
+            });
+            FirebaseManager.getReference().fetchRideRequestsWithStatus(RideRequest.Status.ARRIVED, new FirebaseManager.ReturnValueListener<ArrayList<RideRequest>>() {
+                @Override
+                public void returnValue(ArrayList<RideRequest> value) {
+                    if (value == null) {
+                        return;
+                    }
+
+                    for (RideRequest request : value) {
+                        if (request.getDriverUID().equalsIgnoreCase(FirebaseAuth.getInstance().getCurrentUser().getUid())) {
+                            OfflineCache.getReference().cacheCurrentRideRequest(request);
+                            onRideRequestUpdated(request);
+                        }
+                    }
+                }
+            });
+
         } else {
             FirebaseManager.getReference().fetchRideRequest(FirebaseAuth.getInstance().getCurrentUser().getUid(), new FirebaseManager.ReturnValueListener<RideRequest>() {
                 @Override
@@ -145,6 +193,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                if (GlobalDoubleClickHandler.isDoubleClick()) {
+                    return;
+                }
+
                 if (requestDialog == null) {
                     requestDialog = new CreateRideRequestFragment();
                 }
