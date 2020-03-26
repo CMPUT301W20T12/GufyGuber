@@ -48,6 +48,8 @@ public class RateDriver extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
 
+    public static final String RATING_COLLECTION = "ratings";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -73,16 +75,15 @@ public class RateDriver extends AppCompatActivity {
         thumbsUp.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                db.collection("users").document(userID).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                db.collection(RATING_COLLECTION).document(userID).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
                     @Override
                     public void onSuccess(DocumentSnapshot documentSnapshot) {
                         if (documentSnapshot.exists()) {
-                            db.collection("users").document(userID).update("positive", FieldValue.increment(1));
+                            db.collection(RATING_COLLECTION).document(userID).update("positive", FieldValue.increment(1));
                         }
                         else {
-                            Map<String, Object> driver = new HashMap<>();
-                            driver.put("positive", 1);
-                            db.collection("users").document(userID).set(driver, SetOptions.merge());
+                            Rating rateDriver = new Rating(1, 0);
+                            FirebaseManager.getReference().storeRatingInfo(userID, rateDriver);
                         }
                     }
                 });
@@ -95,16 +96,15 @@ public class RateDriver extends AppCompatActivity {
         thumbsDown.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                db.collection("users").document(userID).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                db.collection(RATING_COLLECTION).document(userID).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
                     @Override
                     public void onSuccess(DocumentSnapshot documentSnapshot) {
                         if (documentSnapshot.exists()) {
-                            db.collection("users").document(userID).update("negative", FieldValue.increment(1));
+                            db.collection(RATING_COLLECTION).document(userID).update("negative", FieldValue.increment(1));
                         }
                         else {
-                            Map<String, Object> driver = new HashMap<>();
-                            driver.put("negative", 1);
-                            db.collection("users").document(userID).set(driver, SetOptions.merge());
+                            Rating rateDriver = new Rating(0, 1);
+                            FirebaseManager.getReference().storeRatingInfo(userID, rateDriver);
                         }
                     }
                 });
