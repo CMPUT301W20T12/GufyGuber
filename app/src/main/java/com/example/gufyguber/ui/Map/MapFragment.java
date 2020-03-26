@@ -151,7 +151,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
                         }
 
                         for (RideRequest request : value) {
-                            if (request.getDriverUID().equalsIgnoreCase(OfflineCache.getReference().retrieveCurrentUser().getUID())) {
+                            String dUID = request.getDriverUID();
+                            if (dUID != null && dUID.equalsIgnoreCase(OfflineCache.getReference().retrieveCurrentUser().getUID())) {
                                 OfflineCache.getReference().cacheCurrentRideRequest(request);
                                 onRideRequestUpdated(request);
                             }
@@ -166,7 +167,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
                         }
 
                         for (RideRequest request : value) {
-                            if (request.getDriverUID().equalsIgnoreCase(OfflineCache.getReference().retrieveCurrentUser().getUID())) {
+                            String dUID = request.getDriverUID();
+                            if (dUID != null && dUID.equalsIgnoreCase(OfflineCache.getReference().retrieveCurrentUser().getUID())) {
                                 OfflineCache.getReference().cacheCurrentRideRequest(request);
                                 onRideRequestUpdated(request);
                             }
@@ -181,7 +183,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
                         }
 
                         for (RideRequest request : value) {
-                            if (request.getDriverUID().equalsIgnoreCase(OfflineCache.getReference().retrieveCurrentUser().getUID())) {
+                            String dUID = request.getDriverUID();
+                            if (dUID != null && dUID.equalsIgnoreCase(OfflineCache.getReference().retrieveCurrentUser().getUID())) {
                                 OfflineCache.getReference().cacheCurrentRideRequest(request);
                                 onRideRequestUpdated(request);
                             }
@@ -196,7 +199,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
                         }
 
                         for (RideRequest request : value) {
-                            if (request.getDriverUID().equalsIgnoreCase(OfflineCache.getReference().retrieveCurrentUser().getUID())) {
+                            String dUID = request.getDriverUID();
+                            if (dUID != null && dUID.equalsIgnoreCase(OfflineCache.getReference().retrieveCurrentUser().getUID())) {
                                 OfflineCache.getReference().cacheCurrentRideRequest(request);
                                 onRideRequestUpdated(request);
                             }
@@ -413,6 +417,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
             @Override
             public void onPlaceSelected(@NonNull Place place) {
                 Log.i(TAG, "Place: + place.getName()" + ", " + place.getId());
+                mAutocomplete = place;
                 geoLocate();
             }
 
