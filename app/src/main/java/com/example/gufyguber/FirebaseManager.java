@@ -653,6 +653,11 @@ public class FirebaseManager {
         vehicleDoc.delete();
     }
 
+    public void deleteRatingInfo(final String driverUID) {
+        DocumentReference ratingDoc = FirebaseFirestore.getInstance().collection(RATING_COLLECTION).document(driverUID);
+        ratingDoc.delete();
+    }
+
     /**
      * Used to determine whether or not a record exists for a user in our cloud Firestore
      * @param UID The UID of the user we're looking for
