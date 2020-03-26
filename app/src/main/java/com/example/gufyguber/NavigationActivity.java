@@ -226,6 +226,7 @@ public class NavigationActivity extends AppCompatActivity implements RideRequest
     public void logout(){
         finish(); // Can't forget to finish this activity to clear the stack
         Intent intent = new Intent(getApplicationContext(), SignInActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP); //https://stackoverflow.com/questions/7599955/android-finish-activity-and-start-another-one
         startActivity(intent);
     }
 

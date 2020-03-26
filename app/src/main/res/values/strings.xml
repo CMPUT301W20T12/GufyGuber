@@ -40,6 +40,7 @@
     <string name="edit_profile">Edit</string>
     <string name="save_profile">Save changes</string>
     <string name="request_status">Current ride request: %s</string>
+    <string name="camera_rationale">Use of the camera is <b>required</b> to receive payment</string>
 
 
 </resources>

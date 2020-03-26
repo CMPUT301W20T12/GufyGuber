@@ -46,7 +46,7 @@ public class startScanQR extends AppCompatActivity {
     public static final int PERMISSION_REQUEST = 200;
 
     private static final String TAG = "startScanQR";
-
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -57,11 +57,40 @@ public class startScanQR extends AppCompatActivity {
         result = findViewById(R.id.result);
 
         if(ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String [] {Manifest.permission.CAMERA}, PERMISSION_REQUEST);
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
+                    Manifest.permission.CAMERA)) {
+                // Show an explanation to the user *asynchronously*
+                new CameraRationaleFragment().show(getSupportFragmentManager(), "camera_rationale");
+            }else {
+                // request the permission
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, PERMISSION_REQUEST);
+            }
+        } else{
+            // permission already granted
+            // proceed to receive payment
+            Intent intent = new Intent(startScanQR.this, Scan.class);
+            startActivityForResult(intent, REQUEST_CODE);
         }
+    }
 
-        Intent intent = new Intent(startScanQR.this, Scan.class);
-        startActivityForResult(intent, REQUEST_CODE);
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String[] permissions, int[] grantResults) {
+        switch (requestCode) {
+            case PERMISSION_REQUEST: {
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // permission granted
+                    // proceed to receive payment
+                    Intent intent = new Intent(startScanQR.this, Scan.class);
+                    startActivityForResult(intent, REQUEST_CODE);
+                } else {
+                    // permission is denied
+                    // return back to navigation activity
+                    finish();
+                }
+            }
+        }
     }
 
     /**
