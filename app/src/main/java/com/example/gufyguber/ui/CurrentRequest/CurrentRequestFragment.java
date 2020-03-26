@@ -14,12 +14,8 @@
 package com.example.gufyguber.ui.CurrentRequest;
 
 
-import android.app.Activity;
 import android.content.Intent;
-import android.graphics.Color;
-import android.graphics.Paint;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -43,7 +39,8 @@ import com.example.gufyguber.RideRequest;
 import com.example.gufyguber.Rider;
 import com.example.gufyguber.startScanQR;
 import com.example.gufyguber.User;
-import com.example.gufyguber.ui.Profile.UserContactInformationFragment;
+import com.example.gufyguber.ui.Profile.DriverContactInformationFragment;
+import com.example.gufyguber.ui.Profile.RiderContactInformationFragment;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.ListenerRegistration;
 
@@ -140,7 +137,8 @@ public class CurrentRequestFragment extends Fragment implements FirebaseManager.
                         riderText.setText("Rider Info Unavailable");
                     } else {
                         riderText.setText(String.format("%s %s", value.getFirstName(), value.getLastName()));
-                        activateContactButton(value, riderContactBtn);
+                        activateRiderContactButton(value, riderContactBtn);
+                        //activateContactButton(value, riderContactBtn);
                     }
                 }
             });
@@ -205,7 +203,8 @@ public class CurrentRequestFragment extends Fragment implements FirebaseManager.
                             driverText.setText("Driver Info Unavailable");
                         } else {
                             driverText.setText(String.format("%s %s", value.getFirstName(), value.getLastName()));
-                            activateContactButton(value, driverContactBtn);
+                            activateDriverContactButton(value, driverContactBtn);
+                            //activateContactButton(value, driverContactBtn);
                         }
                     }
 
@@ -266,8 +265,28 @@ public class CurrentRequestFragment extends Fragment implements FirebaseManager.
         }
 
     }
+    private void activateDriverContactButton(final Driver driver, Button contactBtn){
+        contactBtn.setVisibility(View.VISIBLE);
+        contactBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (GlobalDoubleClickHandler.isDoubleClick()) {
+                    return;
+                }
 
-    private void activateContactButton(final User user, Button contactBtn){
+                Bundle bundle = new Bundle();
+                bundle.putString("email", driver.getEmail());
+                bundle.putString("phone", driver.getPhoneNumber());
+                bundle.putString("make", driver.getVehicle().getModel());
+                bundle.putString("model", driver.getVehicle().getMake());
+                DriverContactInformationFragment infoFragment = new DriverContactInformationFragment();
+                infoFragment.setArguments(bundle);
+                infoFragment.show(getFragmentManager(), "user_contact_information");
+            }
+        });
+
+    }
+    private void activateRiderContactButton(final User user, Button contactBtn){
         contactBtn.setVisibility(View.VISIBLE);
         contactBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -279,7 +298,7 @@ public class CurrentRequestFragment extends Fragment implements FirebaseManager.
                 Bundle bundle = new Bundle();
                 bundle.putString("email", user.getEmail());
                 bundle.putString("phone", user.getPhoneNumber());
-                UserContactInformationFragment infoFragment = new UserContactInformationFragment();
+                RiderContactInformationFragment infoFragment = new RiderContactInformationFragment();
                 infoFragment.setArguments(bundle);
                 infoFragment.show(getChildFragmentManager(), "user_contact_information");
             }

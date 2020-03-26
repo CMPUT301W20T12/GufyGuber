@@ -13,18 +13,20 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  *
- * UserContactInformation.java
+ * RiderContactInformationFragment.java
  *
- * Last edit: hmp, 18/03/20 4:39 PM
+ * Last edit: homie, 25/03/20 6:19 PM
  *
  * Version
  */
 
 package com.example.gufyguber.ui.Profile;
 
+//https://developer.android.com/guide/components/intents-common#Phone
+//https://developer.android.com/guide/components/intents-common#ComposeEmail
+
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -32,6 +34,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -41,10 +44,6 @@ import androidx.fragment.app.DialogFragment;
 import com.example.gufyguber.GlobalDoubleClickHandler;
 import com.example.gufyguber.R;
 
-
-//https://developer.android.com/guide/components/intents-common#Phone
-//https://developer.android.com/guide/components/intents-common#ComposeEmail
-
 /**
  * Displays user contact information for another user to view.
  * Handles directing to and pre-dialing the users default phone app
@@ -52,7 +51,7 @@ import com.example.gufyguber.R;
  * @author Harrison Peters
  */
 
-public class UserContactInformationFragment extends DialogFragment {
+public class RiderContactInformationFragment extends DialogFragment {
     private TextView contactEmail;
     private TextView contactPhone;
     private String email;
@@ -61,7 +60,7 @@ public class UserContactInformationFragment extends DialogFragment {
     @NonNull
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
-        View view = LayoutInflater.from(getActivity()).inflate(R.layout.fragment_contact_info, null);
+        View view = LayoutInflater.from(getActivity()).inflate(R.layout.fragment_rider_contact_info, null);
         Bundle bundle = this.getArguments();
 
         email = bundle.getString("email");
@@ -72,7 +71,8 @@ public class UserContactInformationFragment extends DialogFragment {
 
         contactEmail.setText(email);
 
-        String formattedPhone = String.format("%s-%s-%s", phoneNumber.substring(0,3), phoneNumber.substring(3,6), phoneNumber.substring(6,10));
+
+        String formattedPhone = String.format("%s-%s-%s", phoneNumber.substring(0, 3), phoneNumber.substring(3, 6), phoneNumber.substring(6, 10));
         contactPhone.setText(formattedPhone);
 
         Paint paint = new Paint();
@@ -105,7 +105,7 @@ public class UserContactInformationFragment extends DialogFragment {
                     return;
                 }
 
-                String [] recipient = {email};
+                String[] recipient = {email};
                 Intent intent = new Intent(Intent.ACTION_SENDTO);
                 intent.setData(Uri.parse("mailto:")); // only email apps should handle this
                 intent.putExtra(Intent.EXTRA_EMAIL, recipient);
@@ -115,7 +115,6 @@ public class UserContactInformationFragment extends DialogFragment {
                 }
             }
         });
-
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
         return builder
