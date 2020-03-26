@@ -162,8 +162,9 @@ public class RegisterUserActivity extends AppCompatActivity {
             }
         }
         if (validCounter == 3) {
-            /* if all 3 checks pass, the register form is valid */
-            valid = true;
+            if(phoneNumber.getText().toString().matches("^(\\+?\\d{1,2}\\s)?\\(?\\d{3}\\)?[\\s.-]?\\d{3}[\\s.-]?\\d{4}$"))
+                valid = true;
+            phoneNumber.setError("Invalid Phone Number");
         }
         return valid;
     }
