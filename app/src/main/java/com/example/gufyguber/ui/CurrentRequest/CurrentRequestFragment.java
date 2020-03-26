@@ -276,6 +276,7 @@ public class CurrentRequestFragment extends Fragment implements FirebaseManager.
                 bundle.putString("phone", driver.getPhoneNumber());
                 bundle.putString("make", driver.getVehicle().getModel());
                 bundle.putString("model", driver.getVehicle().getMake());
+                bundle.putString("plate", driver.getVehicle().getPlateNumber());
                 DriverContactInformationFragment infoFragment = new DriverContactInformationFragment();
                 infoFragment.setArguments(bundle);
                 infoFragment.show(getFragmentManager(), "user_contact_information");

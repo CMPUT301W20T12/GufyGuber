@@ -25,13 +25,12 @@ package com.example.gufyguber.ui.Profile;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Intent;
-import android.graphics.Color;
-import android.graphics.Paint;
+
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.ImageView;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -55,14 +54,16 @@ import com.example.gufyguber.R;
  */
 
 public class DriverContactInformationFragment extends DialogFragment {
-    private TextView contactEmail;
-    private TextView contactPhone;
+    private ImageButton contactEmail;
+    private ImageButton contactPhone;
     private TextView contactMake;
     private TextView contactModel;
+    private TextView contactPlate;
     private String email;
     private String phoneNumber;
     private String make;
     private String model;
+    private String plate;
 
     @NonNull
     @Override
@@ -74,30 +75,19 @@ public class DriverContactInformationFragment extends DialogFragment {
         phoneNumber = bundle.getString("phone");
         make = bundle.getString("make");
         model = bundle.getString("model");
+        plate = bundle.getString("plate");
 
         contactEmail = view.findViewById(R.id.contact_email);
         contactPhone = view.findViewById(R.id.contact_phone);
         contactMake = view.findViewById(R.id.contact_make);
         contactModel = view.findViewById(R.id.contact_model);
+        contactPlate = view.findViewById(R.id.contact_plate);
 
-        contactEmail.setText(email);
         contactMake.setText(make);
         contactModel.setText(model);
+        contactPlate.setText(plate);
 
         String formattedPhone = String.format("%s-%s-%s", phoneNumber.substring(0, 3), phoneNumber.substring(3, 6), phoneNumber.substring(6, 10));
-        contactPhone.setText(formattedPhone);
-
-        Paint paint = new Paint();
-        paint.setFlags(Paint.UNDERLINE_TEXT_FLAG);
-        contactPhone.setPaintFlags(paint.getFlags()); //https://stackoverflow.com/questions/8033316/to-draw-an-underline-below-the-textview-in-android/43757835
-        contactEmail.setPaintFlags(paint.getFlags());
-        contactMake.setPaintFlags(paint.getFlags());
-        contactModel.setPaintFlags(paint.getFlags());
-
-        contactPhone.setTextColor(Color.BLUE);
-        contactEmail.setTextColor(Color.BLUE);
-        contactMake.setTextColor(Color.BLUE);
-        contactModel.setTextColor(Color.BLUE);
 
         contactPhone.setOnClickListener(new View.OnClickListener() {
             @Override

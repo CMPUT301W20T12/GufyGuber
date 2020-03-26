@@ -16,6 +16,8 @@ package com.example.gufyguber.ui.Profile;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
+import android.telephony.PhoneNumberFormattingTextWatcher;
+import android.telephony.PhoneNumberUtils;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -23,6 +25,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -51,6 +54,10 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.squareup.picasso.Picasso;
 
 import java.net.URI;
+import java.util.HashMap;
+import java.util.Map;
+
+import static android.telephony.PhoneNumberUtils.formatNumber;
 
 public class ProfileFragment extends Fragment {
 
@@ -144,8 +151,8 @@ public class ProfileFragment extends Fragment {
                 // when user clicks the edit button, change the fields to be editable
                 firstNameText.setEnabled(true);
                 lastNameText.setEnabled(true);
-                emailText.setEnabled(true);
                 phoneText.setEnabled(true);
+                phoneText.addTextChangedListener(new PhoneNumberFormattingTextWatcher("CA"));
                 editProfile.setVisibility(View.GONE);
                 saveProfile.setVisibility(View.VISIBLE);
                 if (driver) {
@@ -164,6 +171,7 @@ public class ProfileFragment extends Fragment {
                 if (GlobalDoubleClickHandler.isDoubleClick()) {
                     return;
                 }
+                phoneText.setText(PhoneNumberUtils.formatNumber(phoneText.getText().toString(), "CA"));
 
                 if(validateForm()) {    // check that all fields are filled in
                     String userEmail = emailText.getText().toString().toLowerCase();
@@ -245,23 +253,44 @@ public class ProfileFragment extends Fragment {
      *  Return true if all fields are filled, false if any are empty
      */
     private boolean validateForm() {
-        if (driver) {
-            return (!TextUtils.isEmpty(emailText.getText().toString()) &&
-                    !TextUtils.isEmpty(firstNameText.getText().toString()) &&
-                    !TextUtils.isEmpty(lastNameText.getText().toString()) &&
-                    !TextUtils.isEmpty(phoneText.getText().toString()) &&
-                    !TextUtils.isEmpty(makeText.getText().toString()) &&
-                    !TextUtils.isEmpty(modelText.getText().toString()) &&
-                    !TextUtils.isEmpty(plateText.getText().toString()) &&
-                    !TextUtils.isEmpty(seatText.getText().toString()));
-        } else {
-            return (!TextUtils.isEmpty(emailText.getText().toString()) &&
-                    !TextUtils.isEmpty(firstNameText.getText().toString()) &&
-                    !TextUtils.isEmpty(lastNameText.getText().toString()) &&
-                    !TextUtils.isEmpty(phoneText.getText().toString()));
+        String phoneRegex = "^(\\+?\\d{1,2}\\s)?\\(?\\d{3}\\)?[\\s.-]?\\d{3}[\\s.-]?\\d{4}$"; //https://stackoverflow.com/questions/16699007/regular-expression-to-match-standard-10-digit-phone-number
+
+        Boolean isValid = true;
+
+        HashMap<EditText, String> fields = new HashMap<>();
+
+        fields.put((EditText) firstNameText, firstNameText.getText().toString());
+        fields.put((EditText) lastNameText, lastNameText.getText().toString());
+        fields.put((EditText) phoneText, phoneText.getText().toString());
+        //fields.put((EditText) phoneText, phoneText.getText().toString());
+        if(driver){
+            fields.put((EditText) makeText, makeText.getText().toString());
+            fields.put((EditText) modelText, modelText.getText().toString());
+            fields.put((EditText) plateText, plateText.getText().toString());
+            fields.put((EditText) seatText, seatText.getText().toString());
         }
+
+        for (Map.Entry field : fields.entrySet()) {
+            /* iterate over Map and check all fields are filled in*/
+            if (TextUtils.isEmpty((String) field.getValue())) {
+                ((EditText) field.getKey()).setError("Required");   /* if not filled in, flag */
+                isValid = false;
+            } else {
+                ((EditText) field.getKey()).setError(null);                 /* else, update counter */
+            }
+        }
+
+        if(isValid){
+            if(!phoneText.getText().toString().matches(phoneRegex)) {
+                phoneText.setError("Invalid Phone Number");
+                isValid = false;
+            }
+        }
+
+        return isValid;  
     }
 
+    
     /**
      * Populates the Profile form based on provided user information
      * @param user The user information to use to populate the form
@@ -292,4 +321,6 @@ public class ProfileFragment extends Fragment {
             Log.e(TAG, "Null rider passed to Profile Fragment.");
         }
     }
+
+
 }
