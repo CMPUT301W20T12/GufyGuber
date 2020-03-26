@@ -24,6 +24,7 @@ package com.example.gufyguber;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.telephony.PhoneNumberFormattingTextWatcher;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -99,6 +100,7 @@ public class RegisterUserActivity extends AppCompatActivity {
         lastName = findViewById(R.id.last_name);
         lastName.setText(intent.getStringExtra("lastName"));
         phoneNumber = findViewById(R.id.phone_number);
+        phoneNumber.addTextChangedListener(new PhoneNumberFormattingTextWatcher("CA"));
         register = findViewById(R.id.register);
         register.setOnClickListener(new View.OnClickListener() {
             @Override
