@@ -16,6 +16,7 @@ package com.example.gufyguber.ui.Profile;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
+import android.telephony.PhoneNumberFormattingTextWatcher;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -50,6 +51,8 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.squareup.picasso.Picasso;
 
 import java.net.URI;
+
+import static android.telephony.PhoneNumberUtils.formatNumber;
 
 public class ProfileFragment extends Fragment {
 
@@ -131,7 +134,7 @@ public class ProfileFragment extends Fragment {
                     firstNameText.setText(value.getFirstName());
                     lastNameText.setText(value.getLastName());
                     emailText.setText(value.getEmail());
-                    phoneText.setText(value.getPhoneNumber());
+                    phoneText.setText(formatNumber(value.getPhoneNumber(), "CA"));
                     if (driver) {
                         // if they are a driver we also need the vehicle info from firebase manager
                         FirebaseManager.getReference().fetchVehicleInfo(FirebaseAuth.getInstance().getUid(),
@@ -164,6 +167,7 @@ public class ProfileFragment extends Fragment {
                 lastNameText.setEnabled(true);
                 emailText.setEnabled(true);
                 phoneText.setEnabled(true);
+                phoneText.addTextChangedListener(new PhoneNumberFormattingTextWatcher("CA"));
                 editProfile.setVisibility(View.GONE);
                 saveProfile.setVisibility(View.VISIBLE);
                 if (driver) {
