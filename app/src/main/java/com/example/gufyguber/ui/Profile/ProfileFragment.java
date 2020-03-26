@@ -17,6 +17,7 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.telephony.PhoneNumberFormattingTextWatcher;
+import android.telephony.PhoneNumberUtils;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -186,6 +187,7 @@ public class ProfileFragment extends Fragment {
                 if (GlobalDoubleClickHandler.isDoubleClick()) {
                     return;
                 }
+                phoneText.setText(PhoneNumberUtils.formatNumber(phoneText.getText().toString(), "CA"));
 
                 if(validateForm()) {    // check that all fields are filled in
                     String userEmail = emailText.getText().toString().toLowerCase();
