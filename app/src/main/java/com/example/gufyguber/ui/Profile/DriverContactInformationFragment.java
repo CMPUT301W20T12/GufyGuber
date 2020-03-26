@@ -25,14 +25,12 @@ package com.example.gufyguber.ui.Profile;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Intent;
-import android.graphics.Color;
-import android.graphics.Paint;
+
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -90,9 +88,6 @@ public class DriverContactInformationFragment extends DialogFragment {
         contactPlate.setText(plate);
 
         String formattedPhone = String.format("%s-%s-%s", phoneNumber.substring(0, 3), phoneNumber.substring(3, 6), phoneNumber.substring(6, 10));
-
-        Paint paint = new Paint();
-        paint.setFlags(Paint.UNDERLINE_TEXT_FLAG);
 
         contactPhone.setOnClickListener(new View.OnClickListener() {
             @Override
