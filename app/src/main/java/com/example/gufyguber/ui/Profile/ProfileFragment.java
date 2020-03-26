@@ -175,11 +175,9 @@ public class ProfileFragment extends Fragment {
                         if(value != null) {
                             String pos = value.getPosPercent(value.getPositive(), value.getNegative());
                             String neg = value.getNegPercent(value.getPositive(), value.getNegative());
-                            String posPer = pos + "%";
-                            String negPer = neg + "%";
 
-                            positive.setText(posPer);
-                            negative.setText(negPer);
+                            positive.setText(pos);
+                            negative.setText(neg);
                         }
                     }
                 });
