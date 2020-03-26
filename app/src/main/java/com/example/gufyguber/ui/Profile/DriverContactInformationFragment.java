@@ -63,10 +63,6 @@ public class DriverContactInformationFragment extends DialogFragment {
     private String phoneNumber;
     private String make;
     private String model;
-    private ImageView profilePicture;
-
-    private boolean isDriver;
-
 
     @NonNull
     @Override
@@ -135,14 +131,6 @@ public class DriverContactInformationFragment extends DialogFragment {
                 }
             }
         });
-
-        profilePicture = view.findViewById(R.id.driver_image);
-        //Picasso.with(getContext()).load("https://www.google.com/url?sa=i&url=https%3A%2F%2Fsantandave.com%2Fpages%2Ftour&psig=AOvVaw2856HYD6Ri5GB2ClCIKG7q&ust=1585252386707000&source=images&cd=vfe&ved=0CAIQjRxqFwoTCOiN67-ztugCFQAAAAAdAAAAABAD").into(profilePicture);
-        //Picasso.with(getContext()).load("https://www.googleapis.com/plus/v1/people/115950284...320?fields=image&key=AIzaSyCc00eAPUQZI2VghOGY9GybhOOj5vfO42M").into(profilePicture);
-        //Picasso.with(getContext()).load(String.format("http://picasaweb.google.com/data/entry/api/user/%s?alt=json", driverEmail)).into(profilePicture);
-        //String userPhoto = acct.getPhotoUrl().toString();
-        //Picasso.with(getContext()).load(userPhoto).into(profilePicture);
-
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
         return builder
