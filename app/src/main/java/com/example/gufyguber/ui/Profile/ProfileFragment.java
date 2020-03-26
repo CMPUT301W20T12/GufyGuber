@@ -288,23 +288,6 @@ public class ProfileFragment extends Fragment {
      */
     private boolean validateForm() {
         String phoneRegex = "^(\\+?\\d{1,2}\\s)?\\(?\\d{3}\\)?[\\s.-]?\\d{3}[\\s.-]?\\d{4}$"; //https://stackoverflow.com/questions/16699007/regular-expression-to-match-standard-10-digit-phone-number
-//        if (driver) {
-//            return (!TextUtils.isEmpty(emailText.getText().toString()) &&
-//                    !TextUtils.isEmpty(firstNameText.getText().toString()) &&
-//                    !TextUtils.isEmpty(lastNameText.getText().toString()) &&
-//                    !TextUtils.isEmpty(phoneText.getText().toString()) &&
-//                    phoneText.getText().toString().matches(phoneRegex) &&
-//                    !TextUtils.isEmpty(makeText.getText().toString()) &&
-//                    !TextUtils.isEmpty(modelText.getText().toString()) &&
-//                    !TextUtils.isEmpty(plateText.getText().toString()) &&
-//                    !TextUtils.isEmpty(seatText.getText().toString()));
-//        } else {
-//            return (!TextUtils.isEmpty(emailText.getText().toString()) &&
-//                    !TextUtils.isEmpty(firstNameText.getText().toString()) &&
-//                    !TextUtils.isEmpty(lastNameText.getText().toString()) &&
-//                    !TextUtils.isEmpty(phoneText.getText().toString()) &&
-//                    phoneText.getText().toString().matches(phoneRegex));
-//        }
 
         Boolean isValid = true;
 
