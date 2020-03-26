@@ -27,7 +27,8 @@ public class Rating {
     private int negative;
 
     public Rating(int positive, int negative) {
-
+        this.setPositive(positive);
+        this.setNegative(negative);
     }
 
     public void setPositive(Integer positive) { this.positive = positive; }

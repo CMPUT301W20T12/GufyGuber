@@ -38,9 +38,11 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 
 import com.example.gufyguber.Driver;
+import com.example.gufyguber.FirebaseManager;
 import com.example.gufyguber.GlobalDoubleClickHandler;
 import com.example.gufyguber.OfflineCache;
 import com.example.gufyguber.R;
+import com.example.gufyguber.Rating;
 
 
 //https://developer.android.com/guide/components/intents-common#Phone
@@ -59,11 +61,20 @@ public class DriverContactInformationFragment extends DialogFragment {
     private TextView contactMake;
     private TextView contactModel;
     private TextView contactPlate;
+    private TextView contactRatePos;
+    private TextView contactRateNeg;
     private String email;
     private String phoneNumber;
     private String make;
     private String model;
     private String plate;
+    private String posPercent;
+    private String negPercent;
+    private int positive;
+    private int negative;
+    private int total;
+    private int pos;
+    private int neg;
 
     @NonNull
     @Override
@@ -77,15 +88,43 @@ public class DriverContactInformationFragment extends DialogFragment {
         model = bundle.getString("model");
         plate = bundle.getString("plate");
 
+        FirebaseManager.getReference().fetchRatingInfo("UID", new FirebaseManager.ReturnValueListener<Rating>() {
+            @Override
+            public void returnValue(Rating value) {
+                if(value != null) {
+                    positive = value.getPositive();
+                    negative = value.getNegative();
+                }
+            }
+        });
+
         contactEmail = view.findViewById(R.id.contact_email);
         contactPhone = view.findViewById(R.id.contact_phone);
         contactMake = view.findViewById(R.id.contact_make);
         contactModel = view.findViewById(R.id.contact_model);
         contactPlate = view.findViewById(R.id.contact_plate);
+        contactRatePos = view.findViewById(R.id.contact_rating_pos);
+        contactRateNeg = view.findViewById(R.id.contact_rating_neg);
 
         contactMake.setText(make);
         contactModel.setText(model);
         contactPlate.setText(plate);
+
+        total = positive + negative;
+
+        if(total == 0) {
+            contactRatePos.setText("0%");
+            contactRateNeg.setText("0%");
+        } else {
+            pos = positive / total;
+            neg = negative / total;
+
+            posPercent = pos + "%";
+            negPercent = neg + "%";
+
+            contactRatePos.setText(posPercent);
+            contactRatePos.setText(negPercent);
+        }
 
         String formattedPhone = String.format("%s-%s-%s", phoneNumber.substring(0, 3), phoneNumber.substring(3, 6), phoneNumber.substring(6, 10));
 
