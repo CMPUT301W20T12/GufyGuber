@@ -20,6 +20,7 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -43,6 +44,8 @@ public class startScanQR extends AppCompatActivity {
 
     public static final int REQUEST_CODE = 100;
     public static final int PERMISSION_REQUEST = 200;
+
+    private static final String TAG = "startScanQR";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,11 +77,12 @@ public class startScanQR extends AppCompatActivity {
                     @Override
                     public void run() {
                         result.setText(barcode.displayValue);
-                        FirebaseManager.getReference().completeRide(OfflineCache.getReference().retrieveCurrentRideRequest(), new FirebaseManager.ReturnValueListener<RideRequest>() {
+                        FirebaseManager.getReference().completeRide(OfflineCache.getReference().retrieveCurrentRideRequest(), new FirebaseManager.ReturnValueListener<Boolean>() {
                             @Override
-                            public void returnValue(RideRequest value) {
-                                if (value != null) {
-                                    OfflineCache.getReference().cacheCurrentRideRequest(value);
+                            public void returnValue(Boolean value) {
+                                if (value == null) {
+                                    Log.e(TAG, "Setting ride request to complete failed.");
+                                } else {
                                     finish();
                                 }
                             }

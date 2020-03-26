@@ -28,7 +28,7 @@ android:
     # if you need to run emulator(s) during your tests.
     # The line should look like this after interpolation:
     # - sys-img-armeabi-v7a-android-22
-    - sys-img-${ANDROID_ABI}-${ANDROID_TARGET}
+    #- sys-img-${ANDROID_ABI}-${ANDROID_TARGET}
 
 licenses:
     - 'android-sdk-license-.+'
@@ -39,21 +39,22 @@ before_install:
 
   # Get gradle
   - chmod +x gradlew
-  - wget https://services.gradle.org/distributions/gradle-5.3-bin.zip
-  - unzip -qq gradle-5.3-bin.zip
-  - export GRADLE_HOME=$PWD/gradle-5.3
+  - wget https://services.gradle.org/distributions/gradle-5.6.4-bin.zip
+  - unzip -qq gradle-5.6.4-bin.zip
+  - export GRADLE_HOME=$PWD/gradle-5.6.4
   - export PATH=$GRADLE_HOME/bin:$PATH
   
   # Build the project
   - gradle -v
   
   # Start the emulator
-  - echo no | android create avd --force -n test -t $ANDROID_TARGET --abi $ANDROID_ABI
-  - emulator -avd test -no-skin -no-audio -no-window &
-  - android-wait-for-emulator
-  - adb shell input keyevent 82 &
+  #- echo no | android create avd --force -n test -t $ANDROID_TARGET --abi $ANDROID_ABI
+  #- emulator -avd test -no-skin -no-audio -no-window &
+  #- android-wait-for-emulator
+  #- adb shell input keyevent 82 &
   
   # The app will now automatically be installed and tested via
   # the command `gradle connectedCheck`
 script:
-  - ./gradlew connectedCheck
+  #- ./gradlew connectedCheck
+  - ./gradlew check

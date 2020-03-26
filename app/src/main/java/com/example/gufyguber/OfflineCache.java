@@ -16,6 +16,10 @@
 
 package com.example.gufyguber;
 
+import android.util.Log;
+
+import com.google.firebase.firestore.ListenerRegistration;
+
 import java.util.ArrayList;
 import java.util.Observable;
 
@@ -24,18 +28,22 @@ import java.util.Observable;
  * Utilizes a singleton pattern.
  * @author Robert MacGillivray | Mar.11.2020
  */
-public class OfflineCache {
+public class OfflineCache implements FirebaseManager.RideRequestListener{
     private static OfflineCache reference;
     public static OfflineCache getReference() {
         if (reference == null) {
             reference = new OfflineCache();
+            Log.d(TAG, "Offline cache lazy instantiation");
         }
         return reference;
     }
 
+    private static final String TAG = "OfflineCache";
+
     private ArrayList<RideRequest.StatusChangedListener> statusChangedListeners;
 
     private RideRequest currentRideRequest;
+    private ListenerRegistration rideRequestListener;
 
     /**
      * Caches a RideRequest instance and initiates any necessary callbacks. Prefer using this
@@ -46,21 +54,46 @@ public class OfflineCache {
         RideRequest temp = currentRideRequest;
         currentRideRequest = request;
 
-        if (temp != null) {
-            if (currentRideRequest != null) {
-                if (temp.getStatus() != currentRideRequest.getStatus()) {
-                    notifyRideRequestStatusChangedListeners(currentRideRequest.getStatus());
-                }
-            } else if(temp.getStatus() != RideRequest.Status.COMPLETED) {
+        String rrString = currentRideRequest == null ? "Null" : currentRideRequest.toString();
+        Log.d(TAG, "Ride request cached:\n" + rrString);
+
+        if (temp != null && currentRideRequest != null) {
+            if (temp.getStatus() != currentRideRequest.getStatus()) {
+                notifyRideRequestStatusChangedListeners(currentRideRequest.getStatus());
+            }
+        } else if (temp == null && currentRideRequest != null) {
+            notifyRideRequestStatusChangedListeners(currentRideRequest.getStatus());
+        } else if (temp != null && currentRideRequest == null) {
+            // Special case for rides cancelled after they're confirmed
+            if (temp.getStatus() != RideRequest.Status.PENDING && temp.getStatus() != RideRequest.Status.COMPLETED) {
                 notifyRideRequestStatusChangedListeners(RideRequest.Status.CANCELLED);
+            }
+        }
+
+        // If the current ride request isn't null, we need to make sure we're listening to Firestore for updates
+        if (currentRideRequest != null) {
+            // Modify listener if request has changed
+            if (rideRequestListener == null || temp == null ||
+                    !temp.getRiderUID().equalsIgnoreCase(currentRideRequest.getRiderUID())) {
+                if (rideRequestListener != null) {
+                    rideRequestListener.remove();
+                    rideRequestListener = null;
+                }
+                rideRequestListener = FirebaseManager.getReference().listenToRideRequest(currentRideRequest.getRiderUID(), this);
+            }
+        } else {
+            // Null ride request, no need to listen anymore
+            if (rideRequestListener != null) {
+                rideRequestListener.remove();
+                rideRequestListener = null;
             }
         }
     }
 
     public void clearCurrentRideRequest(){
-        currentRideRequest = null;
-        return;
+        cacheCurrentRideRequest(null);
     }
+
     public RideRequest retrieveCurrentRideRequest() {
         return currentRideRequest;
     }
@@ -114,10 +147,21 @@ public class OfflineCache {
         }
     }
 
+    public void onRideRequestUpdated(RideRequest updatedRideRequest) {
+        String rrString = updatedRideRequest == null ? "Null" : updatedRideRequest.toString();
+        Log.d(TAG, "Ride request updated from Firestore to:\n" + rrString);
+        cacheCurrentRideRequest(updatedRideRequest);
+    }
+
     /**
      * Dismantles the cache. Should really only be used when the user signs out.
      */
     public void clearCache() {
         reference = null;
+        if (rideRequestListener != null) {
+            rideRequestListener.remove();
+            rideRequestListener = null;
+        }
+        Log.d(TAG, "Offline cache cleared" );
     }
 }
