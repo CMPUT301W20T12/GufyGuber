@@ -46,8 +46,7 @@ public class startScanQR extends AppCompatActivity {
     public static final int PERMISSION_REQUEST = 200;
 
     private static final String TAG = "startScanQR";
-
-
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
