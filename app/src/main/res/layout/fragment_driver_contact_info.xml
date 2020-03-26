@@ -36,6 +36,7 @@
         android:textSize="20sp"
         android:textStyle="bold"
         android:background="@color/colorPrimaryDark"/>
+
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -59,6 +60,7 @@
             android:paddingStart="10dp"
             android:paddingEnd="20dp"
             android:text="XX%"
+            android:textStyle="bold"
             android:textSize="20sp"/>
 
         <ImageView
@@ -74,6 +76,7 @@
             android:paddingStart="10dp"
             android:layout_gravity="center"
             android:text="XX%"
+            android:textStyle="bold"
             android:textSize="20sp"/>
 
     </LinearLayout>
@@ -138,42 +141,31 @@
     </LinearLayout>
 
     <LinearLayout
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
         android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="20dp"
         android:orientation="horizontal">
 
         <ImageButton
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="0.2"
+            android:id="@+id/contact_email"
+            android:layout_width="75dp"
+            android:layout_height="60dp"
             android:src="@android:drawable/ic_dialog_email"
-            android:theme="@style/ThemeOverlay.LightButton"
-            android:scaleType="fitXY"/>
+            android:theme="@style/ThemeOverlay.LightButton" />
 
         <TextView
-            android:id="@+id/contact_email"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="20sp"
-            android:visibility="gone"/>
+            android:layout_width="60sp"
+            android:layout_height="0dp"/>
+
 
         <ImageButton
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="0.8"
-            android:src="@android:drawable/stat_sys_phone_call"
-            android:theme="@style/ThemeOverlay.LightButton"
-            android:layout_gravity="right"
-            android:scaleType="fitXY"/>
-
-        <TextView
             android:id="@+id/contact_phone"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="20sp"
-            android:visibility="gone"/>
+            android:layout_width="75dp"
+            android:layout_height="60dp"
+            android:src="@android:drawable/stat_sys_phone_call"
+            android:theme="@style/ThemeOverlay.LightButton"/>
     </LinearLayout>
 
 
