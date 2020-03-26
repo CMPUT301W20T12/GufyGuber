@@ -153,7 +153,7 @@ public class FirebaseManager {
 
         CollectionReference requestDoc = FirebaseFirestore.getInstance().collection(RIDE_REQUEST_COLLECTION);
 
-        Log.d(TAG, String.format("Storing Ride Request for user [%s]", rideRequest.getRiderUID()));
+        Log.d(TAG, String.format("Storing Ride Request:\n%s", rideRequest.toString()));
 
         HashMap<String, Object> data = new HashMap<>();
         data.put(DRIVER_KEY, rideRequest.getDriverUID());
@@ -272,17 +272,27 @@ public class FirebaseManager {
         // Alternative handler when in test mode
         if (testMode) {
             Log.e(TAG, "Cannot delete ride request from Firestore in Test Mode.");
-            returnFunction.returnValue(Boolean.FALSE);
+            returnFunction.returnValue(false);
             return;
         }
 
+        Log.d(TAG, String.format("Trying to delete Ride Request for [%s]", riderUID));
         DocumentReference requestDoc = FirebaseFirestore.getInstance().collection(RIDE_REQUEST_COLLECTION).document(riderUID);
-        requestDoc.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
-            @Override
-            public void onSuccess(Void aVoid) {
-                returnFunction.returnValue(Boolean.TRUE);
-            }
-        });
+        requestDoc.delete()
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Log.d(TAG, "Ride request deleted successfully.");
+                        returnFunction.returnValue(true);
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.e(TAG, "Error deleting ride request: ", e);
+                        returnFunction.returnValue(false);
+                    }
+                });
     }
     /**
      * Allows a driver to accept a ride request if it hasn't already been accepted
@@ -315,19 +325,13 @@ public class FirebaseManager {
 
                 // Can set the driverUID to null to cancel an accepted request, otherwise mark request accepted
                 value.setDriverUID(driverUID);
-                value.setStatus(value.getDriverUID() == null ? RideRequest.Status.PENDING : RideRequest.Status.ACCEPTED);
-                if (value.getStatus() == RideRequest.Status.ACCEPTED) {
-                    value.getTimeInfo().setRequestAcceptedTime();
-                } else {
-                    value.getTimeInfo().setRequestAcceptedTime(null);
-                }
+                value.setStatus(RideRequest.Status.ACCEPTED);
+                value.getTimeInfo().setRequestAcceptedTime();
 
                 // Push the modifed request to Firebase since we've successfully claimed it
                 storeRideRequest(value);
                 OfflineCache.getReference().cacheCurrentRideRequest(value);
-
                 returnFunction.returnValue(true);
-                return;
             }
         });
     }
@@ -349,11 +353,10 @@ public class FirebaseManager {
         fetchRideRequest(riderUID, new ReturnValueListener<RideRequest>() {
             @Override
             public void returnValue(RideRequest value) {
-                value.setStatus(value.getDriverUID() == null ? RideRequest.Status.ACCEPTED : RideRequest.Status.CONFIRMED);
+                value.setStatus(RideRequest.Status.CONFIRMED);
                 storeRideRequest(value);
                 OfflineCache.getReference().cacheCurrentRideRequest(value);
                 returnFunction.returnValue(true);
-                return;
             }
         });
     }
@@ -371,15 +374,16 @@ public class FirebaseManager {
             returnFunction.returnValue(Boolean.FALSE);
             return;
         }
+
+        request.setDriverUID(null);
+        request.setStatus(RideRequest.Status.PENDING);
+        storeRideRequest(request);
+        OfflineCache.getReference().cacheCurrentRideRequest(request);
+
         fetchRideRequest(riderUID, new ReturnValueListener<RideRequest>() {
             @Override
             public void returnValue(RideRequest value) {
-                value.setDriverUID(null);
-                value.setStatus(value.getDriverUID() == null ? RideRequest.Status.PENDING : RideRequest.Status.ACCEPTED);
-                storeRideRequest(value);
-                OfflineCache.getReference().cacheCurrentRideRequest(value);
-                returnFunction.returnValue(true);
-                return;
+                returnFunction.returnValue(value != null && value.getStatus() == RideRequest.Status.PENDING);
             }
         });
     }
@@ -801,10 +805,23 @@ public class FirebaseManager {
      *
      * @param request
      */
-    public void confirmPickup(RideRequest request) {
+    public void confirmPickup(RideRequest request, final ReturnValueListener<Boolean> returnFunction) {
+        // Alternative handler when in test mode
+        if (testMode) {
+            Log.e(TAG, "Cannot confirm pickup on Firestore in Test Mode.");
+            returnFunction.returnValue(Boolean.FALSE);
+            return;
+        }
+
         request.setStatus(RideRequest.Status.EN_ROUTE);
         storeRideRequest(request);
         OfflineCache.getReference().cacheCurrentRideRequest(request);
+        fetchRideRequest(request.getRiderUID(), new ReturnValueListener<RideRequest>() {
+            @Override
+            public void returnValue(RideRequest value) {
+                returnFunction.returnValue(value != null && value.getStatus() == RideRequest.Status.EN_ROUTE);
+            }
+        });
     }
 
     /**
@@ -812,31 +829,39 @@ public class FirebaseManager {
      * @param request
      */
     public void confirmArrival(RideRequest request, final ReturnValueListener<Boolean> returnFunction) {
+        // Alternative handler when in test mode
+        if (testMode) {
+            Log.e(TAG, "Cannot confirm arrival on Firestore in Test Mode.");
+            returnFunction.returnValue(Boolean.FALSE);
+            return;
+        }
+
         request.setStatus(RideRequest.Status.ARRIVED);
         storeRideRequest(request);
+        OfflineCache.getReference().cacheCurrentRideRequest(request);
         fetchRideRequest(request.getRiderUID(), new ReturnValueListener<RideRequest>() {
             @Override
             public void returnValue(RideRequest value) {
-                if(value.getStatus().toString().equals("Arrived")) {
-                    returnFunction.returnValue(Boolean.TRUE);
-                } else {
-                    returnFunction.returnValue(Boolean.FALSE);
-                }
+                returnFunction.returnValue(value != null && value.getStatus() == RideRequest.Status.ARRIVED);
             }
         });
     }
 
-    public void completeRide(RideRequest request, final ReturnValueListener<RideRequest> returnFunction) {
+    public void completeRide(RideRequest request, final ReturnValueListener<Boolean> returnFunction) {
+        // Alternative handler when in test mode
+        if (testMode) {
+            Log.e(TAG, "Cannot complete rides on Firestore in Test Mode.");
+            returnFunction.returnValue(Boolean.FALSE);
+            return;
+        }
+
         request.setStatus(RideRequest.Status.COMPLETED);
         storeRideRequest(request);
         fetchRideRequest(request.getRiderUID(), new ReturnValueListener<RideRequest>() {
             @Override
             public void returnValue(RideRequest value) {
-                if(value.getStatus().toString().equals("Completed")) {
-                    returnFunction.returnValue(value);
-                } else {
-                    returnFunction.returnValue(null);
-                }
+                // If this is null or complete, we've done our part
+                returnFunction.returnValue(value == null || value.getStatus() == RideRequest.Status.COMPLETED);
             }
         });
     }

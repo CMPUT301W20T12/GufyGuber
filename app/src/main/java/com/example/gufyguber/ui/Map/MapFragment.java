@@ -375,8 +375,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
      * @param newRequest The request created by the dialog fragment
      */
     public void onRideRequestCreated(RideRequest newRequest) {
-        OfflineCache.getReference().cacheCurrentRideRequest(newRequest);
         FirebaseManager.getReference().storeRideRequest(newRequest);
+        OfflineCache.getReference().cacheCurrentRideRequest(newRequest);
         rideRequestListener = FirebaseManager.getReference().listenToRideRequest(newRequest.getRiderUID(), this);
         requestDialog = null;
     }
@@ -549,10 +549,14 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
         }
     }
 
+    /**
+     * Used to catch cases where the map is visible and needs to react to a status change
+     * @param newStatus The new status of the current ride request
+     */
     @Override
     public void onStatusChanged(RideRequest.Status newStatus) {
         if (isDriver) {
-            if (newStatus == RideRequest.Status.CANCELLED || newStatus == RideRequest.Status.PENDING) {
+            if (newStatus == RideRequest.Status.CANCELLED || newStatus == RideRequest.Status.PENDING || newStatus == RideRequest.Status.COMPLETED) {
                 FirebaseManager.getReference().fetchRideRequestsWithStatus(RideRequest.Status.PENDING, new FirebaseManager.ReturnValueListener<ArrayList<RideRequest>>() {
                     @Override
                     public void returnValue(ArrayList<RideRequest> value) {

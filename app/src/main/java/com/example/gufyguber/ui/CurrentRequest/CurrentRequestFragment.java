@@ -16,6 +16,7 @@ package com.example.gufyguber.ui.CurrentRequest;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -49,6 +50,8 @@ import com.google.firebase.firestore.ListenerRegistration;
  * @author Nahome
  */
 public class CurrentRequestFragment extends Fragment implements FirebaseManager.RideRequestListener {
+    private static final String TAG = "CurrentRequestFragment";
+
     private Button cancelBtn;
     private Button confirmPickup;
     private Button confirmArrival;
@@ -161,7 +164,14 @@ public class CurrentRequestFragment extends Fragment implements FirebaseManager.
                             return;
                         }
 
-                        FirebaseManager.getReference().confirmPickup(request);
+                        FirebaseManager.getReference().confirmPickup(request, new FirebaseManager.ReturnValueListener<Boolean>() {
+                            @Override
+                            public void returnValue(Boolean value) {
+                                if (!value) {
+                                    Log.e(TAG, "Confirm pickup failed.");
+                                }
+                            }
+                        });
                     }
                 });
             }
@@ -233,8 +243,8 @@ public class CurrentRequestFragment extends Fragment implements FirebaseManager.
                         FirebaseManager.getReference().confirmArrival(request, new FirebaseManager.ReturnValueListener<Boolean>() {
                             @Override
                             public void returnValue(Boolean value) {
-                                if (value) {
-                                    OfflineCache.getReference().cacheCurrentRideRequest(request);
+                                if (!value) {
+                                    Log.e(TAG, "Arrival confirmation failed.");
                                 }
                             }
                         });

@@ -193,20 +193,21 @@ public class NavigationActivity extends AppCompatActivity implements RideRequest
                 if (OfflineCache.getReference().retrieveCurrentUser() instanceof Rider) {
                     toast.setText("Payment complete.");
                     toast.show();
-                } else {
-                    toast.setText("Payment received.");
-                    toast.show();
-                    FirebaseManager.getReference().deleteRideRequest(OfflineCache.getReference().retrieveCurrentRideRequest().getRiderUID(), new FirebaseManager.ReturnValueListener<Boolean>() {
+                    FirebaseManager.getReference().deleteRideRequest(OfflineCache.getReference().retrieveCurrentUser().getUID(), new FirebaseManager.ReturnValueListener<Boolean>() {
                         @Override
                         public void returnValue(Boolean value) {
-                            if(value){
+                            if(value) {
+                                Log.d(TAG, "Deleted ride request.");
                                 OfflineCache.getReference().clearCurrentRideRequest();
-                            }
-                            else{
+                            } else {
                                 Log.w(TAG, "Error deleting completed ride request.");
                             }
                         }
                     });
+                } else {
+                    toast.setText("Payment received.");
+                    toast.show();
+                    OfflineCache.getReference().clearCurrentRideRequest();
                 }
                 break;
             case CANCELLED:
@@ -226,5 +227,16 @@ public class NavigationActivity extends AppCompatActivity implements RideRequest
         finish(); // Can't forget to finish this activity to clear the stack
         Intent intent = new Intent(getApplicationContext(), SignInActivity.class);
         startActivity(intent);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        RideRequest currentRideRequest = OfflineCache.getReference().retrieveCurrentRideRequest();
+        if (currentRideRequest != null) {
+            if (OfflineCache.getReference().retrieveCurrentRideRequest().getStatus() == RideRequest.Status.COMPLETED) {
+                onStatusChanged(RideRequest.Status.COMPLETED);
+            }
+        }
     }
 }

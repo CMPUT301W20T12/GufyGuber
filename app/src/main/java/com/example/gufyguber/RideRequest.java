@@ -172,7 +172,8 @@ public class RideRequest {
         FirebaseManager.getReference().deleteRideRequest(getRiderUID(), new FirebaseManager.ReturnValueListener<Boolean>() {
             @Override
             public void returnValue(Boolean value) {
-                if (value) {
+                if (!value) {
+                    Log.e(TAG, "Error deleting request from Firestore.");
                 }
             }
         });
