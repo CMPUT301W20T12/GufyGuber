@@ -39,29 +39,31 @@ public class Rating {
 
     public Integer getNegative() { return  negative; }
 
-    public Integer getPosPercent(int positive, int negative) {
+    public String getPosPercent(int positive, int negative) {
         int total = positive + negative;
 
         int posPercent;
-        if(total != 0) {
-            posPercent = (positive / total) * 100;
+        if(total > 0) {
+            posPercent = (positive * 100) / total;
         } else {
             posPercent = 0;
         }
+        String finalPercent = posPercent + "%";
 
-        return posPercent;
+        return finalPercent;
     }
 
-    public Integer getNegPercent(int positive, int negative) {
+    public String getNegPercent(int positive, int negative) {
         int total = positive + negative;
 
         int negPercent;
-        if(total != 0) {
-            negPercent = (negative / total) * 100;
+        if(total > 0) {
+            negPercent = (negative * 100)/ total;
         } else {
             negPercent = 0;
         }
+        String finalPercent = negPercent + "%";
 
-        return negPercent;
+        return finalPercent;
     }
 }

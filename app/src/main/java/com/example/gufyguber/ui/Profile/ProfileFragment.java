@@ -173,8 +173,8 @@ public class ProfileFragment extends Fragment {
                     @Override
                     public void returnValue(Rating value) {
                         if(value != null) {
-                            int pos = value.getPosPercent(value.getPositive(), value.getNegative());
-                            int neg = value.getNegPercent(value.getPositive(), value.getNegative());
+                            String pos = value.getPosPercent(value.getPositive(), value.getNegative());
+                            String neg = value.getNegPercent(value.getPositive(), value.getNegative());
                             String posPer = pos + "%";
                             String negPer = neg + "%";
 
@@ -286,7 +286,7 @@ public class ProfileFragment extends Fragment {
                         FirebaseManager.getReference().fetchRiderInfo(FirebaseAuth.getInstance().getCurrentUser().getUid(), new FirebaseManager.ReturnValueListener<Rider>() {
                             @Override
                             public void returnValue(Rider value) {
-                                OfflineCache.getReference().cacheCurrentUser(value); 
+                                OfflineCache.getReference().cacheCurrentUser(value);
                             }
                         });
                     }

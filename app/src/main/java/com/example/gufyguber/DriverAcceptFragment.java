@@ -39,7 +39,8 @@ import androidx.fragment.app.DialogFragment;
 public class DriverAcceptFragment extends DialogFragment {
 
     private TextView driverName;
-    private TextView driverRating;
+    private TextView positiveRating;
+    private TextView negativeRating;
     private Button accept;
     private Button decline;
 
@@ -51,14 +52,17 @@ public class DriverAcceptFragment extends DialogFragment {
 
         String fName = bundle.getString("first_name");
         String lName = bundle.getString("last_name");
-        String rating = bundle.getString("rating");
+        String positive = bundle.getString("positive");
+        String negative = bundle.getString("negative");
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
 
         driverName = view.findViewById(R.id.driver_offer);
         driverName.setText(String.format("%s %s", fName, lName));
-        driverRating = view.findViewById(R.id.driver_rating);
-        driverRating.setText(rating);
+        positiveRating = view.findViewById(R.id.driver_rating_pos);
+        positiveRating.setText(positive);
+        negativeRating = view.findViewById(R.id.contact_rating_neg);
+        negativeRating.setText(negative);
 
         accept = view.findViewById(R.id.accept_driver);
         decline = view.findViewById(R.id.decline_driver);

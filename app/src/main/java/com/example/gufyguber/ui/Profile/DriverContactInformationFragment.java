@@ -68,13 +68,8 @@ public class DriverContactInformationFragment extends DialogFragment {
     private String make;
     private String model;
     private String plate;
-    private String posPercent;
-    private String negPercent;
-    private int positive;
-    private int negative;
-    private int total;
-    private int pos;
-    private int neg;
+    private String positive;
+    private String negative;
 
     @NonNull
     @Override
@@ -87,16 +82,8 @@ public class DriverContactInformationFragment extends DialogFragment {
         make = bundle.getString("make");
         model = bundle.getString("model");
         plate = bundle.getString("plate");
-
-        FirebaseManager.getReference().fetchRatingInfo("UID", new FirebaseManager.ReturnValueListener<Rating>() {
-            @Override
-            public void returnValue(Rating value) {
-                if (value != null) {
-                    positive = value.getPositive();
-                    negative = value.getNegative();
-                }
-            }
-        });
+        positive = bundle.getString("positive");
+        negative = bundle.getString("negative");
 
         contactEmail = view.findViewById(R.id.contact_email);
         contactPhone = view.findViewById(R.id.contact_phone);
@@ -110,21 +97,8 @@ public class DriverContactInformationFragment extends DialogFragment {
         contactModel.setText(model);
         contactPlate.setText(plate);
 
-        total = positive + negative;
-
-        if(total == 0) {
-            contactRatePos.setText("0%");
-            contactRateNeg.setText("0%");
-        } else {
-            pos = positive / total;
-            neg = negative / total;
-
-            posPercent = pos + "%";
-            negPercent = neg + "%";
-
-            contactRatePos.setText(posPercent);
-            contactRatePos.setText(negPercent);
-        }
+        contactRatePos.setText(positive);
+        contactRateNeg.setText(negative);
 
         String formattedPhone = String.format("%s-%s-%s", phoneNumber.substring(0, 3), phoneNumber.substring(3, 6), phoneNumber.substring(6, 10));
 
