@@ -24,6 +24,7 @@ package com.example.gufyguber;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.telephony.PhoneNumberFormattingTextWatcher;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -68,6 +69,7 @@ public class RegisterUserActivity extends AppCompatActivity {
     private User newUser;
     private Vehicle newVehicle;
     private String UID;
+    private Boolean regComplete;
 
     private FirebaseAuth mAuth;
 
@@ -77,6 +79,7 @@ public class RegisterUserActivity extends AppCompatActivity {
 
         // Initialize Firebase Auth
         mAuth = FirebaseAuth.getInstance();
+        regComplete = false;
         final FirebaseFirestore db = FirebaseFirestore.getInstance();
 
         Intent intent = getIntent();
@@ -99,6 +102,7 @@ public class RegisterUserActivity extends AppCompatActivity {
         lastName = findViewById(R.id.last_name);
         lastName.setText(intent.getStringExtra("lastName"));
         phoneNumber = findViewById(R.id.phone_number);
+        phoneNumber.addTextChangedListener(new PhoneNumberFormattingTextWatcher("CA"));
         register = findViewById(R.id.register);
         register.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -115,7 +119,8 @@ public class RegisterUserActivity extends AppCompatActivity {
                                 phoneNumber.getText().toString());
                         // use firebase manager to store new rider info
                         FirebaseManager.getReference().storeRiderInfo((Rider) newUser);
-                        finish();
+                        regComplete = true;
+                        backToSignin();
                     } else
                         if(validateVehicleInfo()) {     // if they are driver, make sure vehicle info is filled in
                             newVehicle = new Vehicle(model.getText().toString(),
@@ -130,7 +135,8 @@ public class RegisterUserActivity extends AppCompatActivity {
                             // use firebase manager to store new driver and vehicle info
                             FirebaseManager.getReference().storeDriverInfo((Driver) newUser);
                             FirebaseManager.getReference().storeVehicleInfo(newUser.getUID(), newVehicle);
-                            finish();
+                            regComplete = true;
+                            backToSignin();
                     }
                 }
             }
@@ -162,8 +168,9 @@ public class RegisterUserActivity extends AppCompatActivity {
             }
         }
         if (validCounter == 3) {
-            /* if all 3 checks pass, the register form is valid */
-            valid = true;
+            if(phoneNumber.getText().toString().matches("^(\\+?\\d{1,2}\\s)?\\(?\\d{3}\\)?[\\s.-]?\\d{3}[\\s.-]?\\d{4}$"))
+                valid = true;
+            else phoneNumber.setError("Invalid Phone Number");
         }
         return valid;
     }
@@ -198,5 +205,17 @@ public class RegisterUserActivity extends AppCompatActivity {
         }
         return valid;
 
+    }
+
+    @Override
+    protected void onPause() {
+        if(!regComplete)
+            mAuth.getCurrentUser().delete();
+        super.onPause();
+    }
+
+    private void backToSignin(){
+        Intent intent = new Intent(this, SignInActivity.class);
+        startActivity(intent);
     }
 }
