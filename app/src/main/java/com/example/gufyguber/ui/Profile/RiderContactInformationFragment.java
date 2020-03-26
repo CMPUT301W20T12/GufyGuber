@@ -28,14 +28,12 @@ package com.example.gufyguber.ui.Profile;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Intent;
-import android.graphics.Color;
-import android.graphics.Paint;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.ImageView;
-import android.widget.TextView;
+import android.widget.ImageButton;
+
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -52,8 +50,8 @@ import com.example.gufyguber.R;
  */
 
 public class RiderContactInformationFragment extends DialogFragment {
-    private TextView contactEmail;
-    private TextView contactPhone;
+    private ImageButton contactEmail;
+    private ImageButton contactPhone;
     private String email;
     private String phoneNumber;
 
@@ -68,20 +66,6 @@ public class RiderContactInformationFragment extends DialogFragment {
 
         contactEmail = view.findViewById(R.id.contact_email);
         contactPhone = view.findViewById(R.id.contact_phone);
-
-        contactEmail.setText(email);
-
-
-        String formattedPhone = String.format("%s-%s-%s", phoneNumber.substring(0, 3), phoneNumber.substring(3, 6), phoneNumber.substring(6, 10));
-        contactPhone.setText(formattedPhone);
-
-        Paint paint = new Paint();
-        paint.setFlags(Paint.UNDERLINE_TEXT_FLAG);
-        contactPhone.setPaintFlags(paint.getFlags()); //https://stackoverflow.com/questions/8033316/to-draw-an-underline-below-the-textview-in-android/43757835
-        contactEmail.setPaintFlags(paint.getFlags());
-
-        contactPhone.setTextColor(Color.BLUE);
-        contactEmail.setTextColor(Color.BLUE);
 
         contactPhone.setOnClickListener(new View.OnClickListener() {
             @Override
