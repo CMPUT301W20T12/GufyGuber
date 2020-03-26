@@ -22,23 +22,64 @@
 
 package com.example.gufyguber;
 
+/**
+ * This is a class to model a Driver's ratings
+ * @author kenzbauer
+ * @see Driver
+ */
 public class Rating {
     private int positive;
     private int negative;
 
+    /**
+     * This is the constructor method that sets the attributes of the rating of the Driver
+     * @param positive
+     * This is the number of positive ratings from Riders
+     * @param negative
+     * This is the number of negative ratings from Riders
+     */
     public Rating(int positive, int negative) {
         this.setPositive(positive);
         this.setNegative(negative);
     }
 
+    /**
+     * This sets the objects positive attribute
+     * @param positive
+     * The positive number of ratings
+     */
     public void setPositive(int positive) { this.positive = positive; }
 
+    /**
+     * This sets the objects negative attribute
+     * @param negative
+     * The negative number of ratings
+     */
     public void setNegative(int negative) { this.negative = negative; }
 
+    /**
+     * This returns the positive ratings
+     * @return
+     * Return the number of positive ratings
+     */
     public Integer getPositive() { return positive; }
 
+    /**
+     * This returns the negative ratings
+     * @return
+     * Return the number of negative ratings
+     */
     public Integer getNegative() { return  negative; }
 
+    /**
+     * This returns the percentage of ratings that are positive
+     * @param positive
+     * The positive number of ratings
+     * @param negative
+     * The negative number of ratings
+     * @return
+     * Return the positive ratings percentage
+     */
     public String getPosPercent(int positive, int negative) {
         int total = positive + negative;
 
@@ -53,6 +94,15 @@ public class Rating {
         return finalPercent;
     }
 
+    /**
+     * This returns the percentage of ratings that are negative
+     * @param positive
+     * The positive number of ratings
+     * @param negative
+     * The negative number of ratings
+     * @return
+     * Return the negative ratings percentage
+     */
     public String getNegPercent(int positive, int negative) {
         int total = positive + negative;
 

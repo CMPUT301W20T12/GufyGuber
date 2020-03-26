@@ -137,7 +137,7 @@ public class RegisterUserActivity extends AppCompatActivity {
                             // use firebase manager to store new driver and vehicle info
                             FirebaseManager.getReference().storeDriverInfo((Driver) newUser);
                             FirebaseManager.getReference().storeVehicleInfo(newUser.getUID(), newVehicle);
-			    FirebaseManager.getReference().storeRatingInfo(newUser.getUID(), newRating);
+			                FirebaseManager.getReference().storeRatingInfo(newUser.getUID(), newRating);
                             regComplete = true;
                             backToSignin();
                     }

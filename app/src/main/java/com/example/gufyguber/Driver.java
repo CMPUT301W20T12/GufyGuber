@@ -32,7 +32,6 @@ import java.net.URI;
  */
 public class Driver extends User{
     //TODO: reference to a RideRequest
-    //TODO: reference to a Rating
 
     private Vehicle vehicle;
     private Rating rating;

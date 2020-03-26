@@ -77,8 +77,8 @@ public class RateDriver extends AppCompatActivity {
                             db.collection(RATING_COLLECTION).document(userID).update("positive", FieldValue.increment(1));
                         }
                         else {
-                            Rating rateDriver = new Rating(0, 0);
-                            FirebaseManager.getReference().storeRatingInfo(userID, rateDriver);
+                            Rating newRate = new Rating(1, 0);
+                            FirebaseManager.getReference().storeRatingInfo(userID, newRate);
                         }
                     }
                 });
@@ -98,8 +98,8 @@ public class RateDriver extends AppCompatActivity {
                             db.collection(RATING_COLLECTION).document(userID).update("negative", FieldValue.increment(1));
                         }
                         else {
-                            Rating rateDriver = new Rating(0, 0);
-                            FirebaseManager.getReference().storeRatingInfo(userID, rateDriver);
+                            Rating newRate = new Rating(0, 1);
+                            FirebaseManager.getReference().storeRatingInfo(userID, newRate);
                         }
                     }
                 });
