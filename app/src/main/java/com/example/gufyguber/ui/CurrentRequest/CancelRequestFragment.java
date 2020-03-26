@@ -18,6 +18,7 @@ import com.example.gufyguber.FirebaseManager;
 import com.example.gufyguber.GlobalDoubleClickHandler;
 import com.example.gufyguber.LoginActivity;
 import com.example.gufyguber.NavigationActivity;
+import com.example.gufyguber.OfflineCache;
 import com.example.gufyguber.R;
 import com.example.gufyguber.RideRequest;
 import com.google.firebase.auth.FirebaseAuth;
@@ -66,14 +67,10 @@ public class CancelRequestFragment extends DialogFragment {
 
                 new com.example.gufyguber.ui.CurrentRequest.CancelFragment().show(getFragmentManager(), "cancel_fragment");
                 getFragmentManager().beginTransaction().remove(CancelRequestFragment.this).commit();
-                FirebaseManager.getReference().fetchRideRequest(FirebaseAuth.getInstance().getCurrentUser().getUid(), new FirebaseManager.ReturnValueListener<RideRequest>() {
-                    @Override
-                    public void returnValue(RideRequest value) {
-                        if (value != null) {
-                            value.cancelRideRequest();
-                        }
-                    }
-                });
+                RideRequest currentRequest = OfflineCache.getReference().retrieveCurrentRideRequest();
+                if(currentRequest != null) {
+                    currentRequest.cancelRideRequest();
+                }
             }
         });
         final AlertDialog.Builder builder = new AlertDialog.Builder(getContext());

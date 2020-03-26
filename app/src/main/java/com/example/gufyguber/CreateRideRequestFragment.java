@@ -144,7 +144,7 @@ public class CreateRideRequestFragment extends DialogFragment {
                 }
 
                 if (validateEntries()) {
-                    RideRequest newRequest = new RideRequest(FirebaseAuth.getInstance().getCurrentUser().getUid(),
+                    RideRequest newRequest = new RideRequest(OfflineCache.getReference().retrieveCurrentUser().getUID(),
                             Float.parseFloat(fareEditText.getText().toString().replaceAll("[$]","")),
                             tempLocationInfo);
                     if (onCreatedListener != null) {

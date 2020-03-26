@@ -108,7 +108,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
                         }
 
                         for (RideRequest request : value) {
-                            if (request.getDriverUID().equalsIgnoreCase(FirebaseAuth.getInstance().getCurrentUser().getUid())) {
+                            if (request.getDriverUID().equalsIgnoreCase(OfflineCache.getReference().retrieveCurrentUser().getUID())) {
                                 OfflineCache.getReference().cacheCurrentRideRequest(request);
                                 onRideRequestUpdated(request);
                             }
@@ -123,7 +123,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
                         }
 
                         for (RideRequest request : value) {
-                            if (request.getDriverUID().equalsIgnoreCase(FirebaseAuth.getInstance().getCurrentUser().getUid())) {
+                            if (request.getDriverUID().equalsIgnoreCase(OfflineCache.getReference().retrieveCurrentUser().getUID())) {
                                 OfflineCache.getReference().cacheCurrentRideRequest(request);
                                 onRideRequestUpdated(request);
                             }
@@ -138,7 +138,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
                         }
 
                         for (RideRequest request : value) {
-                            if (request.getDriverUID().equalsIgnoreCase(FirebaseAuth.getInstance().getCurrentUser().getUid())) {
+                            if (request.getDriverUID().equalsIgnoreCase(OfflineCache.getReference().retrieveCurrentUser().getUID())) {
                                 OfflineCache.getReference().cacheCurrentRideRequest(request);
                                 onRideRequestUpdated(request);
                             }
@@ -153,7 +153,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
                         }
 
                         for (RideRequest request : value) {
-                            if (request.getDriverUID().equalsIgnoreCase(FirebaseAuth.getInstance().getCurrentUser().getUid())) {
+                            if (request.getDriverUID().equalsIgnoreCase(OfflineCache.getReference().retrieveCurrentUser().getUID())) {
                                 OfflineCache.getReference().cacheCurrentRideRequest(request);
                                 onRideRequestUpdated(request);
                             }
@@ -162,7 +162,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
                 });
 
             } else {
-                FirebaseManager.getReference().fetchRideRequest(FirebaseAuth.getInstance().getCurrentUser().getUid(), new FirebaseManager.ReturnValueListener<RideRequest>() {
+                FirebaseManager.getReference().fetchRideRequest(OfflineCache.getReference().retrieveCurrentUser().getUID(), new FirebaseManager.ReturnValueListener<RideRequest>() {
                     @Override
                     public void returnValue(RideRequest value) {
                         OfflineCache.getReference().cacheCurrentRideRequest(value);
