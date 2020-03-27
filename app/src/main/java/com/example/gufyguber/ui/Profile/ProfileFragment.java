@@ -14,6 +14,7 @@
 package com.example.gufyguber.ui.Profile;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.telephony.PhoneNumberFormattingTextWatcher;
@@ -52,10 +53,13 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Transformation;
 
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
+
+import de.hdodenhof.circleimageview.CircleImageView;
 
 import static android.telephony.PhoneNumberUtils.formatNumber;
 
@@ -76,7 +80,7 @@ public class ProfileFragment extends Fragment {
     private TextView seatText;
     private Button editProfile;
     private Button saveProfile;
-    private ImageView profilePicture;
+    private CircleImageView profilePicture;
     // simple boolean to check if the user is a driver or rider so we know
     private boolean driver;
 
@@ -286,6 +290,7 @@ public class ProfileFragment extends Fragment {
      * @param user The user information to use to populate the form
      */
     private void populateForm(User user) {
+
         // Retrieve google sign in profile photo and use Picasso to set the image.
         GoogleSignInAccount acct = GoogleSignIn.getLastSignedInAccount(getActivity());
         if (acct != null) {
