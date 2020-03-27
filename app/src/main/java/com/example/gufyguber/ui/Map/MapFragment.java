@@ -37,6 +37,7 @@ import com.example.gufyguber.OfflineCache;
 import com.example.gufyguber.R;
 import com.example.gufyguber.RideRequest;
 import com.example.gufyguber.ui.CurrentRequest.CancelRequestFragment;
+import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -254,6 +255,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
 
         if (OfflineCache.getReference().retrieveCurrentRideRequest() == null) {
             request_fab.setVisibility(View.VISIBLE);
+            cancel_fab.setVisibility(View.GONE);
+            arrived_fab.setVisibility(View.GONE);
+            pay_fab.setVisibility(View.GONE);
         }
 
         // Sets a background task to periodically check for an internet connection
@@ -542,6 +546,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
             if (pay_fab.getVisibility() == View.VISIBLE) {
                 pay_fab.setVisibility(View.GONE);
             }
+            if (arrived_fab.getVisibility() == View.VISIBLE) {
+                arrived_fab.setVisibility(View.GONE);
+            }
             removePickupFromMap();
             removeDropoffFromMap();
 
@@ -588,10 +595,12 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
                     cancel_fab.setVisibility(View.VISIBLE);
                     break;
                 case EN_ROUTE:
+                    request_fab.setVisibility(View.GONE);
                     cancel_fab.setVisibility(View.GONE);
                     arrived_fab.setVisibility(View.VISIBLE);
                     break;
                 case ARRIVED:
+                    request_fab.setVisibility(View.GONE);
                     arrived_fab.setVisibility(View.GONE);
                     pay_fab.setVisibility(View.VISIBLE);
             }
