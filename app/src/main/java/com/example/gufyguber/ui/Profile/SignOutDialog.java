@@ -35,6 +35,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 
+import com.example.gufyguber.FirebaseManager;
 import com.example.gufyguber.GlobalDoubleClickHandler;
 import com.example.gufyguber.NavigationActivity;
 import com.example.gufyguber.OfflineCache;
@@ -95,6 +96,8 @@ public class SignOutDialog extends DialogFragment {
                 // Build a GoogleSignInClient with the options specified by gso.
                 GoogleSignInClient signInClient = GoogleSignIn.getClient(tempActivity, gso);
                 // Sign the user out of both firebase and the Google Client
+                FirebaseManager.getReference().storeSignedIn(
+                        FirebaseAuth.getInstance().getCurrentUser().getUid(), false);
                 FirebaseAuth.getInstance().signOut();
                 signInClient.signOut()
                         .addOnCompleteListener(tempActivity, new OnCompleteListener<Void>() {

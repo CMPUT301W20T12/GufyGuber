@@ -889,4 +889,27 @@ public class FirebaseManager {
             }
         });
     }
+
+    public void storeSignedIn(final String uid, Boolean saveSpot){
+        CollectionReference vehicles = FirebaseFirestore.getInstance().collection(SIGNED_IN_COLLECTION);
+        HashMap<String, Object> data = new HashMap<>();
+
+        data.put("signed_in", String.valueOf(saveSpot));
+        vehicles.document(uid)
+                .set(data)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Log.d(TAG, "Signed in update successful");
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.d(TAG, "Signed in update failed" + e.toString());
+                    }
+                });
+    }
+
+
 }

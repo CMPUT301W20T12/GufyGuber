@@ -35,6 +35,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
@@ -223,29 +224,51 @@ public class SignInActivity extends AppCompatActivity {
                             Log.d(TAG, "signInWithCredential: success");
                             final FirebaseUser user = mFirebaseAuth.getCurrentUser();
 
-                            // use FireBaseManager to check if user is registered
-                            firebaseManager.checkUser(user.getUid(), new FirebaseManager.ReturnValueListener<Boolean>() {
+                            // use FireBaseManager to check if user is signed in on another device
+                            firebaseManager.checkSignedIn(user.getUid(), new FirebaseManager.ReturnValueListener<String>() {
                                 @Override
-                                public void returnValue(Boolean value) {
-                                    boolean userExists = value.booleanValue();
-                                    if (userExists){
-                                        Log.d("ACCNT", "Sending user to map screen");
-                                        updateUI(user);
-                                        goToMapView();
-                                    } else {
-                                        Log.d("ACCNT", "Sending user to sign up");
-                                        Bundle bundle = new Bundle();
-                                        // pass account info into fragment to auto-pop some details in registration form
-                                        bundle.putString("UID", user.getUid());
-                                        bundle.putString("email", account.getEmail());
-                                        bundle.putString("firstName", account.getGivenName());
-                                        bundle.putString("lastName", account.getFamilyName());
-                                        UserTypeFragment mUserTypeFragment = new UserTypeFragment();
-                                        mUserTypeFragment.setArguments(bundle);
-                                        mUserTypeFragment.show(getSupportFragmentManager(), "USER_TYPE");
-                                    }
+                                public void returnValue(String value) {
+                                        if(value != null && value.equals("true")) {
+                                            // user is already signed in
+                                            Toast.makeText(SignInActivity.this, "Already Signed In on Another Device", Toast.LENGTH_SHORT).show();
+                                            mGoogleSignInClient.signOut();
+                                            mFirebaseAuth.signOut();
+                                            Intent intent = new Intent(getApplicationContext(), SignInActivity.class);
+                                            startActivity(intent);
+                                        }
+                                        else{
+                                            //add user and proceed
+                                            firebaseManager.storeSignedIn(user.getUid(), true);
+                                            // use FireBaseManager to check if user is registered
+                                            firebaseManager.checkUser(user.getUid(), new FirebaseManager.ReturnValueListener<Boolean>() {
+                                                @Override
+                                                public void returnValue(Boolean value) {
+                                                    boolean userExists = value.booleanValue();
+                                                    if (userExists){
+                                                        Log.d("ACCNT", "Sending user to map screen");
+                                                        updateUI(user);
+                                                        goToMapView();
+                                                    } else {
+                                                        Log.d("ACCNT", "Sending user to sign up");
+                                                        Bundle bundle = new Bundle();
+                                                        // pass account info into fragment to auto-pop some details in registration form
+                                                        bundle.putString("UID", user.getUid());
+                                                        bundle.putString("email", account.getEmail());
+                                                        bundle.putString("firstName", account.getGivenName());
+                                                        bundle.putString("lastName", account.getFamilyName());
+                                                        UserTypeFragment mUserTypeFragment = new UserTypeFragment();
+                                                        mUserTypeFragment.setArguments(bundle);
+                                                        mUserTypeFragment.show(getSupportFragmentManager(), "USER_TYPE");
+                                                    }
+                                                }
+                                            });
+                                        }
+
+
                                 }
                             });
+
+
                         } else {
                             Log.w(TAG, "signInWithCredential: failure");
                             Snackbar.make(findViewById(R.id.main_layout),
