@@ -13,6 +13,7 @@
 
 package com.example.gufyguber.ui.Map;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -29,6 +30,7 @@ import com.example.gufyguber.CreateRideRequestFragment;
 import com.example.gufyguber.DirectionsManager;
 import com.example.gufyguber.Driver;
 import com.example.gufyguber.FirebaseManager;
+import com.example.gufyguber.GenerateQR;
 import com.example.gufyguber.GlobalDoubleClickHandler;
 import com.example.gufyguber.LocationInfo;
 import com.example.gufyguber.OfflineCache;
@@ -212,7 +214,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
                     return;
                 }
                 new CancelRequestFragment().show(getChildFragmentManager(), "cancel_request_fragment");
-                
+
             }
         });
 
@@ -220,6 +222,12 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
         pay_fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (GlobalDoubleClickHandler.isDoubleClick()) {
+                    return;
+                }
+                Intent qrIntent = new Intent(getActivity(), GenerateQR.class);
+                startActivity(qrIntent);
+                getActivity().finish();
 
             }
         });
@@ -509,6 +517,13 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
         }
 
         if (updatedValue == null) {
+            request_fab.setVisibility(View.VISIBLE);
+            if (cancel_fab.getVisibility() == View.VISIBLE) {
+                cancel_fab.setVisibility(View.GONE);
+            }
+            if (pay_fab.getVisibility() == View.VISIBLE) {
+                pay_fab.setVisibility(View.GONE);
+            }
             removePickupFromMap();
             removeDropoffFromMap();
 
@@ -555,6 +570,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
                     cancel_fab.setVisibility(View.VISIBLE);
                     break;
                 case EN_ROUTE:
+                    cancel_fab.setVisibility(View.GONE);
                     break;
                 case ARRIVED:
                     pay_fab.setVisibility(View.VISIBLE);
