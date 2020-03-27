@@ -91,6 +91,7 @@ public class FirebaseManager {
     // Firestore keys
 
     // User Keys
+    public static final String SIGNED_IN_COLLECTION = "signed_in_users";
     public static final String USER_COLLECTION = "users";
     public static final String EMAIL_KEY = "email";
     public static final String FIRST_NAME_KEY = "first_name";
@@ -862,6 +863,29 @@ public class FirebaseManager {
             public void returnValue(RideRequest value) {
                 // If this is null or complete, we've done our part
                 returnFunction.returnValue(value == null || value.getStatus() == RideRequest.Status.COMPLETED);
+            }
+        });
+    }
+
+    public void checkSignedIn(final String uid, final ReturnValueListener<String> returnFunction){
+        DocumentReference signedInDoc = FirebaseFirestore.getInstance().collection(SIGNED_IN_COLLECTION).document(uid);
+        signedInDoc.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.isSuccessful()) {
+                    DocumentSnapshot snapshot = task.getResult();
+                    if (snapshot.exists()) {
+                        Map<String, Object> docData = snapshot.getData();
+                        String signed_in = String.valueOf(docData.get("signed_in"));
+                        returnFunction.returnValue(signed_in);
+                    } else {
+                        Log.w(TAG, String.format("User info for %s not found on Firestore.", uid));
+                        returnFunction.returnValue(null);
+                    }
+                } else {
+                    Log.e(TAG, "Fetching user info failed. Issue communicating with Firestore.");
+                    returnFunction.returnValue(null);
+                }
             }
         });
     }
