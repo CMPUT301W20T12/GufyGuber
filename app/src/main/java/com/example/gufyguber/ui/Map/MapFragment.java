@@ -152,7 +152,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
                         }
 
                         for (RideRequest request : value) {
-                            if (request.getDriverUID().equalsIgnoreCase(OfflineCache.getReference().retrieveCurrentUser().getUID())) {
+                            if (request.getDriverUID() != null && request.getDriverUID().equalsIgnoreCase(OfflineCache.getReference().retrieveCurrentUser().getUID())) {
                                 OfflineCache.getReference().cacheCurrentRideRequest(request);
                                 onRideRequestUpdated(request);
                             }

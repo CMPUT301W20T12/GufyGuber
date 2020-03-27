@@ -71,7 +71,6 @@
         <activity android:name=".startScanQR"
             android:label="Scan QR"
             android:theme="@style/AppTheme"
-            android:noHistory="true"
             android:parentActivityName=".NavigationActivity"/>
         <activity android:name=".Scan"
             android:label="Scan QR"
