@@ -26,6 +26,7 @@ import android.app.ActionBar;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -112,5 +113,15 @@ public class GenerateQR extends AppCompatActivity implements FirebaseManager.Rid
         if(updatedRequest != null && updatedRequest.getStatus() == RideRequest.Status.COMPLETED){
             onBackPressed();
         }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) { //https://stackoverflow.com/questions/36457564/display-back-button-of-action-bar-is-not-going-back-in-android/36457747
+        switch (item.getItemId()){
+            case android.R.id.home:
+                onBackPressed();
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 }
