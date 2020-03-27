@@ -758,6 +758,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
         }
 
         if (updatedValue == null) {
+            return;
+        }
+        
+        if (!isDriver && updatedValue == null) {
             request_fab.setVisibility(View.VISIBLE);
             if (cancel_fab.getVisibility() == View.VISIBLE) {
                 cancel_fab.setVisibility(View.GONE);
