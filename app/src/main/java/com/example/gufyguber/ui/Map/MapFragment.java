@@ -14,18 +14,25 @@
 package com.example.gufyguber.ui.Map;
 
 import android.Manifest;
+import android.content.IntentSender;
 import android.content.pm.PackageManager;
+import android.location.Address;
+import android.location.Geocoder;
+import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
@@ -39,6 +46,16 @@ import com.example.gufyguber.OfflineCache;
 import com.example.gufyguber.R;
 import com.example.gufyguber.RideRequest;
 import com.example.gufyguber.Rider;
+import com.google.android.gms.common.api.ApiException;
+import com.google.android.gms.common.api.ResolvableApiException;
+import com.google.android.gms.common.api.Status;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.LocationSettingsRequest;
+import com.google.android.gms.location.LocationSettingsResponse;
+import com.google.android.gms.location.LocationSettingsStatusCodes;
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -49,11 +66,23 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.android.libraries.places.api.Places;
+import com.google.android.libraries.places.api.model.Place;
+import com.google.android.libraries.places.api.model.RectangularBounds;
+import com.google.android.libraries.places.api.net.PlacesClient;
+import com.google.android.libraries.places.widget.AutocompleteSupportFragment;
+import com.google.android.libraries.places.widget.listener.PlaceSelectionListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.ListenerRegistration;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -79,6 +108,21 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
     private ListenerRegistration allRideRequestListener;
 
     private static final String TAG = "MapFragment";
+
+    private Address address;
+
+    //for permissions
+    private static final String FINE_LOCATION = Manifest.permission.ACCESS_FINE_LOCATION;
+    private static final String COARSE_LOCATION = Manifest.permission.ACCESS_COARSE_LOCATION;
+    private static final int LOCATION_PERMISSION_REQUEST_CODE = 1234;
+    private static final float DEFAULT_ZOOM = 15f;
+
+    //widgets
+    private Place mAutocomplete;
+    private ImageView mGps;
+
+    private Boolean mLocationPermissionsGranted = false;
+    private Boolean mGPSPermissionsGranted = false;
 
     /**
      *  This class is an intermediate step to differentiate the driver from the rider
@@ -107,7 +151,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
                         }
 
                         for (RideRequest request : value) {
-                            if (request.getDriverUID().equalsIgnoreCase(OfflineCache.getReference().retrieveCurrentUser().getUID())) {
+                            String dUID = request.getDriverUID();
+                            if (dUID != null && dUID.equalsIgnoreCase(OfflineCache.getReference().retrieveCurrentUser().getUID())) {
                                 OfflineCache.getReference().cacheCurrentRideRequest(request);
                                 onRideRequestUpdated(request);
                             }
@@ -122,7 +167,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
                         }
 
                         for (RideRequest request : value) {
-                            if (request.getDriverUID().equalsIgnoreCase(OfflineCache.getReference().retrieveCurrentUser().getUID())) {
+                            String dUID = request.getDriverUID();
+                            if (dUID != null && dUID.equalsIgnoreCase(OfflineCache.getReference().retrieveCurrentUser().getUID())) {
                                 OfflineCache.getReference().cacheCurrentRideRequest(request);
                                 onRideRequestUpdated(request);
                             }
@@ -137,7 +183,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
                         }
 
                         for (RideRequest request : value) {
-                            if (request.getDriverUID().equalsIgnoreCase(OfflineCache.getReference().retrieveCurrentUser().getUID())) {
+                            String dUID = request.getDriverUID();
+                            if (dUID != null && dUID.equalsIgnoreCase(OfflineCache.getReference().retrieveCurrentUser().getUID())) {
                                 OfflineCache.getReference().cacheCurrentRideRequest(request);
                                 onRideRequestUpdated(request);
                             }
@@ -152,7 +199,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
                         }
 
                         for (RideRequest request : value) {
-                            if (request.getDriverUID() != null && request.getDriverUID().equalsIgnoreCase(OfflineCache.getReference().retrieveCurrentUser().getUID())) {
+                            String dUID = request.getDriverUID();
+                            if (dUID != null && dUID.equalsIgnoreCase(OfflineCache.getReference().retrieveCurrentUser().getUID())) {
                                 OfflineCache.getReference().cacheCurrentRideRequest(request);
                                 onRideRequestUpdated(request);
                             }
@@ -191,6 +239,101 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
     private View riderOnCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
         View v = inflater.inflate(R.layout.fragment_map, container, false);
+
+        //______________________________________ AutoComplete Widget ______________________________________
+
+        // need to initialize places
+        if (!Places.isInitialized()) {
+            Places.initialize(getActivity(), getString(R.string.api_key), Locale.CANADA);
+            PlacesClient placesClient = Places.createClient(getActivity());
+        }
+
+        AutocompleteSupportFragment autocompleteFragment;
+        autocompleteFragment = (AutocompleteSupportFragment) getChildFragmentManager().findFragmentById(R.id.autocomplete_fragment);
+
+        //Bias in Edmonton (SE,NW)
+        autocompleteFragment.setLocationBias(RectangularBounds.newInstance(
+                new LatLng(53.415299,-113.674242),
+                new LatLng(53.654777, -113.328740)));
+
+        // gives suggestions in Canada in general
+        autocompleteFragment.setCountries("CA");
+
+        //specify the types of place data to return
+        autocompleteFragment.setPlaceFields(Arrays.asList(Place.Field.ID, Place.Field.NAME, Place.Field.ADDRESS,Place.Field.ID,Place.Field.ADDRESS_COMPONENTS));
+
+        autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
+            @Override
+            public void onPlaceSelected(@NonNull Place place) {
+                Log.i(TAG, "Place: + place.getName()" + ", " + place.getId());
+                mAutocomplete = place;
+
+                Address searchAddress = geoLocate();
+                LatLng latLng = new LatLng(searchAddress.getLatitude(),searchAddress.getLongitude());
+
+                if (requestDialog != null) {
+                    boolean dirty = false;
+                    if (requestDialog.settingStart) {
+                        requestDialog.setNewPickup(latLng);
+                        if (pickupMarker != null) {
+                            pickupMarker.remove(); // replaces old pickup marker
+                        }
+                        MarkerInfo newMarker = new MarkerInfo();
+                        pickupMarker = newMarker.makeMarker("Pickup", true, latLng, mMap);
+                        dirty = true;
+                    }
+
+                    if (requestDialog.settingEnd) {
+                        requestDialog.setNewDropoff(latLng);
+                        if (dropoffMarker != null) {
+                            dropoffMarker.remove(); //replaces old dropoff marker
+                        }
+                        MarkerInfo newMarker = new MarkerInfo();
+                        dropoffMarker = newMarker.makeMarker("Drop Off", false, latLng, mMap);
+                        dirty = true;
+                    }
+
+                    if (dirty) {
+                        requestDialog.show(getChildFragmentManager(), "create_ride_request");
+                        dirty = false;
+                    }
+                }
+
+            }
+
+            @Override
+            public void onError(@NonNull Status status) {
+                Log.i(TAG, "And error occurred: " + status);
+
+            }
+        });
+
+
+        // for current location
+        mGps = v.findViewById(R.id.ic_gps);
+        mGps.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d(TAG,"onClick: clicked gps icon");
+
+                //asking for permissions.
+                getLocationPermissions();
+                Log.d(TAG,"getLocationPermissions: do we have permissions? " +mLocationPermissionsGranted.toString());
+                getGPS();
+                Log.d(TAG,"getGPS: do we have permissions? " +mLocationPermissionsGranted.toString());
+
+
+                if((ContextCompat.checkSelfPermission(getActivity(),Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) && mGPSPermissionsGranted) {
+                    Log.d(TAG,"onClick: checking permissions");
+                    mMap.setMyLocationEnabled(true);
+                    mMap.getUiSettings().setMyLocationButtonEnabled(false);
+                    getDeviceLocation();
+                }
+                else {
+                    Log.d(TAG,"onClick: do we have permissions? " +mLocationPermissionsGranted.toString());
+                }
+            }
+        });
 
         // makes a button for us to create ride requests (RIDER) from navigation drawer activity default
 
@@ -248,6 +391,68 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
     public View driverOnCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
         View v = inflater.inflate(R.layout.fragment_driver_map, container, false);
+        //______________________________________ AutoComplete Widget ______________________________________
+
+        // need to initialize places
+        if (!Places.isInitialized()) {
+            Places.initialize(getActivity(), getString(R.string.api_key), Locale.CANADA);
+            PlacesClient placesClient = Places.createClient(getActivity());
+        }
+
+        AutocompleteSupportFragment autocompleteFragment;
+        autocompleteFragment = (AutocompleteSupportFragment) getChildFragmentManager().findFragmentById(R.id.autocomplete_fragment);
+
+        //Bias in Edmonton (SE,NW)
+        autocompleteFragment.setLocationBias(RectangularBounds.newInstance(
+                new LatLng(53.415299,-113.674242),
+                new LatLng(53.654777, -113.328740)));
+
+        // gives suggestions in Canada in general
+        autocompleteFragment.setCountries("CA");
+
+        //specify the types of place data to return
+        autocompleteFragment.setPlaceFields(Arrays.asList(Place.Field.ID, Place.Field.NAME, Place.Field.ADDRESS,Place.Field.ID,Place.Field.ADDRESS_COMPONENTS));
+
+        autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
+            @Override
+            public void onPlaceSelected(@NonNull Place place) {
+                Log.i(TAG, "Place: + place.getName()" + ", " + place.getId());
+                mAutocomplete = place;
+                geoLocate();
+            }
+
+            @Override
+            public void onError(@NonNull Status status) {
+                Log.i(TAG, "And error occurred: " + status);
+
+            }
+        });
+
+        // for current location feature
+        mGps = v.findViewById(R.id.ic_gps);
+        mGps.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d(TAG,"onClick: clicked gps icon");
+
+                //asking for permissions.
+                getLocationPermissions();
+                Log.d(TAG,"getLocationPermissions: do we have permissions? " +mLocationPermissionsGranted.toString());
+                getGPS();
+                Log.d(TAG,"getGPS: do we have permissions? " +mLocationPermissionsGranted.toString());
+
+
+                if(mLocationPermissionsGranted && mGPSPermissionsGranted) {
+                    Log.d(TAG,"onClick: checking permissions");
+                    mMap.setMyLocationEnabled(true);
+                    mMap.getUiSettings().setMyLocationButtonEnabled(false);
+                    getDeviceLocation();
+                }
+                else {
+                    Log.d(TAG,"onClick: do we have permissions? " +mLocationPermissionsGranted.toString());
+                }
+            }
+        });
 
         offlineText = v.findViewById(R.id.offline_text);
 
@@ -306,12 +511,19 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
         // If our Firestore async request finished before the map loaded, this will force a UI update
         onRideRequestUpdated(OfflineCache.getReference().retrieveCurrentRideRequest());
 
-        // zoom to Edmonton and move the camera UNTIL CURRENT LOCATION WORKS
-        LatLng edmonton = new LatLng(53.5461, -113.4938);
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(edmonton));
+        // Checks the user's permissions beforehand, so on start the map would automatically start at your current location
+        if(mLocationPermissionsGranted && mGPSPermissionsGranted){
+            mMap.setMyLocationEnabled(true);
+            mMap.getUiSettings().setMyLocationButtonEnabled(false);
+            getDeviceLocation();
 
-        float zoomLevel = 16.0f; //max is 21
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(edmonton, zoomLevel));
+        }
+        else {
+            // zoom to Edmonton and move the camera on start unless Permissions granted
+            LatLng edmonton = new LatLng(53.5461, -113.4938);
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(edmonton, DEFAULT_ZOOM));
+        }
+
 
         if (isDriver) {
             mMap.setOnMarkerClickListener(this);
@@ -567,4 +779,201 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
             }
         }
     }
+
+
+    //___________________________ GEOLOCATION / CURRENT LOCATION FEATURES _______________________________
+
+    /**
+     *  This function allows the user to input a name and retrieve the address in the search bar
+     *  Also moves the camera to the searched location
+     * @return
+     * returns the Address value
+     */
+
+    private Address geoLocate(){
+        Log.d(TAG,"geoLocate: geolocating");
+
+        String autoSearch = mAutocomplete.getName();
+
+        Geocoder geocoder = new Geocoder(getActivity());
+        List<Address> list = new ArrayList<>();
+        try {
+            // only looking for one result
+            list = geocoder.getFromLocationName(autoSearch, 1);
+
+        }
+        catch (IOException e){
+            Log.e(TAG, "geoLocate: IOException: " + e.getMessage());
+
+        }
+        // that means we have some requests
+        if(list.size() > 0){
+            // made final for request fragment
+            address = list.get(0);
+            Log.d(TAG,"goeLocate: found a location: " + address.toString());
+
+            moveCamera(new LatLng(address.getLatitude(), address.getLongitude()), DEFAULT_ZOOM);
+        }
+        return address;
+    }
+
+    /**
+     *  This function allows the camera to move to the user's current location when the location button is pressed
+     */
+
+    private void getDeviceLocation() {
+        Log.d(TAG,"getDeviceLocation: getting the device's current location");
+        //vars
+        FusedLocationProviderClient mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(getActivity());
+
+        try {
+            if(mLocationPermissionsGranted && mGPSPermissionsGranted) {
+                Task location = mFusedLocationProviderClient.getLastLocation();
+                location.addOnCompleteListener(new OnCompleteListener() {
+                    @Override
+                    public void onComplete(@NonNull Task task) {
+                        if(task.isSuccessful())   {
+                            Log.d(TAG,"onComplete: found location");
+                            Location currentLocation = (Location) task.getResult();
+
+                            moveCamera(new LatLng(currentLocation.getLatitude(),currentLocation.getLongitude()),DEFAULT_ZOOM);
+
+                        }
+                        else {
+                            Log.d(TAG,"onComplete: current location is null");
+                            Toast.makeText(getActivity(), "Unable to get location", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+            }
+        }
+        catch (SecurityException e) {
+            Log.e(TAG, "getDeviceLocation: SecurityException: " + e.getMessage());
+        }
+    }
+
+    /**
+     *  This function handles all the camera movement when called
+     * @param latLng where you want the camera to update to
+     * @param zoom level of zoom (DEFAULT_ZOOM is 16)
+     */
+
+    private void moveCamera(LatLng latLng, float zoom) {
+        Log.d(TAG,"moveCamera: moving camera to: lat:" + latLng.latitude + ", lng: " + latLng.longitude);
+
+        CameraUpdate location = CameraUpdateFactory.newLatLngZoom(latLng,DEFAULT_ZOOM);
+        mMap.animateCamera(location);
+
+    }
+
+    //____________________________________ PERMISSIONS ______________________________________
+
+    /**
+     * This function asks the user to allow OUR APP to get location permissions
+     */
+
+    private void getLocationPermissions() {
+        Log.d(TAG,"getLocationPermissions: getting the APP's location permissions");
+        String[] permissions = {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION};
+
+        if (ContextCompat.checkSelfPermission(getActivity(), FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            if (ContextCompat.checkSelfPermission(getActivity(), COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                mLocationPermissionsGranted = true;
+                Log.d(TAG,"getLocationPermissions: Location permissions granted");
+
+            } else {
+                ActivityCompat.requestPermissions(getActivity(), permissions, LOCATION_PERMISSION_REQUEST_CODE);
+            }
+        }
+        else {
+            ActivityCompat.requestPermissions(getActivity(), permissions, LOCATION_PERMISSION_REQUEST_CODE);
+        }
+
+    }
+
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        mLocationPermissionsGranted = false;
+
+        switch (requestCode) {
+            case LOCATION_PERMISSION_REQUEST_CODE: {
+                if (grantResults.length > 0) {
+                    for (int i = 0; i < grantResults.length; i++) {
+                        if (grantResults[i] != PackageManager.PERMISSION_GRANTED) {
+                            mLocationPermissionsGranted = false;
+                            Log.d(TAG,"onRequestPermissionsResult: do we have permissions? " +mLocationPermissionsGranted.toString());
+                            Toast.makeText(getActivity(), "Please allow us to use your location",Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+                        mLocationPermissionsGranted = true;
+                        onMapReady(mMap);
+                    }
+
+
+                }
+            }
+        }
+    }
+
+    /**
+     * This function asks the user for location permission before map usage. (for current location)
+     */
+
+    public void getGPS() {
+        Log.d(TAG,"askLocationPermissions: This gets the permission for GPS");
+        LocationRequest mLocationRequest = new LocationRequest();
+        mLocationRequest.setInterval(10);
+        mLocationRequest.setSmallestDisplacement(10);
+        mLocationRequest.setFastestInterval(10);
+        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        LocationSettingsRequest.Builder builder = new
+                LocationSettingsRequest.Builder();
+        builder.addLocationRequest(mLocationRequest);
+
+        Task<LocationSettingsResponse> task = LocationServices.getSettingsClient(getActivity()).checkLocationSettings(builder.build());
+
+        task.addOnCompleteListener(new OnCompleteListener<LocationSettingsResponse>() {
+            @Override
+            public void onComplete(Task<LocationSettingsResponse> task) {
+                try {
+                    LocationSettingsResponse response = task.getResult(ApiException.class);
+                    // All location settings are satisfied. The client can initialize location
+                    // requests here.
+                    mGPSPermissionsGranted = true;
+                    Log.d(TAG,"getGPSPermissions: GPS permissions granted");
+
+                } catch (ApiException exception) {
+                    switch (exception.getStatusCode()) {
+                        case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
+                            // Location settings are not satisfied. But could be fixed by showing the
+                            // user a dialog.
+                            mGPSPermissionsGranted = false;
+                            try {
+                                // Cast to a resolvable exception.
+                                ResolvableApiException resolvable = (ResolvableApiException) exception;
+                                // Show the dialog by calling startResolutionForResult(),
+                                // and check the result in onActivityResult().
+                                resolvable.startResolutionForResult(
+                                        getActivity(),
+                                        101);
+                            } catch (IntentSender.SendIntentException e) {
+                                // Ignore the error.
+                            } catch (ClassCastException e) {
+                                // Ignore, should be an impossible error.
+                            }
+                            break;
+                        case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
+                            // Location settings are not satisfied. However, we have no way to fix the
+                            // settings so we won't show the dialog.
+                            mGPSPermissionsGranted = false;
+                            break;
+                    }
+                }
+
+            }
+        });
+
+
+    }
+
+
 }
