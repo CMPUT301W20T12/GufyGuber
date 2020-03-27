@@ -758,9 +758,13 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
         }
 
         if (updatedValue == null) {
+
+            if (mMap != null) {
+                mMap.clear();
+            }
             return;
         }
-        
+
         if (!isDriver && updatedValue == null) {
             request_fab.setVisibility(View.VISIBLE);
             if (cancel_fab.getVisibility() == View.VISIBLE) {
@@ -780,9 +784,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
                 rideRequestListener = null;
             }
 
-            if (mMap != null) {
-                mMap.clear();
-            }
             return;
         }
 
@@ -1003,8 +1004,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
                         mLocationPermissionsGranted = true;
                         onMapReady(mMap);
                     }
-
-
                 }
             }
         }
@@ -1064,12 +1063,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
                             break;
                     }
                 }
-
             }
         });
-
-
     }
-
-
 }
