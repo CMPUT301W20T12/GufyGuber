@@ -67,6 +67,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
     private Button request_fab;
     private Button cancel_fab;
     private Button pay_fab;
+    private Button arrived_fab;
     private TextView offlineText;
     private Timer offlineTestTimer;
     private boolean isDriver;
@@ -214,7 +215,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
                     return;
                 }
                 new CancelRequestFragment().show(getChildFragmentManager(), "cancel_request_fragment");
-
             }
         });
 
@@ -229,6 +229,24 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
                 startActivity(qrIntent);
                 getActivity().finish();
 
+            }
+        });
+
+        arrived_fab = v.findViewById(R.id.arrived_fab);
+        arrived_fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (GlobalDoubleClickHandler.isDoubleClick()) {
+                    return;
+                }
+                FirebaseManager.getReference().confirmArrival(OfflineCache.getReference().retrieveCurrentRideRequest(), new FirebaseManager.ReturnValueListener<Boolean>() {
+                    @Override
+                    public void returnValue(Boolean value) {
+                        if (!value) {
+                            Log.e(TAG, "Arrival confirmation failed.");
+                        }
+                    }
+                });
             }
         });
 
@@ -571,8 +589,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
                     break;
                 case EN_ROUTE:
                     cancel_fab.setVisibility(View.GONE);
+                    arrived_fab.setVisibility(View.VISIBLE);
                     break;
                 case ARRIVED:
+                    arrived_fab.setVisibility(View.GONE);
                     pay_fab.setVisibility(View.VISIBLE);
             }
         }

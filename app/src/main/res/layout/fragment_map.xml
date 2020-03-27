@@ -61,6 +61,21 @@
             android:visibility="gone"/>
 
         <Button
+            android:id="@+id/arrived_fab"
+            android:elevation="8dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:layout_margin="@dimen/fab_margin"
+            android:text="I'm here!"
+            android:textAllCaps="false"
+            android:textSize="18sp"
+            android:textColor="@android:color/white"
+            android:padding="10dp"
+            android:background="@drawable/long_fab"
+            android:visibility="gone"/>
+
+        <Button
             android:id="@+id/pay_fab"
             android:elevation="8dp"
             android:layout_width="wrap_content"
