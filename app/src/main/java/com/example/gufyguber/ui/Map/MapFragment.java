@@ -13,6 +13,7 @@
 
 package com.example.gufyguber.ui.Map;
 
+import android.content.Intent;
 import android.Manifest;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
@@ -34,17 +35,19 @@ import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
 
 import com.example.gufyguber.CreateRideRequestFragment;
 import com.example.gufyguber.DirectionsManager;
 import com.example.gufyguber.Driver;
 import com.example.gufyguber.FirebaseManager;
+import com.example.gufyguber.GenerateQR;
 import com.example.gufyguber.GlobalDoubleClickHandler;
 import com.example.gufyguber.LocationInfo;
 import com.example.gufyguber.OfflineCache;
 import com.example.gufyguber.R;
 import com.example.gufyguber.RideRequest;
+import com.example.gufyguber.ui.CurrentRequest.CancelRequestFragment;
+import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.example.gufyguber.Rider;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.ResolvableApiException;
@@ -60,12 +63,11 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
+
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.libraries.places.api.Places;
@@ -99,7 +101,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
     private Marker dropoffMarker;
     private Polyline routeLine;
     private CreateRideRequestFragment requestDialog;
-    private Button fab;
+    private Button request_fab;
+    private Button cancel_fab;
+    private Button pay_fab;
+    private Button arrived_fab;
     private TextView offlineText;
     private Timer offlineTestTimer;
     private boolean isDriver;
@@ -134,6 +139,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
      */
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+
         isDriver = (OfflineCache.getReference().retrieveCurrentUser() instanceof Driver);
 
         // Have cached request, no need to refresh
@@ -336,10 +342,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
         });
 
         // makes a button for us to create ride requests (RIDER) from navigation drawer activity default
-
-        offlineText = v.findViewById(R.id.offline_text);
-        fab = v.findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
+        request_fab = v.findViewById(R.id.request_fab);
+        request_fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (GlobalDoubleClickHandler.isDoubleClick()) {
@@ -352,6 +356,59 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
                 requestDialog.show(getChildFragmentManager(), "create_ride_request");
             }
         });
+
+        // these buttons will not be visible depending on the ride status, but we set up the click listener's here
+        cancel_fab = v.findViewById(R.id.cancel_fab);
+        cancel_fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (GlobalDoubleClickHandler.isDoubleClick()) {
+                    return;
+                }
+                new CancelRequestFragment().show(getChildFragmentManager(), "cancel_request_fragment");
+            }
+        });
+
+        pay_fab = v.findViewById(R.id.pay_fab);
+        pay_fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (GlobalDoubleClickHandler.isDoubleClick()) {
+                    return;
+                }
+                Intent qrIntent = new Intent(getActivity(), GenerateQR.class);
+                startActivity(qrIntent);
+                getActivity().finish();
+
+            }
+        });
+
+        arrived_fab = v.findViewById(R.id.arrived_fab);
+        arrived_fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (GlobalDoubleClickHandler.isDoubleClick()) {
+                    return;
+                }
+                FirebaseManager.getReference().confirmArrival(OfflineCache.getReference().retrieveCurrentRideRequest(), new FirebaseManager.ReturnValueListener<Boolean>() {
+                    @Override
+                    public void returnValue(Boolean value) {
+                        if (!value) {
+                            Log.e(TAG, "Arrival confirmation failed.");
+                        }
+                    }
+                });
+            }
+        });
+
+        offlineText = v.findViewById(R.id.offline_text);
+
+        if (OfflineCache.getReference().retrieveCurrentRideRequest() == null) {
+            request_fab.setVisibility(View.VISIBLE);
+            cancel_fab.setVisibility(View.GONE);
+            arrived_fab.setVisibility(View.GONE);
+            pay_fab.setVisibility(View.GONE);
+        }
 
         // Sets a background task to periodically check for an internet connection
         offlineTestTimer = new Timer();
@@ -366,7 +423,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
                         @Override
                         public void run() {
                             boolean isOnline = FirebaseManager.getReference().isOnline(getContext());
-                            fab.setVisibility(isOnline ? View.VISIBLE : View.GONE);
+//                            fab.setVisibility(isOnline ? View.VISIBLE : View.GONE);
                             offlineText.setVisibility(isOnline ? View.GONE : View.VISIBLE);
                             if (OfflineCache.getReference().retrieveCurrentRideRequest() == null && requestDialog == null) {
                                 onRideRequestUpdated(null);
@@ -700,17 +757,28 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
             return;
         }
 
-        if (updatedValue == null) {
+        if (isDriver && updatedValue == null) {
+            mMap.clear();
+            return;
+            }
+
+        if (!isDriver && updatedValue == null) {
+            request_fab.setVisibility(View.VISIBLE);
+            if (cancel_fab.getVisibility() == View.VISIBLE) {
+                cancel_fab.setVisibility(View.GONE);
+            }
+            if (pay_fab.getVisibility() == View.VISIBLE) {
+                pay_fab.setVisibility(View.GONE);
+            }
+            if (arrived_fab.getVisibility() == View.VISIBLE) {
+                arrived_fab.setVisibility(View.GONE);
+            }
             removePickupFromMap();
             removeDropoffFromMap();
 
             if (rideRequestListener != null) {
                 rideRequestListener.remove();
                 rideRequestListener = null;
-            }
-
-            if (mMap != null) {
-                mMap.clear();
             }
             return;
         }
@@ -735,6 +803,31 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
                     dropoffMarker.getPosition().latitude != updatedValue.getLocationInfo().getDropoff().latitude ||
                     dropoffMarker.getPosition().longitude != updatedValue.getLocationInfo().getDropoff().longitude) {
                 addDropoffToMap(updatedValue.getLocationInfo().getDropoff());
+            }
+        }
+
+        if(!isDriver) {
+            switch (updatedValue.getStatus()) {
+                // freeeee fallin'
+                case PENDING:
+                case ACCEPTED:
+                case CONFIRMED:
+                    // any ride status between pending and en route should have a cancel button
+                    request_fab.setVisibility(View.GONE);
+                    cancel_fab.setVisibility(View.VISIBLE);
+                    break;
+                case EN_ROUTE:
+                    // when en route, rider will have button to confirm arrival
+                    request_fab.setVisibility(View.GONE);
+                    cancel_fab.setVisibility(View.GONE);
+                    arrived_fab.setVisibility(View.VISIBLE);
+                    break;
+                case ARRIVED:
+                    // pay when arrived
+                    request_fab.setVisibility(View.GONE);
+                    arrived_fab.setVisibility(View.GONE);
+                    pay_fab.setVisibility(View.VISIBLE);
+                    break;
             }
         }
     }
@@ -907,8 +1000,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
                         mLocationPermissionsGranted = true;
                         onMapReady(mMap);
                     }
-
-
                 }
             }
         }
@@ -968,12 +1059,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
                             break;
                     }
                 }
-
             }
         });
-
-
     }
-
-
 }
