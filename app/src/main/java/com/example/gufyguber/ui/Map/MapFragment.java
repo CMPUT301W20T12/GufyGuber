@@ -588,21 +588,26 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
 
         if(!isDriver) {
             switch (updatedValue.getStatus()) {
+                // freeeee fallin'
                 case PENDING:
                 case ACCEPTED:
                 case CONFIRMED:
+                    // any ride status between pending and en route should have a cancel button
                     request_fab.setVisibility(View.GONE);
                     cancel_fab.setVisibility(View.VISIBLE);
                     break;
                 case EN_ROUTE:
+                    // when en route, rider will have button to confirm arrival
                     request_fab.setVisibility(View.GONE);
                     cancel_fab.setVisibility(View.GONE);
                     arrived_fab.setVisibility(View.VISIBLE);
                     break;
                 case ARRIVED:
+                    // pay when arrived
                     request_fab.setVisibility(View.GONE);
                     arrived_fab.setVisibility(View.GONE);
                     pay_fab.setVisibility(View.VISIBLE);
+                    break;
             }
         }
     }
