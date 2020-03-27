@@ -757,13 +757,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
             return;
         }
 
-        if (updatedValue == null) {
-
-            if (mMap != null) {
-                mMap.clear();
-            }
+        if (isDriver && updatedValue == null) {
+            mMap.clear();
             return;
-        }
+            }
 
         if (!isDriver && updatedValue == null) {
             request_fab.setVisibility(View.VISIBLE);
@@ -783,7 +780,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
                 rideRequestListener.remove();
                 rideRequestListener = null;
             }
-
             return;
         }
 
