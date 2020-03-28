@@ -570,16 +570,17 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
         // If our Firestore async request finished before the map loaded, this will force a UI update
         onRideRequestUpdated(OfflineCache.getReference().retrieveCurrentRideRequest());
 
-        // Checks the user's permissions beforehand, so on start the map would automatically start at your current location
-        if(mLocationPermissionsGranted && mGPSPermissionsGranted){
+        // Use open request markers for initial map zoom
+        if (pickupMarker != null && dropoffMarker != null && mMap != null){
+            zoomFit();
+        }
+        // If no request is in progress, and permissions have been granted, use location for initial map zoom
+        else if (mLocationPermissionsGranted && mGPSPermissionsGranted) {
             mMap.setMyLocationEnabled(true);
             mMap.getUiSettings().setMyLocationButtonEnabled(false);
             getDeviceLocation();
-
         }
-        else if (OfflineCache.getReference().retrieveCurrentRideRequest() != null && pickupMarker != null && dropoffMarker != null){
-            zoomFit(mMap);
-        }
+        // Default Edmonton fallback for initial map zoom
         else {
             // zoom to Edmonton and move the camera on start unless Permissions granted
             LatLng edmonton = new LatLng(53.5461, -113.4938);
@@ -675,6 +676,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
         removePickupFromMap();
         pickupMarker = new MarkerInfo().makeMarker("Pickup", true, location, mMap);
         updateNavLine();
+        zoomFit();
     }
 
     private void removePickupFromMap() {
@@ -689,7 +691,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
         removeDropoffFromMap();
         dropoffMarker = new MarkerInfo().makeMarker("Drop Off", false, location, mMap);
         updateNavLine();
-        zoomFit(mMap);
+        zoomFit();
     }
 
     private void removeDropoffFromMap() {
@@ -728,12 +730,16 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
                             }
                         }
                     });
-            zoomFit(mMap);
         }
     }
 
-    public void zoomFit(GoogleMap mMap) {
+    public void zoomFit() {
         Log.d(TAG, "zoomFit: initializing ");
+
+        if (pickupMarker == null || dropoffMarker == null || mMap == null) {
+            Log.d(TAG, "zoomFit aborted due to missing marker or map. Expected behaviour.");
+            return;
+        }
 
         LatLngBounds.Builder builder = new LatLngBounds.Builder();
 
