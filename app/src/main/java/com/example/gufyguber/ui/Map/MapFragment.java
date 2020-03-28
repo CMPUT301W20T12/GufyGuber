@@ -64,6 +64,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
@@ -279,23 +280,24 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
 
                 if (requestDialog != null) {
                     boolean dirty = false;
+
                     if (requestDialog.settingStart) {
-                        requestDialog.setNewPickup(latLng);
-                        if (pickupMarker != null) {
-                            pickupMarker.remove(); // replaces old pickup marker
+                        // If we have an active request, it's confusing to show its pins while we do this
+                        if (!requestDialog.hasDropoffData()) {
+                            removeDropoffFromMap();
                         }
-                        MarkerInfo newMarker = new MarkerInfo();
-                        pickupMarker = newMarker.makeMarker("Pickup", true, latLng, mMap);
+                        requestDialog.setNewPickup(latLng);
+                        addPickupToMap(latLng);
                         dirty = true;
                     }
 
                     if (requestDialog.settingEnd) {
-                        requestDialog.setNewDropoff(latLng);
-                        if (dropoffMarker != null) {
-                            dropoffMarker.remove(); //replaces old dropoff marker
+                        // If we have an active request, it's confusing to show its pins while we do this
+                        if (!requestDialog.hasPickupData()) {
+                            removePickupFromMap();
                         }
-                        MarkerInfo newMarker = new MarkerInfo();
-                        dropoffMarker = newMarker.makeMarker("Drop Off", false, latLng, mMap);
+                        requestDialog.setNewDropoff(latLng);
+                        addDropoffToMap(latLng);
                         dirty = true;
                     }
 
@@ -575,6 +577,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
             getDeviceLocation();
 
         }
+        else if (OfflineCache.getReference().retrieveCurrentRideRequest() != null && pickupMarker != null && dropoffMarker != null){
+            zoomFit(mMap);
+        }
         else {
             // zoom to Edmonton and move the camera on start unless Permissions granted
             LatLng edmonton = new LatLng(53.5461, -113.4938);
@@ -684,6 +689,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
         removeDropoffFromMap();
         dropoffMarker = new MarkerInfo().makeMarker("Drop Off", false, location, mMap);
         updateNavLine();
+        zoomFit(mMap);
     }
 
     private void removeDropoffFromMap() {
@@ -722,7 +728,25 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
                             }
                         }
                     });
+            zoomFit(mMap);
         }
+    }
+
+    public void zoomFit(GoogleMap mMap) {
+        Log.d(TAG, "zoomFit: initializing ");
+
+        LatLngBounds.Builder builder = new LatLngBounds.Builder();
+
+        builder.include(pickupMarker.getPosition());
+        builder.include(dropoffMarker.getPosition());
+
+        LatLngBounds bounds = builder.build();
+        int width = getResources().getDisplayMetrics().widthPixels;
+
+        // i2 = padding hard coded, because anthony henday is a thing
+        CameraUpdate update = CameraUpdateFactory.newLatLngBounds(bounds, width,width, 200);
+
+        mMap.animateCamera(update);
     }
 
     @Override
