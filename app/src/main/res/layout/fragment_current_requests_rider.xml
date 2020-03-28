@@ -89,7 +89,7 @@
                         android:theme="@style/ThemeOverlay.LightButton"
                         android:text="Contact"
                         android:textSize="16sp"
-                        android:visibility="visible"/>
+                        android:visibility="gone"/>
                 </LinearLayout>
 
                 <LinearLayout
