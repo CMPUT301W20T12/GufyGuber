@@ -285,7 +285,22 @@ public class RiderInstrumentedTests {
      */
     @Test
     public void testCreateRideRequest() {
-        onView(withId(R.id.fab))
+        onView(withId(R.id.cancel_fab))
+                .perform(click());
+
+        onView(isRoot()).perform(waitFor(1000));
+
+        onView(withId(R.id.cancel_ride_yes_btn))
+                .perform(click());
+
+        onView(isRoot()).perform(waitFor(1000));
+
+        onView(withId(R.id.cancelled_rider_button))
+                .perform(click());
+
+        onView(isRoot()).perform(waitFor(1000));
+
+        onView(withId(R.id.request_fab))
                 .perform(click());
 
         onView(isRoot()).perform(waitFor(1000));

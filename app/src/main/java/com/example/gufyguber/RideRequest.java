@@ -165,21 +165,6 @@ public class RideRequest {
     }
 
     /**
-     * Cancels this ride request and initiates related cleanup
-     */
-    public void cancelRideRequest() {
-        setStatus(Status.CANCELLED);
-        FirebaseManager.getReference().deleteRideRequest(getRiderUID(), new FirebaseManager.ReturnValueListener<Boolean>() {
-            @Override
-            public void returnValue(Boolean value) {
-                if (!value) {
-                    Log.e(TAG, "Error deleting request from Firestore.");
-                }
-            }
-        });
-    }
-
-    /**
      * Calculates a fair fare based on provided LocationInfo
      * @param locationInfo The LocationInfo used to calculate a distance with which to calculate the fair fare
      * @return A float representing a fair fare in dollars

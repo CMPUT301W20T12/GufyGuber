@@ -808,8 +808,12 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
 
         if (isDriver && updatedValue == null) {
             mMap.clear();
-            return;
+            if (rideRequestListener != null) {
+                rideRequestListener.remove();
+                rideRequestListener = null;
             }
+            return;
+        }
 
         if (!isDriver && updatedValue == null) {
             request_fab.setVisibility(View.VISIBLE);
