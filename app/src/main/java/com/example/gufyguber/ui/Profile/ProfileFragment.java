@@ -45,6 +45,7 @@ import com.example.gufyguber.R;
 import com.example.gufyguber.Rating;
 import com.example.gufyguber.Rider;
 import com.example.gufyguber.SignInActivity;
+import com.example.gufyguber.User;
 import com.example.gufyguber.Vehicle;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
@@ -69,7 +70,6 @@ public class ProfileFragment extends Fragment {
 
     // Declare variables for later; some are for the Vehicle object and will not
     // be used if the user is a rider
-    private ProfileViewModel profileViewModel;
     private TextView firstNameText;
     private TextView lastNameText;
     private TextView phoneText;
@@ -87,18 +87,10 @@ public class ProfileFragment extends Fragment {
     // simple boolean to check if the user is a driver or rider so we know
     private boolean driver;
 
-    public View onCreateView(@NonNull final LayoutInflater inflater,
-                             final ViewGroup container, Bundle savedInstanceState) {
-        profileViewModel = ViewModelProviders.of(this).get(ProfileViewModel.class);
+    public View onCreateView(@NonNull final LayoutInflater inflater, final ViewGroup container, Bundle savedInstanceState) {
 
         // get he driver boolean from the offline cache by checking if instance driver object
         driver = OfflineCache.getReference().retrieveCurrentUser() instanceof Driver;
-
-        profileViewModel.getText().observe(getViewLifecycleOwner(), new Observer<String>() {
-            @Override
-            public void onChanged(@Nullable String s) {
-            }
-        });
 
         // which layout file to inflate with
         if (driver) {
@@ -127,60 +119,27 @@ public class ProfileFragment extends Fragment {
         positive = view.findViewById(R.id.positive);
         negative = view.findViewById(R.id.negative);
 
-
-        // Use firebase manager to get the user profile info to auto pop the fields
-        // use googleSignIn feature to retrieve profile picture
-
-
-        FirebaseManager.getReference().fetchRiderInfo(FirebaseAuth.getInstance().getCurrentUser().getUid(),
-                new FirebaseManager.ReturnValueListener<Rider>() {
-            @Override
-            public void returnValue(Rider value) {
-                // Retrieve google sign in profile photo and use Picasso to set the image.
-
-                GoogleSignInAccount acct = GoogleSignIn.getLastSignedInAccount(getActivity());
-                if (acct != null) {
-                    String userPhoto = acct.getPhotoUrl().toString();
-                    Picasso.with(getContext()).load(userPhoto).into(profilePicture);
-                }
-                if (value != null) {
-                    firstNameText.setText(value.getFirstName());
-                    lastNameText.setText(value.getLastName());
-                    emailText.setText(value.getEmail());
-                    phoneText.setText(formatNumber(value.getPhoneNumber(), "CA"));
-                    if (driver) {
-                        // if they are a driver we also need the vehicle info from firebase manager
-                        FirebaseManager.getReference().fetchVehicleInfo(FirebaseAuth.getInstance().getUid(),
-                                new FirebaseManager.ReturnValueListener<Vehicle>() {
-                            @Override
-                            public void returnValue(Vehicle value) {
-                                makeText.setText(value.getMake());
-                                modelText.setText(value.getModel());
-                                plateText.setText(value.getPlateNumber());
-                                seatText.setText(String.valueOf(value.getSeatNumber()));
-                            }
-                        });
-                    }
-                } else {
-                    // log the error if firebase manager fails to get user
-                    Log.e(TAG, "Null rider passed to Profile Fragment.");
-                }
-            }
-        });
-
-        FirebaseManager.getReference().fetchRatingInfo(FirebaseAuth.getInstance().getCurrentUser().getUid(),
-                new FirebaseManager.ReturnValueListener<Rating>() {
+        // Use cached info or firebase manager to get the user profile info to auto pop the fields
+        User user = OfflineCache.getReference().retrieveCurrentUser();
+        if (user != null) {
+            populateForm(user);
+        } else {
+            if (driver) {
+                FirebaseManager.getReference().fetchDriverInfo(FirebaseAuth.getInstance().getCurrentUser().getUid(), new FirebaseManager.ReturnValueListener<Driver>() {
                     @Override
-                    public void returnValue(Rating value) {
-                        if(value != null) {
-                            String pos = value.getPosPercent(value.getPositive(), value.getNegative());
-                            String neg = value.getNegPercent(value.getPositive(), value.getNegative());
-
-                            positive.setText(pos);
-                            negative.setText(neg);
-                        }
+                    public void returnValue(Driver value) {
+                        populateForm(value);
                     }
                 });
+            } else {
+                FirebaseManager.getReference().fetchRiderInfo(FirebaseAuth.getInstance().getCurrentUser().getUid(), new FirebaseManager.ReturnValueListener<Rider>() {
+                    @Override
+                    public void returnValue(Rider value) {
+                        populateForm(value);
+                    }
+                });
+            }
+        }
 
         editProfile.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -225,68 +184,50 @@ public class ProfileFragment extends Fragment {
                             userLastName,
                             userEmail);
                     if (driver) {       // if they are a driver, store the new Driver object in FB via the manager
-                        FirebaseManager.getReference().storeDriverInfo(new
-                                Driver(FirebaseAuth.getInstance().getCurrentUser().getUid(),
-                                userEmail,
-                                userFirstName,
-                                userLastName,
-                                userPhone,
-                                new Vehicle(modelText.getText().toString(),     // Driver needs a Vehicle in the input as well
-                                        makeText.getText().toString(),
-                                        plateText.getText().toString(),
-                                        Integer.parseInt(seatText.getText().toString())),
-                                new Rating(Integer.parseInt(positive.getText().toString()), Integer.parseInt(negative.getText().toString()))));
-                        // update the vehicle as well via the manager
-                        FirebaseManager.getReference().storeVehicleInfo(FirebaseAuth.getInstance().getCurrentUser().getUid(),
-                                new Vehicle(modelText.getText().toString(),
-                                makeText.getText().toString(),
-                                plateText.getText().toString(),
-                                Integer.parseInt(seatText.getText().toString())));
-                        // update the authentication email for the firebase project
-                        FirebaseAuth.getInstance().getCurrentUser().updateEmail(userEmail)
-                                .addOnCompleteListener(new OnCompleteListener<Void>() {
-                                    @Override
-                                    public void onComplete(@NonNull Task<Void> task) {
-                                        if (task.isSuccessful()) {
-                                            Log.d(TAG, "User email address updated.");
-                                        } else {
-                                            Log.d(TAG, "Failed to update user email address.");
-                                        }
-                                    }
-                                });
-                        // get the newly updated Driver object to store in the offline cache
-                        FirebaseManager.getReference().fetchDriverInfo(FirebaseAuth.getInstance().getCurrentUser().getUid(), new FirebaseManager.ReturnValueListener<Driver>() {
-                            @Override
-                            public void returnValue(Driver value) {
-                                OfflineCache.getReference().cacheCurrentUser(value);
-                            }
-                        });
+                        Driver updatedDriver = new Driver(OfflineCache.getReference().retrieveCurrentUser().getUID(),
+                                userEmail, userFirstName, userLastName, userPhone,
+                                new Vehicle(modelText.getText().toString(), makeText.getText().toString(),
+                                        plateText.getText().toString(), Integer.parseInt(seatText.getText().toString())));
 
+                        OfflineCache.getReference().cacheCurrentUser(updatedDriver);
+                        FirebaseManager.getReference().storeDriverInfo(updatedDriver);
+                        FirebaseManager.getReference().storeVehicleInfo(updatedDriver.getUID(), updatedDriver.getVehicle());
+
+                        // update the authentication email for the firebase project
+                        if (FirebaseAuth.getInstance() != null && FirebaseAuth.getInstance().getCurrentUser() != null) {
+                            FirebaseAuth.getInstance().getCurrentUser().updateEmail(userEmail)
+                                    .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                        @Override
+                                        public void onComplete(@NonNull Task<Void> task) {
+                                            if (task.isSuccessful()) {
+                                                Log.d(TAG, "User email address updated.");
+                                            } else {
+                                                Log.d(TAG, "Failed to update user email address.");
+                                            }
+                                        }
+                                    });
+                        }
                     } else {
                         // Same as above, but this time for a rider...
-                        FirebaseManager.getReference().storeRiderInfo(new
-                                Rider(FirebaseAuth.getInstance().getCurrentUser().getUid(),
-                                userEmail,
-                                userFirstName,
-                                userLastName,
-                                userPhone));
-                        FirebaseAuth.getInstance().getCurrentUser().updateEmail(userEmail)
-                                .addOnCompleteListener(new OnCompleteListener<Void>() {
-                                    @Override
-                                    public void onComplete(@NonNull Task<Void> task) {
-                                        if (task.isSuccessful()) {
-                                            Log.d(TAG, "User email address updated.");
-                                        } else {
-                                            Log.d(TAG, "Failed to update user email address.");
+                        Rider updatedRider = new Rider(OfflineCache.getReference().retrieveCurrentUser().getUID(),
+                                userEmail, userFirstName, userLastName, userPhone);
+
+                        OfflineCache.getReference().cacheCurrentUser(updatedRider);
+                        FirebaseManager.getReference().storeRiderInfo(updatedRider);
+                        // update the authentication email for the firebase project
+                        if (FirebaseAuth.getInstance() != null && FirebaseAuth.getInstance().getCurrentUser() != null) {
+                            FirebaseAuth.getInstance().getCurrentUser().updateEmail(userEmail)
+                                    .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                        @Override
+                                        public void onComplete(@NonNull Task<Void> task) {
+                                            if (task.isSuccessful()) {
+                                                Log.d(TAG, "User email address updated.");
+                                            } else {
+                                                Log.d(TAG, "Failed to update user email address.");
+                                            }
                                         }
-                                    }
-                                });
-                        FirebaseManager.getReference().fetchRiderInfo(FirebaseAuth.getInstance().getCurrentUser().getUid(), new FirebaseManager.ReturnValueListener<Rider>() {
-                            @Override
-                            public void returnValue(Rider value) {
-                                OfflineCache.getReference().cacheCurrentUser(value);
-                            }
-                        });
+                                    });
+                        }
                     }
                     Toast.makeText(getContext(), "Profile successfully updated", Toast.LENGTH_LONG).show();
                     closeFragment();// head back to map after updated
@@ -346,9 +287,37 @@ public class ProfileFragment extends Fragment {
             }
         }
 
-        return isValid;
+        return isValid;  
     }
+    
+    /**
+     * Populates the Profile form based on provided user information
+     * @param user The user information to use to populate the form
+     */
+    private void populateForm(User user) {
+        // Retrieve google sign in profile photo and use Picasso to set the image.
+        GoogleSignInAccount acct = GoogleSignIn.getLastSignedInAccount(getActivity());
+        if (acct != null) {
+            String userPhoto = acct.getPhotoUrl().toString();
+            Picasso.with(getContext()).load(userPhoto).into(profilePicture);
+        } else {
+            Log.e(TAG, "Invalid Google account details for profile picture.");
+        }
 
-
-
+        if (user != null) {
+            firstNameText.setText(user.getFirstName());
+            lastNameText.setText(user.getLastName());
+            emailText.setText(user.getEmail());
+            phoneText.setText(user.getPhoneNumber());
+            if (driver) {
+                Vehicle vehicle = ((Driver)user).getVehicle();
+                makeText.setText(vehicle.getMake());
+                modelText.setText(vehicle.getModel());
+                plateText.setText(vehicle.getPlateNumber());
+                seatText.setText(String.valueOf(vehicle.getSeatNumber()));
+            }
+        } else {
+            Log.e(TAG, "Null rider passed to Profile Fragment.");
+        }
+    }
 }

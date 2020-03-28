@@ -140,6 +140,15 @@ public class RideRequest {
         timeInfo = new TimeInfo();
     }
 
+    /**
+     * Greedy constructor for the RideRequest class
+     * @param riderUID The UID of the rider user that created the request
+     * @param driverUID The UID of the driver user that accepted the request
+     * @param status The current status of the request
+     * @param offeredFare The fare that the rider offered for this request
+     * @param locationInfo The location info for the pickup and dropoff of the request
+     * @param timeInfo The timestamps for important events related to the request
+     */
     public RideRequest(String riderUID, String driverUID, Status status, float offeredFare, LocationInfo locationInfo, TimeInfo timeInfo) {
         setRiderUID(riderUID);
         setDriverUID(driverUID);
@@ -149,19 +158,10 @@ public class RideRequest {
         this.timeInfo = timeInfo;
     }
 
-    /**
-     * Cancels this ride request and initiates related cleanup
-     */
-    public void cancelRideRequest() {
-        setStatus(Status.CANCELLED);
-        FirebaseManager.getReference().deleteRideRequest(getRiderUID(), new FirebaseManager.ReturnValueListener<Boolean>() {
-            @Override
-            public void returnValue(Boolean value) {
-                if (value) {
-                    ;
-                }
-            }
-        });
+    @Override
+    public String toString() {
+        return String.format("Rider UID: %s\nDriver UID: %s\nStatus: %s\nFare: %.2f\nPickup: %s\nDrop Off: %s\nOpen Time: %tc\nAccepted Time: %tc\nClosed Time: %tc\n",
+                getRiderUID(), getDriverUID(), getStatus().name(), getOfferedFare(), LocationInfo.latlngToString(getLocationInfo().getPickup()), LocationInfo.latlngToString(getLocationInfo().getDropoff()), getTimeInfo().getRequestOpenTime(), getTimeInfo().getRequestAcceptedTime(), getTimeInfo().getRequestClosedTime());
     }
 
     /**

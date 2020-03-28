@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -18,6 +19,7 @@ import com.example.gufyguber.FirebaseManager;
 import com.example.gufyguber.GlobalDoubleClickHandler;
 import com.example.gufyguber.LoginActivity;
 import com.example.gufyguber.NavigationActivity;
+import com.example.gufyguber.OfflineCache;
 import com.example.gufyguber.R;
 import com.example.gufyguber.RideRequest;
 import com.google.firebase.auth.FirebaseAuth;
@@ -29,6 +31,8 @@ import com.google.firebase.auth.FirebaseAuth;
  */
 
 public class CancelRequestFragment extends DialogFragment {
+
+    private static final String TAG = "CancelRequestFragment";
 
     private Button noBtn;
     private Button yesBtn;
@@ -66,14 +70,16 @@ public class CancelRequestFragment extends DialogFragment {
 
                 new com.example.gufyguber.ui.CurrentRequest.CancelFragment().show(getFragmentManager(), "cancel_fragment");
                 getFragmentManager().beginTransaction().remove(CancelRequestFragment.this).commit();
-                FirebaseManager.getReference().fetchRideRequest(FirebaseAuth.getInstance().getCurrentUser().getUid(), new FirebaseManager.ReturnValueListener<RideRequest>() {
-                    @Override
-                    public void returnValue(RideRequest value) {
-                        if (value != null) {
-                            value.cancelRideRequest();
+                if (OfflineCache.getReference().retrieveCurrentRideRequest() != null) {
+                    FirebaseManager.getReference().riderCancelRequest(OfflineCache.getReference().retrieveCurrentRideRequest(), new FirebaseManager.ReturnValueListener<Boolean>() {
+                        @Override
+                        public void returnValue(Boolean value) {
+                            if (!value) {
+                                Log.e(TAG, "Error deleting ride.");
+                            }
                         }
-                    }
-                });
+                    });
+                }
             }
         });
         final AlertDialog.Builder builder = new AlertDialog.Builder(getContext());

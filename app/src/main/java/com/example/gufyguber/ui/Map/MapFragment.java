@@ -13,47 +13,80 @@
 
 package com.example.gufyguber.ui.Map;
 
+import android.content.Intent;
 import android.Manifest;
+import android.content.IntentSender;
 import android.content.pm.PackageManager;
+import android.location.Address;
+import android.location.Geocoder;
+import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
+import androidx.test.espresso.action.ViewActions;
 
 import com.example.gufyguber.CreateRideRequestFragment;
 import com.example.gufyguber.DirectionsManager;
 import com.example.gufyguber.Driver;
 import com.example.gufyguber.FirebaseManager;
+import com.example.gufyguber.GenerateQR;
 import com.example.gufyguber.GlobalDoubleClickHandler;
 import com.example.gufyguber.LocationInfo;
 import com.example.gufyguber.OfflineCache;
 import com.example.gufyguber.R;
 import com.example.gufyguber.RideRequest;
+import com.example.gufyguber.ui.CurrentRequest.CancelRequestFragment;
+import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.example.gufyguber.Rider;
+import com.google.android.gms.common.api.ApiException;
+import com.google.android.gms.common.api.ResolvableApiException;
+import com.google.android.gms.common.api.Status;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.LocationSettingsRequest;
+import com.google.android.gms.location.LocationSettingsResponse;
+import com.google.android.gms.location.LocationSettingsStatusCodes;
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
+
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.android.libraries.places.api.Places;
+import com.google.android.libraries.places.api.model.Place;
+import com.google.android.libraries.places.api.model.RectangularBounds;
+import com.google.android.libraries.places.api.net.PlacesClient;
+import com.google.android.libraries.places.widget.AutocompleteSupportFragment;
+import com.google.android.libraries.places.widget.listener.PlaceSelectionListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.ListenerRegistration;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -63,22 +96,43 @@ import java.util.TimerTask;
 
 public class MapFragment extends Fragment implements OnMapReadyCallback, CreateRideRequestFragment.CreateRideRequestListener,
         CreateRideRequestFragment.CancelCreateRideRequestListener, GoogleMap.OnMarkerClickListener, FirebaseManager.RideRequestListener,
-        FirebaseManager.DriverRideRequestCollectionListener{
+        FirebaseManager.DriverRideRequestCollectionListener, RideRequest.StatusChangedListener{
 
     private GoogleMap mMap;
     private Marker pickupMarker;
     private Marker dropoffMarker;
     private Polyline routeLine;
     private CreateRideRequestFragment requestDialog;
-    private Button fab;
+    private Button request_fab;
+    private Button cancel_fab;
+    private Button pay_fab;
+    private Button arrived_fab;
     private TextView offlineText;
     private Timer offlineTestTimer;
+    // Quick reference for the user type we're dealing with
     private boolean isDriver;
+    // Tracks the connectivity status to handle returning from being offline
+    private boolean wasOffline;
 
     private ListenerRegistration rideRequestListener;
     private ListenerRegistration allRideRequestListener;
 
     private static final String TAG = "MapFragment";
+
+    private Address address;
+
+    //for permissions
+    private static final String FINE_LOCATION = Manifest.permission.ACCESS_FINE_LOCATION;
+    private static final String COARSE_LOCATION = Manifest.permission.ACCESS_COARSE_LOCATION;
+    private static final int LOCATION_PERMISSION_REQUEST_CODE = 1234;
+    private static final float DEFAULT_ZOOM = 15f;
+
+    //widgets
+    private Place mAutocomplete;
+    private ImageView mGps;
+
+    private Boolean mLocationPermissionsGranted = false;
+    private Boolean mGPSPermissionsGranted = false;
 
     /**
      *  This class is an intermediate step to differentiate the driver from the rider
@@ -88,84 +142,95 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
      * @return
      * returns what the user type is (rider/driver)
      */
-
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+
         isDriver = (OfflineCache.getReference().retrieveCurrentUser() instanceof Driver);
 
-        // Start by syncing any current requests with Firebase in case the app was closed and opened
-        if (isDriver) {
-            // For the driver, having the Rider UID will be enough to keep it synced later on with a cheaper query
-            FirebaseManager.getReference().fetchRideRequestsWithStatus(RideRequest.Status.ACCEPTED, new FirebaseManager.ReturnValueListener<ArrayList<RideRequest>>() {
-                @Override
-                public void returnValue(ArrayList<RideRequest> value) {
-                    if (value == null) {
-                        return;
-                    }
-
-                    for (RideRequest request : value) {
-                        if (request.getDriverUID().equalsIgnoreCase(FirebaseAuth.getInstance().getCurrentUser().getUid())) {
-                            OfflineCache.getReference().cacheCurrentRideRequest(request);
-                            onRideRequestUpdated(request);
-                        }
-                    }
-                }
-            });
-            FirebaseManager.getReference().fetchRideRequestsWithStatus(RideRequest.Status.CONFIRMED, new FirebaseManager.ReturnValueListener<ArrayList<RideRequest>>() {
-                @Override
-                public void returnValue(ArrayList<RideRequest> value) {
-                    if (value == null) {
-                        return;
-                    }
-
-                    for (RideRequest request : value) {
-                        if (request.getDriverUID().equalsIgnoreCase(FirebaseAuth.getInstance().getCurrentUser().getUid())) {
-                            OfflineCache.getReference().cacheCurrentRideRequest(request);
-                            onRideRequestUpdated(request);
-                        }
-                    }
-                }
-            });
-            FirebaseManager.getReference().fetchRideRequestsWithStatus(RideRequest.Status.EN_ROUTE, new FirebaseManager.ReturnValueListener<ArrayList<RideRequest>>() {
-                @Override
-                public void returnValue(ArrayList<RideRequest> value) {
-                    if (value == null) {
-                        return;
-                    }
-
-                    for (RideRequest request : value) {
-                        if (request.getDriverUID().equalsIgnoreCase(FirebaseAuth.getInstance().getCurrentUser().getUid())) {
-                            OfflineCache.getReference().cacheCurrentRideRequest(request);
-                            onRideRequestUpdated(request);
-                        }
-                    }
-                }
-            });
-            FirebaseManager.getReference().fetchRideRequestsWithStatus(RideRequest.Status.ARRIVED, new FirebaseManager.ReturnValueListener<ArrayList<RideRequest>>() {
-                @Override
-                public void returnValue(ArrayList<RideRequest> value) {
-                    if (value == null) {
-                        return;
-                    }
-
-                    for (RideRequest request : value) {
-                        if (request.getDriverUID().equalsIgnoreCase(FirebaseAuth.getInstance().getCurrentUser().getUid())) {
-                            OfflineCache.getReference().cacheCurrentRideRequest(request);
-                            onRideRequestUpdated(request);
-                        }
-                    }
-                }
-            });
-
+        // Have cached request, no need to refresh
+        if (OfflineCache.getReference().retrieveCurrentRideRequest() != null) {
+            onRideRequestUpdated(OfflineCache.getReference().retrieveCurrentRideRequest());
         } else {
-            FirebaseManager.getReference().fetchRideRequest(FirebaseAuth.getInstance().getCurrentUser().getUid(), new FirebaseManager.ReturnValueListener<RideRequest>() {
-                @Override
-                public void returnValue(RideRequest value) {
-                    OfflineCache.getReference().cacheCurrentRideRequest(value);
-                    onRideRequestUpdated(value);
-                }
-            });
+            // Start by syncing any current requests with Firebase in case the app was closed and opened
+            if (isDriver) {
+                // For the driver, having the Rider UID will be enough to keep it synced later on with a cheaper query
+                FirebaseManager.getReference().fetchRideRequestsWithStatus(RideRequest.Status.ACCEPTED, new FirebaseManager.ReturnValueListener<ArrayList<RideRequest>>() {
+                    @Override
+                    public void returnValue(ArrayList<RideRequest> value) {
+                        if (value == null) {
+                            return;
+                        }
+
+                        for (RideRequest request : value) {
+                            String dUID = request.getDriverUID();
+                            if (dUID != null && dUID.equalsIgnoreCase(OfflineCache.getReference().retrieveCurrentUser().getUID())) {
+                                OfflineCache.getReference().cacheCurrentRideRequest(request);
+                                onRideRequestUpdated(request);
+                            }
+                        }
+                    }
+                });
+                FirebaseManager.getReference().fetchRideRequestsWithStatus(RideRequest.Status.CONFIRMED, new FirebaseManager.ReturnValueListener<ArrayList<RideRequest>>() {
+                    @Override
+                    public void returnValue(ArrayList<RideRequest> value) {
+                        if (value == null) {
+                            return;
+                        }
+
+                        for (RideRequest request : value) {
+                            String dUID = request.getDriverUID();
+                            if (dUID != null && dUID.equalsIgnoreCase(OfflineCache.getReference().retrieveCurrentUser().getUID())) {
+                                OfflineCache.getReference().cacheCurrentRideRequest(request);
+                                onRideRequestUpdated(request);
+                            }
+                        }
+                    }
+                });
+                FirebaseManager.getReference().fetchRideRequestsWithStatus(RideRequest.Status.EN_ROUTE, new FirebaseManager.ReturnValueListener<ArrayList<RideRequest>>() {
+                    @Override
+                    public void returnValue(ArrayList<RideRequest> value) {
+                        if (value == null) {
+                            return;
+                        }
+
+                        for (RideRequest request : value) {
+                            String dUID = request.getDriverUID();
+                            if (dUID != null && dUID.equalsIgnoreCase(OfflineCache.getReference().retrieveCurrentUser().getUID())) {
+                                OfflineCache.getReference().cacheCurrentRideRequest(request);
+                                onRideRequestUpdated(request);
+                            }
+                        }
+                    }
+                });
+                FirebaseManager.getReference().fetchRideRequestsWithStatus(RideRequest.Status.ARRIVED, new FirebaseManager.ReturnValueListener<ArrayList<RideRequest>>() {
+                    @Override
+                    public void returnValue(ArrayList<RideRequest> value) {
+                        if (value == null) {
+                            return;
+                        }
+
+                        for (RideRequest request : value) {
+                            String dUID = request.getDriverUID();
+                            if (dUID != null && dUID.equalsIgnoreCase(OfflineCache.getReference().retrieveCurrentUser().getUID())) {
+                                OfflineCache.getReference().cacheCurrentRideRequest(request);
+                                onRideRequestUpdated(request);
+                            }
+                        }
+                    }
+                });
+
+            } else {
+                FirebaseManager.getReference().fetchRideRequest(OfflineCache.getReference().retrieveCurrentUser().getUID(), new FirebaseManager.ReturnValueListener<RideRequest>() {
+                    @Override
+                    public void returnValue(RideRequest value) {
+                        OfflineCache.getReference().cacheCurrentRideRequest(value);
+                        onRideRequestUpdated(value);
+                    }
+                });
+            }
         }
+
+        OfflineCache.getReference().addRideRequestStatusChangedListener(this);
 
         if (isDriver) {
             return driverOnCreateView(inflater, container, savedInstanceState);
@@ -186,11 +251,105 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
 
         View v = inflater.inflate(R.layout.fragment_map, container, false);
 
-        // makes a button for us to create ride requests (RIDER) from navigation drawer activity default
+        //______________________________________ AutoComplete Widget ______________________________________
 
-        offlineText = v.findViewById(R.id.offline_text);
-        fab = v.findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
+        // need to initialize places
+        if (!Places.isInitialized()) {
+            Places.initialize(getActivity(), getString(R.string.api_key), Locale.CANADA);
+            PlacesClient placesClient = Places.createClient(getActivity());
+        }
+
+        AutocompleteSupportFragment autocompleteFragment;
+        autocompleteFragment = (AutocompleteSupportFragment) getChildFragmentManager().findFragmentById(R.id.autocomplete_fragment);
+
+        //Bias in Edmonton (SE,NW)
+        autocompleteFragment.setLocationBias(RectangularBounds.newInstance(
+                new LatLng(53.415299,-113.674242),
+                new LatLng(53.654777, -113.328740)));
+
+        // gives suggestions in Canada in general
+        autocompleteFragment.setCountries("CA");
+
+        //specify the types of place data to return
+        autocompleteFragment.setPlaceFields(Arrays.asList(Place.Field.ID, Place.Field.NAME, Place.Field.ADDRESS,Place.Field.ID,Place.Field.ADDRESS_COMPONENTS));
+
+        autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
+            @Override
+            public void onPlaceSelected(@NonNull Place place) {
+                Log.i(TAG, "Place: + place.getName()" + ", " + place.getId());
+                mAutocomplete = place;
+
+                Address searchAddress = geoLocate();
+                LatLng latLng = new LatLng(searchAddress.getLatitude(),searchAddress.getLongitude());
+
+                if (requestDialog != null) {
+                    boolean dirty = false;
+
+                    if (requestDialog.settingStart) {
+                        // If we have an active request, it's confusing to show its pins while we do this
+                        if (!requestDialog.hasDropoffData()) {
+                            removeDropoffFromMap();
+                        }
+                        requestDialog.setNewPickup(latLng);
+                        addPickupToMap(latLng);
+                        dirty = true;
+                    }
+
+                    if (requestDialog.settingEnd) {
+                        // If we have an active request, it's confusing to show its pins while we do this
+                        if (!requestDialog.hasPickupData()) {
+                            removePickupFromMap();
+                        }
+                        requestDialog.setNewDropoff(latLng);
+                        addDropoffToMap(latLng);
+                        dirty = true;
+                    }
+
+                    if (dirty) {
+                        requestDialog.show(getChildFragmentManager(), "create_ride_request");
+                        dirty = false;
+                    }
+                }
+
+            }
+
+            @Override
+            public void onError(@NonNull Status status) {
+                Log.i(TAG, "And error occurred: " + status);
+
+            }
+        });
+
+
+        // for current location
+        mGps = v.findViewById(R.id.ic_gps);
+        mGps.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d(TAG,"onClick: clicked gps icon");
+
+                //asking for permissions.
+                getLocationPermissions();
+                Log.d(TAG,"getLocationPermissions: do we have permissions? " +mLocationPermissionsGranted.toString());
+                getGPS();
+                Log.d(TAG,"getGPS: do we have permissions? " +mLocationPermissionsGranted.toString());
+
+
+                if((ContextCompat.checkSelfPermission(getActivity(),Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) && mGPSPermissionsGranted) {
+                    Log.d(TAG,"onClick: checking permissions");
+                    mMap.setMyLocationEnabled(true);
+                    mMap.getUiSettings().setMyLocationButtonEnabled(false);
+                    getDeviceLocation();
+                }
+                else {
+                    Log.d(TAG,"onClick: do we have permissions? " +mLocationPermissionsGranted.toString());
+                }
+            }
+        });
+
+        // makes a button for us to create ride requests (RIDER) from navigation drawer activity default
+        request_fab = v.findViewById(R.id.request_fab);
+        request_fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (GlobalDoubleClickHandler.isDoubleClick()) {
@@ -203,6 +362,59 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
                 requestDialog.show(getChildFragmentManager(), "create_ride_request");
             }
         });
+
+        // these buttons will not be visible depending on the ride status, but we set up the click listener's here
+        cancel_fab = v.findViewById(R.id.cancel_fab);
+        cancel_fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (GlobalDoubleClickHandler.isDoubleClick()) {
+                    return;
+                }
+                new CancelRequestFragment().show(getChildFragmentManager(), "cancel_request_fragment");
+            }
+        });
+
+        pay_fab = v.findViewById(R.id.pay_fab);
+        pay_fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (GlobalDoubleClickHandler.isDoubleClick()) {
+                    return;
+                }
+                Intent qrIntent = new Intent(getActivity(), GenerateQR.class);
+                startActivity(qrIntent);
+                getActivity().finish();
+
+            }
+        });
+
+        arrived_fab = v.findViewById(R.id.arrived_fab);
+        arrived_fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (GlobalDoubleClickHandler.isDoubleClick()) {
+                    return;
+                }
+                FirebaseManager.getReference().confirmArrival(OfflineCache.getReference().retrieveCurrentRideRequest(), new FirebaseManager.ReturnValueListener<Boolean>() {
+                    @Override
+                    public void returnValue(Boolean value) {
+                        if (!value) {
+                            Log.e(TAG, "Arrival confirmation failed.");
+                        }
+                    }
+                });
+            }
+        });
+
+        offlineText = v.findViewById(R.id.offline_text);
+
+        if (OfflineCache.getReference().retrieveCurrentRideRequest() == null) {
+            request_fab.setVisibility(View.VISIBLE);
+            cancel_fab.setVisibility(View.GONE);
+            arrived_fab.setVisibility(View.GONE);
+            pay_fab.setVisibility(View.GONE);
+        }
 
         // Sets a background task to periodically check for an internet connection
         offlineTestTimer = new Timer();
@@ -217,11 +429,18 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
                         @Override
                         public void run() {
                             boolean isOnline = FirebaseManager.getReference().isOnline(getContext());
-                            fab.setVisibility(isOnline ? View.VISIBLE : View.GONE);
+
+                            // Handle things that need to be dealt with now that we're online again
+                            if (wasOffline && isOnline) {
+                                updateNavLine();
+                            }
+
                             offlineText.setVisibility(isOnline ? View.GONE : View.VISIBLE);
                             if (OfflineCache.getReference().retrieveCurrentRideRequest() == null && requestDialog == null) {
                                 onRideRequestUpdated(null);
                             }
+
+                            wasOffline = !isOnline;
                         }
                     });
                 }
@@ -242,6 +461,68 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
     public View driverOnCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
         View v = inflater.inflate(R.layout.fragment_driver_map, container, false);
+        //______________________________________ AutoComplete Widget ______________________________________
+
+        // need to initialize places
+        if (!Places.isInitialized()) {
+            Places.initialize(getActivity(), getString(R.string.api_key), Locale.CANADA);
+            PlacesClient placesClient = Places.createClient(getActivity());
+        }
+
+        AutocompleteSupportFragment autocompleteFragment;
+        autocompleteFragment = (AutocompleteSupportFragment) getChildFragmentManager().findFragmentById(R.id.autocomplete_fragment);
+
+        //Bias in Edmonton (SE,NW)
+        autocompleteFragment.setLocationBias(RectangularBounds.newInstance(
+                new LatLng(53.415299,-113.674242),
+                new LatLng(53.654777, -113.328740)));
+
+        // gives suggestions in Canada in general
+        autocompleteFragment.setCountries("CA");
+
+        //specify the types of place data to return
+        autocompleteFragment.setPlaceFields(Arrays.asList(Place.Field.ID, Place.Field.NAME, Place.Field.ADDRESS,Place.Field.ID,Place.Field.ADDRESS_COMPONENTS));
+
+        autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
+            @Override
+            public void onPlaceSelected(@NonNull Place place) {
+                Log.i(TAG, "Place: + place.getName()" + ", " + place.getId());
+                mAutocomplete = place;
+                geoLocate();
+            }
+
+            @Override
+            public void onError(@NonNull Status status) {
+                Log.i(TAG, "And error occurred: " + status);
+
+            }
+        });
+
+        // for current location feature
+        mGps = v.findViewById(R.id.ic_gps);
+        mGps.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d(TAG,"onClick: clicked gps icon");
+
+                //asking for permissions.
+                getLocationPermissions();
+                Log.d(TAG,"getLocationPermissions: do we have permissions? " +mLocationPermissionsGranted.toString());
+                getGPS();
+                Log.d(TAG,"getGPS: do we have permissions? " +mLocationPermissionsGranted.toString());
+
+
+                if(mLocationPermissionsGranted && mGPSPermissionsGranted) {
+                    Log.d(TAG,"onClick: checking permissions");
+                    mMap.setMyLocationEnabled(true);
+                    mMap.getUiSettings().setMyLocationButtonEnabled(false);
+                    getDeviceLocation();
+                }
+                else {
+                    Log.d(TAG,"onClick: do we have permissions? " +mLocationPermissionsGranted.toString());
+                }
+            }
+        });
 
         offlineText = v.findViewById(R.id.offline_text);
 
@@ -258,8 +539,16 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
                         @Override
                         public void run() {
                             boolean isOnline = FirebaseManager.getReference().isOnline(getContext());
+
+                            // Handle things that need to be dealt with now that we're online again
+                            if (wasOffline && isOnline) {
+                                updateNavLine();
+                            }
+
                             offlineText.setVisibility(isOnline ? View.GONE : View.VISIBLE);
                             validateCallbacks();
+
+                            wasOffline = !isOnline;
                         }
                     });
                 }
@@ -300,12 +589,23 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
         // If our Firestore async request finished before the map loaded, this will force a UI update
         onRideRequestUpdated(OfflineCache.getReference().retrieveCurrentRideRequest());
 
-        // zoom to Edmonton and move the camera UNTIL CURRENT LOCATION WORKS
-        LatLng edmonton = new LatLng(53.5461, -113.4938);
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(edmonton));
+        // Use open request markers for initial map zoom
+        if (pickupMarker != null && dropoffMarker != null && mMap != null){
+            zoomFit();
+        }
+        // If no request is in progress, and permissions have been granted, use location for initial map zoom
+        else if (mLocationPermissionsGranted && mGPSPermissionsGranted) {
+            mMap.setMyLocationEnabled(true);
+            mMap.getUiSettings().setMyLocationButtonEnabled(false);
+            getDeviceLocation();
+        }
+        // Default Edmonton fallback for initial map zoom
+        else {
+            // zoom to Edmonton and move the camera on start unless Permissions granted
+            LatLng edmonton = new LatLng(53.5461, -113.4938);
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(edmonton, DEFAULT_ZOOM));
+        }
 
-        float zoomLevel = 16.0f; //max is 21
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(edmonton, zoomLevel));
 
         if (isDriver) {
             mMap.setOnMarkerClickListener(this);
@@ -317,12 +617,20 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
                         boolean dirty = false;
 
                         if (requestDialog.settingStart) {
+                            // If we have an active request, it's confusing to show its pins while we do this
+                            if (!requestDialog.hasDropoffData()) {
+                                removeDropoffFromMap();
+                            }
                             requestDialog.setNewPickup(latLng);
                             addPickupToMap(latLng);
                             dirty = true;
                         }
 
                         if (requestDialog.settingEnd) {
+                            // If we have an active request, it's confusing to show its pins while we do this
+                            if (!requestDialog.hasPickupData()) {
+                                removePickupFromMap();
+                            }
                             requestDialog.setNewDropoff(latLng);
                             addDropoffToMap(latLng);
                             dirty = true;
@@ -342,6 +650,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
     public void onDestroy() {
         offlineTestTimer.cancel();
         offlineTestTimer.purge();
+        OfflineCache.getReference().removeRideRequestStatusChangedListener(this);
 
         if (rideRequestListener != null) {
             rideRequestListener.remove();
@@ -360,8 +669,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
      * @param newRequest The request created by the dialog fragment
      */
     public void onRideRequestCreated(RideRequest newRequest) {
-        OfflineCache.getReference().cacheCurrentRideRequest(newRequest);
         FirebaseManager.getReference().storeRideRequest(newRequest);
+        OfflineCache.getReference().cacheCurrentRideRequest(newRequest);
         rideRequestListener = FirebaseManager.getReference().listenToRideRequest(newRequest.getRiderUID(), this);
         requestDialog = null;
     }
@@ -373,12 +682,20 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
         removePickupFromMap();
         removeDropoffFromMap();
         requestDialog = null;
+
+        RideRequest cachedReference = OfflineCache.getReference().retrieveCurrentRideRequest();
+        if (cachedReference != null) {
+            addPickupToMap(cachedReference.getLocationInfo().getPickup());
+            addDropoffToMap(cachedReference.getLocationInfo().getDropoff());
+        }
+
     }
 
     private void addPickupToMap(LatLng location) {
         removePickupFromMap();
         pickupMarker = new MarkerInfo().makeMarker("Pickup", true, location, mMap);
         updateNavLine();
+        zoomFit();
     }
 
     private void removePickupFromMap() {
@@ -393,6 +710,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
         removeDropoffFromMap();
         dropoffMarker = new MarkerInfo().makeMarker("Drop Off", false, location, mMap);
         updateNavLine();
+        zoomFit();
     }
 
     private void removeDropoffFromMap() {
@@ -434,6 +752,28 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
         }
     }
 
+    public void zoomFit() {
+        Log.d(TAG, "zoomFit: initializing ");
+
+        if (pickupMarker == null || dropoffMarker == null || mMap == null) {
+            Log.d(TAG, "zoomFit aborted due to missing marker or map. Expected behaviour.");
+            return;
+        }
+
+        LatLngBounds.Builder builder = new LatLngBounds.Builder();
+
+        builder.include(pickupMarker.getPosition());
+        builder.include(dropoffMarker.getPosition());
+
+        LatLngBounds bounds = builder.build();
+        int width = getResources().getDisplayMetrics().widthPixels;
+
+        // i2 = padding hard coded, because anthony henday is a thing
+        CameraUpdate update = CameraUpdateFactory.newLatLngBounds(bounds, width,width, 200);
+
+        mMap.animateCamera(update);
+    }
+
     @Override
     public boolean onMarkerClick(Marker marker) {
         if (isDriver && OfflineCache.getReference().retrieveCurrentRideRequest() == null) {
@@ -459,25 +799,39 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
         }
     }
 
+    @Override
     public void onRideRequestUpdated(RideRequest updatedValue) {
-        OfflineCache.getReference().cacheCurrentRideRequest(updatedValue);
-
         if (mMap == null) {
             Log.e(TAG, "Map shouldn't be null.");
             return;
         }
 
-        if (updatedValue == null) {
+        if (isDriver && updatedValue == null) {
+            mMap.clear();
+            if (rideRequestListener != null) {
+                rideRequestListener.remove();
+                rideRequestListener = null;
+            }
+            return;
+        }
+
+        if (!isDriver && updatedValue == null) {
+            request_fab.setVisibility(View.VISIBLE);
+            if (cancel_fab.getVisibility() == View.VISIBLE) {
+                cancel_fab.setVisibility(View.GONE);
+            }
+            if (pay_fab.getVisibility() == View.VISIBLE) {
+                pay_fab.setVisibility(View.GONE);
+            }
+            if (arrived_fab.getVisibility() == View.VISIBLE) {
+                arrived_fab.setVisibility(View.GONE);
+            }
             removePickupFromMap();
             removeDropoffFromMap();
 
             if (rideRequestListener != null) {
                 rideRequestListener.remove();
                 rideRequestListener = null;
-            }
-
-            if (mMap != null) {
-                mMap.clear();
             }
             return;
         }
@@ -504,8 +858,34 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
                 addDropoffToMap(updatedValue.getLocationInfo().getDropoff());
             }
         }
+
+        if(!isDriver) {
+            switch (updatedValue.getStatus()) {
+                // freeeee fallin'
+                case PENDING:
+                case ACCEPTED:
+                case CONFIRMED:
+                    // any ride status between pending and en route should have a cancel button
+                    request_fab.setVisibility(View.GONE);
+                    cancel_fab.setVisibility(View.VISIBLE);
+                    break;
+                case EN_ROUTE:
+                    // when en route, rider will have button to confirm arrival
+                    request_fab.setVisibility(View.GONE);
+                    cancel_fab.setVisibility(View.GONE);
+                    arrived_fab.setVisibility(View.VISIBLE);
+                    break;
+                case ARRIVED:
+                    // pay when arrived
+                    request_fab.setVisibility(View.GONE);
+                    arrived_fab.setVisibility(View.GONE);
+                    pay_fab.setVisibility(View.VISIBLE);
+                    break;
+            }
+        }
     }
 
+    @Override
     public void onRideRequestsUpdated(ArrayList<RideRequest> rideRequests) {
         if (isDriver && OfflineCache.getReference().retrieveCurrentRideRequest() == null) {
             if (mMap == null) {
@@ -525,5 +905,214 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
                 new DriverRequestMarker(request).makeMarker(mMap);
             }
         }
+    }
+
+    /**
+     * Used to catch cases where the map is visible and needs to react to a status change
+     * @param newStatus The new status of the current ride request
+     */
+    @Override
+    public void onStatusChanged(RideRequest.Status newStatus) {
+        if (isDriver) {
+            if (newStatus == RideRequest.Status.CANCELLED || newStatus == RideRequest.Status.PENDING || newStatus == RideRequest.Status.COMPLETED) {
+                FirebaseManager.getReference().fetchRideRequestsWithStatus(RideRequest.Status.PENDING, new FirebaseManager.ReturnValueListener<ArrayList<RideRequest>>() {
+                    @Override
+                    public void returnValue(ArrayList<RideRequest> value) {
+                        OfflineCache.getReference().clearCurrentRideRequest();
+                        onRideRequestsUpdated(value);
+                    }
+                });
+            }
+        }
+    }
+
+
+    //___________________________ GEOLOCATION / CURRENT LOCATION FEATURES _______________________________
+
+    /**
+     *  This function allows the user to input a name and retrieve the address in the search bar
+     *  Also moves the camera to the searched location
+     * @return
+     * returns the Address value
+     */
+
+    private Address geoLocate(){
+        Log.d(TAG,"geoLocate: geolocating");
+
+        String autoSearch = mAutocomplete.getName();
+
+        Geocoder geocoder = new Geocoder(getActivity());
+        List<Address> list = new ArrayList<>();
+        try {
+            // only looking for one result
+            list = geocoder.getFromLocationName(autoSearch, 1);
+
+        }
+        catch (IOException e){
+            Log.e(TAG, "geoLocate: IOException: " + e.getMessage());
+
+        }
+        // that means we have some requests
+        if(list.size() > 0){
+            // made final for request fragment
+            address = list.get(0);
+            Log.d(TAG,"goeLocate: found a location: " + address.toString());
+
+            moveCamera(new LatLng(address.getLatitude(), address.getLongitude()), DEFAULT_ZOOM);
+        }
+        return address;
+    }
+
+    /**
+     *  This function allows the camera to move to the user's current location when the location button is pressed
+     */
+
+    private void getDeviceLocation() {
+        Log.d(TAG,"getDeviceLocation: getting the device's current location");
+        //vars
+        FusedLocationProviderClient mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(getActivity());
+
+        try {
+            if(mLocationPermissionsGranted && mGPSPermissionsGranted) {
+                Task location = mFusedLocationProviderClient.getLastLocation();
+                location.addOnCompleteListener(new OnCompleteListener() {
+                    @Override
+                    public void onComplete(@NonNull Task task) {
+                        if(task.isSuccessful())   {
+                            Log.d(TAG,"onComplete: found location");
+                            Location currentLocation = (Location) task.getResult();
+
+                            moveCamera(new LatLng(currentLocation.getLatitude(),currentLocation.getLongitude()),DEFAULT_ZOOM);
+
+                        }
+                        else {
+                            Log.d(TAG,"onComplete: current location is null");
+                            Toast.makeText(getActivity(), "Unable to get location", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+            }
+        }
+        catch (SecurityException e) {
+            Log.e(TAG, "getDeviceLocation: SecurityException: " + e.getMessage());
+        }
+    }
+
+    /**
+     *  This function handles all the camera movement when called
+     * @param latLng where you want the camera to update to
+     * @param zoom level of zoom (DEFAULT_ZOOM is 16)
+     */
+
+    private void moveCamera(LatLng latLng, float zoom) {
+        Log.d(TAG,"moveCamera: moving camera to: lat:" + latLng.latitude + ", lng: " + latLng.longitude);
+
+        CameraUpdate location = CameraUpdateFactory.newLatLngZoom(latLng,DEFAULT_ZOOM);
+        mMap.animateCamera(location);
+
+    }
+
+    //____________________________________ PERMISSIONS ______________________________________
+
+    /**
+     * This function asks the user to allow OUR APP to get location permissions
+     */
+
+    private void getLocationPermissions() {
+        Log.d(TAG,"getLocationPermissions: getting the APP's location permissions");
+        String[] permissions = {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION};
+
+        if (ContextCompat.checkSelfPermission(getActivity(), FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            if (ContextCompat.checkSelfPermission(getActivity(), COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                mLocationPermissionsGranted = true;
+                Log.d(TAG,"getLocationPermissions: Location permissions granted");
+
+            } else {
+                ActivityCompat.requestPermissions(getActivity(), permissions, LOCATION_PERMISSION_REQUEST_CODE);
+            }
+        }
+        else {
+            ActivityCompat.requestPermissions(getActivity(), permissions, LOCATION_PERMISSION_REQUEST_CODE);
+        }
+
+    }
+
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        mLocationPermissionsGranted = false;
+
+        switch (requestCode) {
+            case LOCATION_PERMISSION_REQUEST_CODE: {
+                if (grantResults.length > 0) {
+                    for (int i = 0; i < grantResults.length; i++) {
+                        if (grantResults[i] != PackageManager.PERMISSION_GRANTED) {
+                            mLocationPermissionsGranted = false;
+                            Log.d(TAG,"onRequestPermissionsResult: do we have permissions? " +mLocationPermissionsGranted.toString());
+                            Toast.makeText(getActivity(), "Please allow us to use your location",Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+                        mLocationPermissionsGranted = true;
+                        onMapReady(mMap);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * This function asks the user for location permission before map usage. (for current location)
+     */
+
+    public void getGPS() {
+        Log.d(TAG,"askLocationPermissions: This gets the permission for GPS");
+        LocationRequest mLocationRequest = new LocationRequest();
+        mLocationRequest.setInterval(10);
+        mLocationRequest.setSmallestDisplacement(10);
+        mLocationRequest.setFastestInterval(10);
+        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        LocationSettingsRequest.Builder builder = new
+                LocationSettingsRequest.Builder();
+        builder.addLocationRequest(mLocationRequest);
+
+        Task<LocationSettingsResponse> task = LocationServices.getSettingsClient(getActivity()).checkLocationSettings(builder.build());
+
+        task.addOnCompleteListener(new OnCompleteListener<LocationSettingsResponse>() {
+            @Override
+            public void onComplete(Task<LocationSettingsResponse> task) {
+                try {
+                    LocationSettingsResponse response = task.getResult(ApiException.class);
+                    // All location settings are satisfied. The client can initialize location
+                    // requests here.
+                    mGPSPermissionsGranted = true;
+                    Log.d(TAG,"getGPSPermissions: GPS permissions granted");
+
+                } catch (ApiException exception) {
+                    switch (exception.getStatusCode()) {
+                        case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
+                            // Location settings are not satisfied. But could be fixed by showing the
+                            // user a dialog.
+                            mGPSPermissionsGranted = false;
+                            try {
+                                // Cast to a resolvable exception.
+                                ResolvableApiException resolvable = (ResolvableApiException) exception;
+                                // Show the dialog by calling startResolutionForResult(),
+                                // and check the result in onActivityResult().
+                                resolvable.startResolutionForResult(
+                                        getActivity(),
+                                        101);
+                            } catch (IntentSender.SendIntentException e) {
+                                // Ignore the error.
+                            } catch (ClassCastException e) {
+                                // Ignore, should be an impossible error.
+                            }
+                            break;
+                        case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
+                            // Location settings are not satisfied. However, we have no way to fix the
+                            // settings so we won't show the dialog.
+                            mGPSPermissionsGranted = false;
+                            break;
+                    }
+                }
+            }
+        });
     }
 }

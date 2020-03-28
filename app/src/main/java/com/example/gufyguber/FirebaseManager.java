@@ -84,6 +84,10 @@ public class FirebaseManager {
     // Tag for logging purposes
     private static final String TAG = "FirebaseManager";
 
+    // True when instrument testing
+    private boolean testMode;
+    public void setTestMode(boolean testMode) { this.testMode = testMode; }
+
     // Firestore keys
 
     // User Keys
@@ -146,9 +150,15 @@ public class FirebaseManager {
      * @param rideRequest The valid RideRequest object to store using Firebase
      */
     public void storeRideRequest(RideRequest rideRequest) {
+        // Alternative handler when in test mode
+        if (testMode) {
+            Log.e(TAG, "Cannot store ride requests on Firestore in Test Mode");
+            return;
+        }
+
         CollectionReference requestDoc = FirebaseFirestore.getInstance().collection(RIDE_REQUEST_COLLECTION);
 
-        Log.d(TAG, String.format("Storing Ride Request for user [%s]", rideRequest.getRiderUID()));
+        Log.d(TAG, String.format("Storing Ride Request:\n%s", rideRequest.toString()));
 
         HashMap<String, Object> data = new HashMap<>();
         data.put(DRIVER_KEY, rideRequest.getDriverUID());
@@ -182,6 +192,13 @@ public class FirebaseManager {
      * @param returnFunction The callback to use once we've finished retrieving a RideRequest
      */
     public void fetchRideRequest(final String riderUID, final ReturnValueListener<RideRequest> returnFunction) {
+        // Alternative handler when in test mode
+        if (testMode) {
+            Log.e(TAG, "Cannot fetch ride requests from Firestore in Test Mode.");
+            returnFunction.returnValue(null);
+            return;
+        }
+
         DocumentReference requestDoc = FirebaseFirestore.getInstance().collection(RIDE_REQUEST_COLLECTION).document(riderUID);
         requestDoc.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
@@ -227,6 +244,12 @@ public class FirebaseManager {
      * @return A ListenerRegistration object that should be used to remove the listener when no longer needed
      */
     public ListenerRegistration listenToRideRequest(final String riderUID, final RideRequestListener onChangedListener) {
+        // Alternative handler when in test mode
+        if (testMode) {
+            Log.e(TAG, "Cannot listen to Firestore in Test Mode.");
+            return null;
+        }
+
         DocumentReference requestDoc = FirebaseFirestore.getInstance().collection(RIDE_REQUEST_COLLECTION).document(riderUID);
         return requestDoc.addSnapshotListener(new EventListener<DocumentSnapshot>() {
             @Override
@@ -247,24 +270,18 @@ public class FirebaseManager {
     }
 
     /**
-     * Deletes a Ride Request record from our cloud Firestore
-     * @param riderUID The Rider UID associated with the ride request to be deleted
-     */
-    public void deleteRideRequest(final String riderUID, final ReturnValueListener<Boolean> returnFunction) {
-        DocumentReference requestDoc = FirebaseFirestore.getInstance().collection(RIDE_REQUEST_COLLECTION).document(riderUID);
-        requestDoc.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
-            @Override
-            public void onSuccess(Void aVoid) {
-                returnFunction.returnValue(Boolean.TRUE);
-            }
-        });
-    }
-    /**
      * Allows a driver to accept a ride request if it hasn't already been accepted
      * @param driverUID The UID of the driver user that is attempting to accept this ride request
      * @return True if the request acceptance succeeded, false otherwise
      */
     public void driverAcceptRideRequest(final String driverUID, final RideRequest request, final ReturnValueListener<Boolean> returnFunction) {
+        // Alternative handler when in test mode
+        if(testMode) {
+            Log.e(TAG, "Cannot accept ride requests on Firestore in Test Mode.");
+            returnFunction.returnValue(Boolean.FALSE);
+            return;
+        }
+
         fetchRideRequest(request.getRiderUID(), new ReturnValueListener<RideRequest>() {
             @Override
             public void returnValue(RideRequest value) {
@@ -283,21 +300,49 @@ public class FirebaseManager {
 
                 // Can set the driverUID to null to cancel an accepted request, otherwise mark request accepted
                 value.setDriverUID(driverUID);
-                value.setStatus(value.getDriverUID() == null ? RideRequest.Status.PENDING : RideRequest.Status.ACCEPTED);
-                if (value.getStatus() == RideRequest.Status.ACCEPTED) {
-                    value.getTimeInfo().setRequestAcceptedTime();
-                } else {
-                    value.getTimeInfo().setRequestAcceptedTime(null);
-                }
+                value.setStatus(RideRequest.Status.ACCEPTED);
+                value.getTimeInfo().setRequestAcceptedTime();
 
                 // Push the modifed request to Firebase since we've successfully claimed it
                 storeRideRequest(value);
                 OfflineCache.getReference().cacheCurrentRideRequest(value);
-
                 returnFunction.returnValue(true);
-                return;
             }
         });
+    }
+
+    /**
+     * Cancels a ride request and deletes it from Firestore
+     * @param request The ride request to cancel and delete from Firestore
+     * @param returnFunction Returns true if successful, false otherwise
+     */
+    public void riderCancelRequest(RideRequest request, final ReturnValueListener<Boolean> returnFunction) {
+        // Alternative handler when in test mode
+        if (testMode) {
+            Log.w(TAG, "Cannot properly delete ride request from Firestore in Test Mode.");
+            OfflineCache.getReference().clearCurrentRideRequest();
+            returnFunction.returnValue(true);
+            return;
+        }
+
+        Log.d(TAG, String.format("Trying to cancel and delete Ride Request:\n", request.toString()));
+        OfflineCache.getReference().clearCurrentRideRequest();
+        DocumentReference requestDoc = FirebaseFirestore.getInstance().collection(RIDE_REQUEST_COLLECTION).document(request.getRiderUID());
+        requestDoc.delete()
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Log.d(TAG, "Ride request deleted successfully.");
+                        returnFunction.returnValue(true);
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.e(TAG, "Error deleting ride request: ", e);
+                        returnFunction.returnValue(false);
+                    }
+                });
     }
 
     /**
@@ -307,14 +352,20 @@ public class FirebaseManager {
      * @param returnFunction
      */
     public void riderAcceptDriverOffer(String riderUID, RideRequest request, final ReturnValueListener<Boolean> returnFunction) {
+        // Alternative handler when in test mode
+        if (testMode) {
+            Log.e(TAG, "Cannot accept driver offers on Firestore while in Test Mode.");
+            returnFunction.returnValue(Boolean.FALSE);
+            return;
+        }
+
         fetchRideRequest(riderUID, new ReturnValueListener<RideRequest>() {
             @Override
             public void returnValue(RideRequest value) {
-                value.setStatus(value.getDriverUID() == null ? RideRequest.Status.ACCEPTED : RideRequest.Status.CONFIRMED);
+                value.setStatus(RideRequest.Status.CONFIRMED);
                 storeRideRequest(value);
                 OfflineCache.getReference().cacheCurrentRideRequest(value);
                 returnFunction.returnValue(true);
-                return;
             }
         });
     }
@@ -326,15 +377,22 @@ public class FirebaseManager {
      * @param returnFunction
      */
     public void riderDeclineDriverOffer(String riderUID, RideRequest request, final ReturnValueListener<Boolean> returnFunction) {
+        // Alternative handler when in test mode
+        if (testMode) {
+            Log.e(TAG, "Cannot decline ride offers on Firestore in Test Mode.");
+            returnFunction.returnValue(Boolean.FALSE);
+            return;
+        }
+
+        request.setDriverUID(null);
+        request.setStatus(RideRequest.Status.PENDING);
+        storeRideRequest(request);
+        OfflineCache.getReference().cacheCurrentRideRequest(request);
+
         fetchRideRequest(riderUID, new ReturnValueListener<RideRequest>() {
             @Override
             public void returnValue(RideRequest value) {
-                value.setDriverUID(null);
-                value.setStatus(value.getDriverUID() == null ? RideRequest.Status.PENDING : RideRequest.Status.ACCEPTED);
-                storeRideRequest(value);
-                OfflineCache.getReference().cacheCurrentRideRequest(value);
-                returnFunction.returnValue(true);
-                return;
+                returnFunction.returnValue(value != null && value.getStatus() == RideRequest.Status.PENDING);
             }
         });
     }
@@ -344,6 +402,13 @@ public class FirebaseManager {
      * @param returnFunction The callback to use once we've finished retrieving a Vehicle
      */
     public void fetchRideRequestsWithStatus(final RideRequest.Status status, final ReturnValueListener<ArrayList<RideRequest>> returnFunction) {
+        // Alternative handler when in test mode
+        if(testMode) {
+            Log.e(TAG, "Cannot fetch collections of ride requests from Firestore in Test Mode.");
+            returnFunction.returnValue(null);
+            return;
+        }
+
         FirebaseFirestore.getInstance().collection(RIDE_REQUEST_COLLECTION).whereEqualTo(STATUS_KEY, status.name()).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
             @Override
             public void onComplete(@NonNull Task<QuerySnapshot> task) {
@@ -368,6 +433,12 @@ public class FirebaseManager {
     }
 
     public ListenerRegistration listenToAllRideRequests(final DriverRideRequestCollectionListener onChangedListener) {
+        // Alternative handler when in test mode
+        if (testMode) {
+            Log.e(TAG, "Cannot listen to Firestore in Test Mode.");
+            return null;
+        }
+
         CollectionReference collectionReference = FirebaseFirestore.getInstance().collection(RIDE_REQUEST_COLLECTION);
         return collectionReference.addSnapshotListener(new EventListener<QuerySnapshot>() {
             @Override
@@ -393,6 +464,12 @@ public class FirebaseManager {
      * @param rider The Rider to store in our cloud Firestore
      */
     public void storeRiderInfo(Rider rider) {
+        // Alternative handler when in test mode
+        if (testMode) {
+            Log.e(TAG, "Cannot store rider info on Firestore in Test Mode.");
+            return;
+        }
+
         CollectionReference usersDoc = FirebaseFirestore.getInstance().collection(USER_COLLECTION);
 
         Log.d(TAG, "createAccount:" + rider.getUID() + " - " + rider.getEmail());
@@ -426,6 +503,12 @@ public class FirebaseManager {
      * @param returnFunction The callback to use once we've finished retrieving a Rider
      */
     public void fetchRiderInfo(final String riderUID, final ReturnValueListener<Rider> returnFunction) {
+        // Alternative handler when in test mode
+        if (testMode) {
+            Log.e(TAG, "Cannot fetch rider info from Firestore in Test Mode.");
+            returnFunction.returnValue(null);
+            return;
+        }
         DocumentReference riderDoc = FirebaseFirestore.getInstance().collection(USER_COLLECTION).document(riderUID);
         riderDoc.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
@@ -456,6 +539,12 @@ public class FirebaseManager {
      * @param riderUID The UID associated with the rider record to be deleted
      */
     public void deleteRiderInfo(final String riderUID) {
+        // Alternative handler when in test mode
+        if (testMode) {
+            Log.e(TAG, "Cannot delete rider records from Firestore in Test Mode.");
+            return;
+        }
+
         // TODO: If we delete a rider, what should we delete that's associated with them? Just their personal info?
         DocumentReference riderDoc = FirebaseFirestore.getInstance().collection(USER_COLLECTION).document(riderUID);
         riderDoc.delete();
@@ -466,6 +555,12 @@ public class FirebaseManager {
      * @param driver The Driver to store in our cloud Firestore.
      */
     public void storeDriverInfo(Driver driver) {
+        // Alternative handler when in test mode
+        if (testMode) {
+            Log.e(TAG, "Cannot store driver info on Firestore in Test Mode.");
+            return;
+        }
+
         CollectionReference usersDoc = FirebaseFirestore.getInstance().collection(USER_COLLECTION);
 
         Log.d(TAG, "createAccount:" + driver.getUID() + " - " + driver.getEmail());
@@ -499,6 +594,13 @@ public class FirebaseManager {
      * @param returnFunction The callback to use once we've finished retrieving a driver (and their vehicle)
      */
     public void fetchDriverInfo(final String driverUID, final ReturnValueListener<Driver> returnFunction) {
+        // Alternative handler when in test mode
+        if(testMode) {
+            Log.e(TAG, "Cannot fetch driver info from Firestore in Test Mode.");
+            returnFunction.returnValue(null);
+            return;
+        }
+
         DocumentReference driverDoc = FirebaseFirestore.getInstance().collection(USER_COLLECTION).document(driverUID);
         driverDoc.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
@@ -549,6 +651,12 @@ public class FirebaseManager {
      * @param driverUID The UID associated with the driver record to be deleted
      */
     public void deleteDriverInfo(final String driverUID) {
+        // Alternative handler when in test mode
+        if(testMode) {
+            Log.e(TAG, "Cannot delete driver record from Firestore in Test Mode.");
+            return;
+        }
+
         // TODO: If we delete a driver, what should we delete that's associated with them? Just their personal info?
         DocumentReference driverDoc = FirebaseFirestore.getInstance().collection(USER_COLLECTION).document(driverUID);
         driverDoc.delete();
@@ -560,6 +668,12 @@ public class FirebaseManager {
      * @param vehicle The vehicle that is being registered
      */
     public void storeVehicleInfo(String driverUID, Vehicle vehicle) {
+        // Alternative handler when in test mode
+        if (testMode) {
+            Log.e(TAG, "Cannot store vehicle info on Firestore in Test Mode.");
+            return;
+        }
+
         CollectionReference vehicles = FirebaseFirestore.getInstance().collection(VEHICLE_COLLECTION);
         HashMap<String, Object> vehicleData = new HashMap<>();
 
@@ -590,7 +704,14 @@ public class FirebaseManager {
      */
     public void fetchVehicleInfo(final String driverUID, final ReturnValueListener<Vehicle> returnFunction) {
         //TODO: Decide what constitutes a key for getting vehicle info if drivers have > 1 vehicle
-        //TODO: Fetch information about a vehicle
+
+        // Alternative handler when in test mode
+        if (testMode) {
+            Log.e(TAG, "Cannot fetch vehicle record from Firestore while in Test Mode.");
+            returnFunction.returnValue(null);
+            return;
+        }
+
         DocumentReference vehicleDoc = FirebaseFirestore.getInstance().collection(VEHICLE_COLLECTION).document(driverUID);
         vehicleDoc.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
@@ -679,6 +800,14 @@ public class FirebaseManager {
      */
     public void isUserDriver(final String userUID, final ReturnValueListener<Boolean> returnFunction) {
         //TODO: Replace with something better
+
+        // Alternative handler when in test mode
+        if (testMode) {
+            Log.e(TAG, "Cannot use Firestore to determine whether or not a user is a driver in Test Mode.");
+            returnFunction.returnValue(Boolean.FALSE);
+            return;
+        }
+
         DocumentReference userDoc = FirebaseFirestore.getInstance().collection(USER_COLLECTION).document(userUID);
         userDoc.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
@@ -704,6 +833,12 @@ public class FirebaseManager {
      * @param driverUID The UID associated with the driver who owns the vehicle
      */
     public void deleteVehicleInfo(final String driverUID) {
+        // Alternative handler when in test mode
+        if (testMode) {
+            Log.e(TAG, "Cannot delete a vehicle record from Firestore in Test Mode.");
+            return;
+        }
+
         DocumentReference vehicleDoc = FirebaseFirestore.getInstance().collection(VEHICLE_COLLECTION).document(driverUID);
         vehicleDoc.delete();
     }
@@ -723,6 +858,12 @@ public class FirebaseManager {
      * @param returnFunction Asynchronously returns true if the user exists in our cloud Firestore, false otherwise
      */
     public void checkUser(String UID, final ReturnValueListener<Boolean> returnFunction) {
+        // Alternative handler when in test mode
+        if (testMode) {
+            Log.e(TAG, "Cannot check Firestore for the presence of a user record in Test Mode.");
+            returnFunction.returnValue(Boolean.FALSE);
+            return;
+        }
 
         final DocumentReference userDoc = FirebaseFirestore.getInstance().collection("users").document(UID);
         userDoc.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
@@ -749,10 +890,23 @@ public class FirebaseManager {
      *
      * @param request
      */
-    public void confirmPickup(RideRequest request) {
+    public void confirmPickup(RideRequest request, final ReturnValueListener<Boolean> returnFunction) {
+        // Alternative handler when in test mode
+        if (testMode) {
+            Log.e(TAG, "Cannot confirm pickup on Firestore in Test Mode.");
+            returnFunction.returnValue(Boolean.FALSE);
+            return;
+        }
+
         request.setStatus(RideRequest.Status.EN_ROUTE);
         storeRideRequest(request);
         OfflineCache.getReference().cacheCurrentRideRequest(request);
+        fetchRideRequest(request.getRiderUID(), new ReturnValueListener<RideRequest>() {
+            @Override
+            public void returnValue(RideRequest value) {
+                returnFunction.returnValue(value != null && value.getStatus() == RideRequest.Status.EN_ROUTE);
+            }
+        });
     }
 
     /**
@@ -760,31 +914,39 @@ public class FirebaseManager {
      * @param request
      */
     public void confirmArrival(RideRequest request, final ReturnValueListener<Boolean> returnFunction) {
+        // Alternative handler when in test mode
+        if (testMode) {
+            Log.e(TAG, "Cannot confirm arrival on Firestore in Test Mode.");
+            returnFunction.returnValue(Boolean.FALSE);
+            return;
+        }
+
         request.setStatus(RideRequest.Status.ARRIVED);
         storeRideRequest(request);
+        OfflineCache.getReference().cacheCurrentRideRequest(request);
         fetchRideRequest(request.getRiderUID(), new ReturnValueListener<RideRequest>() {
             @Override
             public void returnValue(RideRequest value) {
-                if(value.getStatus().toString().equals("Arrived")) {
-                    returnFunction.returnValue(Boolean.TRUE);
-                } else {
-                    returnFunction.returnValue(Boolean.FALSE);
-                }
+                returnFunction.returnValue(value != null && value.getStatus() == RideRequest.Status.ARRIVED);
             }
         });
     }
 
-    public void completeRide(RideRequest request, final ReturnValueListener<RideRequest> returnFunction) {
+    public void completeRide(RideRequest request, final ReturnValueListener<Boolean> returnFunction) {
+        // Alternative handler when in test mode
+        if (testMode) {
+            Log.e(TAG, "Cannot complete rides on Firestore in Test Mode.");
+            returnFunction.returnValue(Boolean.FALSE);
+            return;
+        }
+
         request.setStatus(RideRequest.Status.COMPLETED);
         storeRideRequest(request);
         fetchRideRequest(request.getRiderUID(), new ReturnValueListener<RideRequest>() {
             @Override
             public void returnValue(RideRequest value) {
-                if(value.getStatus().toString().equals("Completed")) {
-                    returnFunction.returnValue(value);
-                } else {
-                    returnFunction.returnValue(null);
-                }
+                // If this is null or complete, we've done our part
+                returnFunction.returnValue(value == null || value.getStatus() == RideRequest.Status.COMPLETED);
             }
         });
     }
