@@ -35,6 +35,7 @@ import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.test.espresso.action.ViewActions;
 
 import com.example.gufyguber.CreateRideRequestFragment;
 import com.example.gufyguber.DirectionsManager;
@@ -108,7 +109,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
     private Button arrived_fab;
     private TextView offlineText;
     private Timer offlineTestTimer;
+    // Quick reference for the user type we're dealing with
     private boolean isDriver;
+    // Tracks the connectivity status to handle returning from being offline
+    private boolean wasOffline;
 
     private ListenerRegistration rideRequestListener;
     private ListenerRegistration allRideRequestListener;
@@ -425,11 +429,18 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
                         @Override
                         public void run() {
                             boolean isOnline = FirebaseManager.getReference().isOnline(getContext());
-//                            fab.setVisibility(isOnline ? View.VISIBLE : View.GONE);
+
+                            // Handle things that need to be dealt with now that we're online again
+                            if (wasOffline && isOnline) {
+                                updateNavLine();
+                            }
+
                             offlineText.setVisibility(isOnline ? View.GONE : View.VISIBLE);
                             if (OfflineCache.getReference().retrieveCurrentRideRequest() == null && requestDialog == null) {
                                 onRideRequestUpdated(null);
                             }
+
+                            wasOffline = !isOnline;
                         }
                     });
                 }
@@ -528,8 +539,16 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
                         @Override
                         public void run() {
                             boolean isOnline = FirebaseManager.getReference().isOnline(getContext());
+
+                            // Handle things that need to be dealt with now that we're online again
+                            if (wasOffline && isOnline) {
+                                updateNavLine();
+                            }
+
                             offlineText.setVisibility(isOnline ? View.GONE : View.VISIBLE);
                             validateCallbacks();
+
+                            wasOffline = !isOnline;
                         }
                     });
                 }
