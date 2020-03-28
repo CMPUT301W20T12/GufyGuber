@@ -21,38 +21,44 @@
   ~ Version
   -->
 
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
-    android:layout_height="match_parent">
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent" android:layout_height="match_parent">
 
     <TextView
+        android:id="@+id/rateDriver"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="206dp"
+        android:layout_marginBottom="32dp"
         android:text="Rate your driver! "
-        android:textSize="25dp"/>
+        android:textSize="25dp"
+        app:layout_constraintBottom_toTopOf="@+id/upp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true" >
+    <ImageButton
+        android:id="@+id/upp"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:layout_marginStart="50dp"
+        android:src="@drawable/ic_thumb_up_black_24dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
-        <ImageButton
-            android:layout_width="150dp"
-            android:layout_height="150dp"
-            android:id="@+id/upp"
-            android:src="@drawable/ic_thumb_up_black_24dp"/>
+    <ImageButton
+        android:id="@+id/down"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:layout_marginEnd="50dp"
+        android:src="@drawable/ic_thumb_down_black_24dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/upp"
+        app:layout_constraintTop_toTopOf="parent" />
 
-        <ImageButton
-            android:layout_width="150dp"
-            android:layout_height="150dp"
-            android:id="@+id/down"
-            android:src="@drawable/ic_thumb_down_black_24dp"/>
-
-    </LinearLayout>
-
-</RelativeLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>
