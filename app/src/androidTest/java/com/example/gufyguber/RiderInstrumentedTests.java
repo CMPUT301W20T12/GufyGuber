@@ -293,12 +293,12 @@ public class RiderInstrumentedTests {
         onView(withId(R.id.cancel_ride_yes_btn))
                 .perform(click());
 
-        onView(isRoot()).perform(waitFor(1000));
+        onView(isRoot()).perform(waitFor(2000));
 
         onView(withId(R.id.cancelled_rider_button))
                 .perform(click());
 
-        onView(isRoot()).perform(waitFor(1000));
+        onView(isRoot()).perform(waitFor(2000));
 
         onView(withId(R.id.request_fab))
                 .perform(click());
