@@ -61,7 +61,7 @@ public class DriverAcceptFragment extends DialogFragment {
         driverName.setText(String.format("%s %s", fName, lName));
         positiveRating = view.findViewById(R.id.driver_rating_pos);
         positiveRating.setText(positive);
-        negativeRating = view.findViewById(R.id.contact_rating_neg);
+        negativeRating = view.findViewById(R.id.driver_rating_neg);
         negativeRating.setText(negative);
 
         accept = view.findViewById(R.id.accept_driver);
