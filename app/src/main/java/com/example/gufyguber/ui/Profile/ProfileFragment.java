@@ -54,6 +54,7 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.squareup.picasso.Picasso;
 
@@ -83,6 +84,8 @@ public class ProfileFragment extends Fragment {
     private ImageView profilePicture;
     private TextView positive;
     private TextView negative;
+    private int numPositive;
+    private int numNegative;
 
     // simple boolean to check if the user is a driver or rider so we know
     private boolean driver;
@@ -187,11 +190,13 @@ public class ProfileFragment extends Fragment {
                         Driver updatedDriver = new Driver(OfflineCache.getReference().retrieveCurrentUser().getUID(),
                                 userEmail, userFirstName, userLastName, userPhone,
                                 new Vehicle(modelText.getText().toString(), makeText.getText().toString(),
-                                        plateText.getText().toString(), Integer.parseInt(seatText.getText().toString())));
+                                        plateText.getText().toString(), Integer.parseInt(seatText.getText().toString())),
+                                new Rating(numPositive, numNegative));
 
                         OfflineCache.getReference().cacheCurrentUser(updatedDriver);
                         FirebaseManager.getReference().storeDriverInfo(updatedDriver);
                         FirebaseManager.getReference().storeVehicleInfo(updatedDriver.getUID(), updatedDriver.getVehicle());
+                        FirebaseManager.getReference().storeRatingInfo(updatedDriver.getUID(), updatedDriver.getRating());
 
                         // update the authentication email for the firebase project
                         if (FirebaseAuth.getInstance() != null && FirebaseAuth.getInstance().getCurrentUser() != null) {
@@ -315,6 +320,13 @@ public class ProfileFragment extends Fragment {
                 modelText.setText(vehicle.getModel());
                 plateText.setText(vehicle.getPlateNumber());
                 seatText.setText(String.valueOf(vehicle.getSeatNumber()));
+
+                Rating rating = ((Driver)user).getRating();
+                positive.setText(rating.getPosPercent(rating.getPositive(), rating.getNegative()));
+                negative.setText(rating.getNegPercent(rating.getPositive(), rating.getNegative()));
+
+                numPositive = rating.getPositive();
+                numNegative = rating.getNegative();
             }
         } else {
             Log.e(TAG, "Null rider passed to Profile Fragment.");
