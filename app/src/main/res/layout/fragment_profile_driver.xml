@@ -87,6 +87,8 @@
                         android:layout_weight="1"
                         android:enabled="false"
                         android:textColor="#000"
+                        android:paddingHorizontal="15dp"
+
                         android:text="First Name"
                         android:autoSizeMinTextSize="12sp"
                         android:autoSizeMaxTextSize="30sp"/>
@@ -102,6 +104,7 @@
                         android:enabled="false"
                         android:textColor="#000"
                         android:text="Last Name"
+                        android:paddingHorizontal="15dp"
                         android:autoSizeMinTextSize="12sp"
                         android:autoSizeMaxTextSize="30sp"/>
                         <!--android:maxLines="1"
@@ -130,6 +133,7 @@
                         android:layout_height="wrap_content"
                         android:enabled="false"
                         android:textColor="#000"
+                        android:paddingHorizontal="15dp"
                         android:text="Phone Number"
                         android:autoSizeMinTextSize="12sp"
                         android:autoSizeMaxTextSize="30sp"
