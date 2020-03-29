@@ -30,33 +30,20 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-            <!--    <TextView-->
-            <!--        android:id="@+id/text_profile"-->
-            <!--        android:layout_width="match_parent"-->
-            <!--        android:layout_height="wrap_content"-->
-            <!--        android:layout_marginStart="8dp"-->
-            <!--        android:layout_marginTop="8dp"-->
-            <!--        android:layout_marginEnd="8dp"-->
-            <!--        android:textAlignment="center"-->
-            <!--        android:textSize="20sp"-->
-            <!--        app:layout_constraintEnd_toEndOf="parent"-->
-            <!--        app:layout_constraintStart_toStartOf="parent"-->
-            <!--        app:layout_constraintTop_toTopOf="parent" >-->
-            <!--    </TextView>-->
-
             <LinearLayout
                 android:id="@+id/linearLayout"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:orientation="vertical">
 
-                <ImageView
+                <de.hdodenhof.circleimageview.CircleImageView
                     android:id="@+id/user_image"
-                    android:layout_width="138dp"
-                    android:layout_height="119dp"
-                    android:layout_gravity="center"
-                    android:layout_margin="20sp"
-                    android:src="@drawable/ic_menu_profile" />
+                    android:layout_width="136dp"
+                    android:layout_height="136dp"
+                    android:layout_marginTop="15dp"
+                    android:src="@drawable/ic_menu_profile"
+                    android:layout_gravity="center_horizontal"/>
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -86,11 +73,12 @@
                     android:orientation="horizontal">
 
                     <TextView
-                        android:layout_width="0dp"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
+                        android:layout_marginEnd="60dp"
                         android:text="Name"
-                        android:textSize="20sp" />
+                        android:textSize="20sp"
+                        android:textStyle="bold"/>
 
                     <EditText
                         android:id="@+id/user_first_name"
@@ -99,6 +87,8 @@
                         android:layout_weight="1"
                         android:enabled="false"
                         android:textColor="#000"
+                        android:paddingHorizontal="15dp"
+
                         android:text="First Name"
                         android:autoSizeMinTextSize="12sp"
                         android:autoSizeMaxTextSize="30sp"/>
@@ -114,6 +104,7 @@
                         android:enabled="false"
                         android:textColor="#000"
                         android:text="Last Name"
+                        android:paddingHorizontal="15dp"
                         android:autoSizeMinTextSize="12sp"
                         android:autoSizeMaxTextSize="30sp"/>
                         <!--android:maxLines="1"
@@ -129,19 +120,20 @@
                     android:orientation="horizontal">
 
                     <TextView
-                        android:layout_width="0dp"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
+                        android:layout_marginEnd="60dp"
                         android:text="Phone"
-                        android:textSize="20sp" />
+                        android:textSize="20sp"
+                        android:textStyle="bold"/>
 
                     <EditText
                         android:id="@+id/rider_phone"
-                        android:layout_width="0dp"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_weight="2"
                         android:enabled="false"
                         android:textColor="#000"
+                        android:paddingHorizontal="15dp"
                         android:text="Phone Number"
                         android:autoSizeMinTextSize="12sp"
                         android:autoSizeMaxTextSize="30sp"
@@ -170,7 +162,7 @@
                     android:id="@+id/edit_make_model"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_margin="25dp"
+                    android:layout_marginHorizontal="25dp"
                     android:orientation="horizontal">
 
                     <TextView
@@ -178,6 +170,7 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:text="Make"
+                        android:textStyle="bold"
                         android:textSize="20sp" />
 
                     <EditText
@@ -196,6 +189,7 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:text="Model"
+                        android:textStyle="bold"
                         android:textSize="20sp" />
 
                     <EditText
@@ -224,6 +218,8 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:text="Plate"
+                        android:textStyle="bold"
+
                         android:textSize="20sp" />
 
                     <EditText
@@ -242,6 +238,7 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:text="Seats"
+                        android:textStyle="bold"
                         android:textSize="20sp" />
 
                     <EditText
@@ -265,16 +262,6 @@
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>
-    <RelativeLayout
-        android:layout_width="fill_parent"
-        android:layout_height="100dp"
-        android:layout_weight="1"
-        android:background="@color/colorPrimaryDark"
-        app:layout_constraintTop_toTopOf="parent"
-        android:paddingLeft="16dp"
-        android:paddingRight="16dp"
-        android:layout_gravity="bottom">
-
         <Button
             android:id="@+id/edit_profile_button"
             android:layout_width="match_parent"
@@ -282,7 +269,8 @@
             android:layout_centerInParent="true"
             android:text="@string/edit_profile"
             android:textAllCaps="false"
-            android:theme="@style/ThemeOverlay.LightButton" />
+            android:theme="@style/ThemeOverlay.LightButton"
+            android:layout_margin="15dp"/>
 
         <Button
             android:id="@+id/save_profile_button"
@@ -292,6 +280,6 @@
             android:text="@string/save_profile"
             android:textAllCaps="false"
             android:visibility="gone"
-            android:theme="@style/ThemeOverlay.LightButton" />
-    </RelativeLayout>
+            android:theme="@style/ThemeOverlay.LightButton"
+            android:layout_margin="15dp"/>
 </LinearLayout>
