@@ -49,17 +49,33 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textView6" />
 
+
     <TextView
-        android:id="@+id/driver_rating"
+        android:id="@+id/driver_rating_pos"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:drawableLeft="@android:drawable/arrow_up_float"
-        android:text="XX"
+        android:text="xx"
         android:textSize="20sp"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.415"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/driver_offer" />
+
+    <TextView
+        android:id="@+id/driver_rating_neg"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:drawableLeft="@android:drawable/arrow_down_float"
+        android:text="xx"
+        android:textSize="20sp"
+        app:layout_constraintBaseline_toBaselineOf="@+id/driver_rating_pos"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.563"
+        app:layout_constraintLeft_toRightOf="@+id/driver_rating_pos"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <Button
         android:id="@+id/decline_driver"
@@ -73,7 +89,7 @@
         android:text="Decline"
         app:layout_constraintEnd_toStartOf="@+id/accept_driver"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/driver_rating"
+        app:layout_constraintTop_toBottomOf="@+id/driver_rating_pos"
         android:theme="@style/ThemeOverlay.LightButton"/>
 
     <Button

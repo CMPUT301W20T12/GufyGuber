@@ -27,6 +27,8 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -111,7 +113,8 @@ public class GenerateQR extends AppCompatActivity implements FirebaseManager.Rid
     @Override
     public void onRideRequestUpdated(RideRequest updatedRequest) {
         if(updatedRequest != null && updatedRequest.getStatus() == RideRequest.Status.COMPLETED){
-            onBackPressed();
+            Intent rateDriver = new Intent(getApplicationContext(), RateDriver.class);
+            startActivity(rateDriver);
         }
     }
 
