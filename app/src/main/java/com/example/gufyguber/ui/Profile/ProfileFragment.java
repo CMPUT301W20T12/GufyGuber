@@ -14,6 +14,7 @@
 package com.example.gufyguber.ui.Profile;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.telephony.PhoneNumberFormattingTextWatcher;
@@ -42,6 +43,7 @@ import com.example.gufyguber.GlobalDoubleClickHandler;
 import com.example.gufyguber.NavigationActivity;
 import com.example.gufyguber.OfflineCache;
 import com.example.gufyguber.R;
+import com.example.gufyguber.Rating;
 import com.example.gufyguber.Rider;
 import com.example.gufyguber.SignInActivity;
 import com.example.gufyguber.User;
@@ -49,13 +51,20 @@ import com.example.gufyguber.Vehicle;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldValue;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Transformation;
 
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
+
+import de.hdodenhof.circleimageview.CircleImageView;
 
 import static android.telephony.PhoneNumberUtils.formatNumber;
 
@@ -76,7 +85,12 @@ public class ProfileFragment extends Fragment {
     private TextView seatText;
     private Button editProfile;
     private Button saveProfile;
-    private ImageView profilePicture;
+    private CircleImageView profilePicture;
+    private TextView positive;
+    private TextView negative;
+    private int numPositive;
+    private int numNegative;
+
     // simple boolean to check if the user is a driver or rider so we know
     private boolean driver;
 
@@ -109,27 +123,33 @@ public class ProfileFragment extends Fragment {
         editProfile = view.findViewById(R.id.edit_profile_button);
         saveProfile = view.findViewById(R.id.save_profile_button);
         profilePicture = view.findViewById(R.id.user_image);
+        positive = view.findViewById(R.id.positive);
+        negative = view.findViewById(R.id.negative);
 
         // Use cached info or firebase manager to get the user profile info to auto pop the fields
         User user = OfflineCache.getReference().retrieveCurrentUser();
         if (user != null) {
             populateForm(user);
+        }
+
+        // Re-populate the fields after a query to make sure the driver rating is up-to-date
+        // Could replace with a proper Firestore listener if we have time
+        if (driver) {
+            FirebaseManager.getReference().fetchDriverInfo(FirebaseAuth.getInstance().getCurrentUser().getUid(), new FirebaseManager.ReturnValueListener<Driver>() {
+                @Override
+                public void returnValue(Driver value) {
+                    OfflineCache.getReference().cacheCurrentUser(value);
+                    populateForm(value);
+                }
+            });
         } else {
-            if (driver) {
-                FirebaseManager.getReference().fetchDriverInfo(FirebaseAuth.getInstance().getCurrentUser().getUid(), new FirebaseManager.ReturnValueListener<Driver>() {
-                    @Override
-                    public void returnValue(Driver value) {
-                        populateForm(value);
-                    }
-                });
-            } else {
-                FirebaseManager.getReference().fetchRiderInfo(FirebaseAuth.getInstance().getCurrentUser().getUid(), new FirebaseManager.ReturnValueListener<Rider>() {
-                    @Override
-                    public void returnValue(Rider value) {
-                        populateForm(value);
-                    }
-                });
-            }
+            FirebaseManager.getReference().fetchRiderInfo(FirebaseAuth.getInstance().getCurrentUser().getUid(), new FirebaseManager.ReturnValueListener<Rider>() {
+                @Override
+                public void returnValue(Rider value) {
+                    OfflineCache.getReference().cacheCurrentUser(value);
+                    populateForm(value);
+                }
+            });
         }
 
         editProfile.setOnClickListener(new View.OnClickListener() {
@@ -178,11 +198,13 @@ public class ProfileFragment extends Fragment {
                         Driver updatedDriver = new Driver(OfflineCache.getReference().retrieveCurrentUser().getUID(),
                                 userEmail, userFirstName, userLastName, userPhone,
                                 new Vehicle(modelText.getText().toString(), makeText.getText().toString(),
-                                        plateText.getText().toString(), Integer.parseInt(seatText.getText().toString())));
+                                        plateText.getText().toString(), Integer.parseInt(seatText.getText().toString())),
+                                new Rating(numPositive, numNegative));
 
                         OfflineCache.getReference().cacheCurrentUser(updatedDriver);
                         FirebaseManager.getReference().storeDriverInfo(updatedDriver);
                         FirebaseManager.getReference().storeVehicleInfo(updatedDriver.getUID(), updatedDriver.getVehicle());
+                        FirebaseManager.getReference().storeRatingInfo(updatedDriver.getUID(), updatedDriver.getRating());
 
                         // update the authentication email for the firebase project
                         if (FirebaseAuth.getInstance() != null && FirebaseAuth.getInstance().getCurrentUser() != null) {
@@ -286,6 +308,7 @@ public class ProfileFragment extends Fragment {
      * @param user The user information to use to populate the form
      */
     private void populateForm(User user) {
+
         // Retrieve google sign in profile photo and use Picasso to set the image.
         GoogleSignInAccount acct = GoogleSignIn.getLastSignedInAccount(getActivity());
         if (acct != null) {
@@ -306,6 +329,13 @@ public class ProfileFragment extends Fragment {
                 modelText.setText(vehicle.getModel());
                 plateText.setText(vehicle.getPlateNumber());
                 seatText.setText(String.valueOf(vehicle.getSeatNumber()));
+
+                Rating rating = ((Driver)user).getRating();
+                positive.setText(rating.getPosPercent(rating.getPositive(), rating.getNegative()));
+                negative.setText(rating.getNegPercent(rating.getPositive(), rating.getNegative()));
+
+                numPositive = rating.getPositive();
+                numNegative = rating.getNegative();
             }
         } else {
             Log.e(TAG, "Null rider passed to Profile Fragment.");

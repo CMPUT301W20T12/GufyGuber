@@ -68,6 +68,7 @@ public class RegisterUserActivity extends AppCompatActivity {
     private Button register;
     private User newUser;
     private Vehicle newVehicle;
+    private Rating newRating;
     private String UID;
     private Boolean regComplete;
 
@@ -127,14 +128,16 @@ public class RegisterUserActivity extends AppCompatActivity {
                                     make.getText().toString(),
                                     plateNumber.getText().toString(),
                                     Integer.parseInt(seatNumber.getText().toString()));
+                            newRating = new Rating(0,0);
                             newUser = new Driver(UID, email.getText().toString().toLowerCase(),
                                     firstName.getText().toString(),
                                     lastName.getText().toString(),
                                     phoneNumber.getText().toString(),
-                                    newVehicle);
+                                    newVehicle, newRating);
                             // use firebase manager to store new driver and vehicle info
                             FirebaseManager.getReference().storeDriverInfo((Driver) newUser);
                             FirebaseManager.getReference().storeVehicleInfo(newUser.getUID(), newVehicle);
+			                FirebaseManager.getReference().storeRatingInfo(newUser.getUID(), newRating);
                             regComplete = true;
                             backToSignin();
                     }

@@ -149,7 +149,8 @@ public class NavigationActivity extends AppCompatActivity implements RideRequest
                                 Bundle bundle = new Bundle();
                                 bundle.putString("first_name", value.getFirstName());
                                 bundle.putString("last_name", value.getLastName());
-                                bundle.putString("rating", "99"); //TODO: get driver rating
+                                bundle.putString("positive", value.getRating().getPosPercent(value.getRating().getPositive(), value.getRating().getNegative()));
+                                bundle.putString("negative", value.getRating().getNegPercent(value.getRating().getPositive(), value.getRating().getNegative()));
                                 DriverAcceptFragment acceptFragment = new DriverAcceptFragment();
                                 acceptFragment.setArguments(bundle);
                                 acceptFragment.show(getSupportFragmentManager(), "DRIVER_OFFER");

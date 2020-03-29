@@ -79,6 +79,10 @@
             android:theme="@style/AppTheme"
             android:noHistory="true"
             android:parentActivityName=".startScanQR"/>
+        <activity android:name=".RateDriver"
+            android:label="Rate Driver"
+            android:theme="@style/AppTheme"
+            android:parentActivityName=".GenerateQR"/>
     </application>
 
 </manifest>

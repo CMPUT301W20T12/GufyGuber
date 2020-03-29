@@ -113,12 +113,44 @@ public class FirebaseManagerTests {
         });
     }
 
+    @Ignore("Unable to test Firestone right now.")
+    @Test
+    public void testRating() {
+        String testDriverUID = "testDriver";
+        final Rating testRating = new Rating(8, 8);
+
+        FirebaseManager.getReference().fetchRatingInfo(testDriverUID, new FirebaseManager.ReturnValueListener<Rating>() {
+            @Override
+            public void returnValue(Rating value) {
+                assertNull(value);
+            }
+        });
+
+        FirebaseManager.getReference().storeRatingInfo(testDriverUID, testRating);
+        FirebaseManager.getReference().fetchRatingInfo(testDriverUID, new FirebaseManager.ReturnValueListener<Rating>() {
+            @Override
+            public void returnValue(Rating value) {
+                assertEquals(value.getPositive(), testRating.getPositive());
+                assertEquals(value.getNegative(), testRating.getNegative());
+            }
+        });
+
+        FirebaseManager.getReference().deleteRatingInfo(testDriverUID);
+        FirebaseManager.getReference().fetchRatingInfo(testDriverUID, new FirebaseManager.ReturnValueListener<Rating>() {
+            @Override
+            public void returnValue(Rating value) {
+                assertNull(value);
+            }
+        });
+    }
+
     @Ignore("Unable to test Firestore right now.")
     @Test
     public void testDriver() {
         final Vehicle testVehicle = new Vehicle("testModel", "testMake", "testPlate", 3);
+        final Rating testRating = new Rating(8, 8);
         final Driver testDriver = new Driver("testDriverUID", "testEmail@test.com",
-                "testFirstName", "testLastName", "(098)765-4321", testVehicle);
+                "testFirstName", "testLastName", "(098)765-4321", testVehicle, testRating);
 
         FirebaseManager.getReference().fetchDriverInfo(testDriver.getUID(), new FirebaseManager.ReturnValueListener<Driver>() {
             @Override

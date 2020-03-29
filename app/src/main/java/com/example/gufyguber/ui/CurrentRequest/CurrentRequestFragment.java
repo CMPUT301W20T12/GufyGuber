@@ -45,6 +45,10 @@ import com.example.gufyguber.ui.Profile.RiderContactInformationFragment;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.ListenerRegistration;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+
 /**
  * Displays ride request information for a rider's current open request
  * @author Nahome
@@ -59,8 +63,6 @@ public class CurrentRequestFragment extends Fragment implements FirebaseManager.
     private Button takePayment;
     private Button driverContactBtn;
     private Button riderContactBtn;
-
-
     private TextView driverText;
     private TextView riderText;
     private TextView pickupTimeText;
@@ -70,7 +72,7 @@ public class CurrentRequestFragment extends Fragment implements FirebaseManager.
     private TextView suggestedFareText;
     private TextView rideStatus;
     private ListenerRegistration rideRequestListener;
-
+    private SimpleDateFormat formatter;
     private boolean isDriver;
 
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -144,13 +146,15 @@ public class CurrentRequestFragment extends Fragment implements FirebaseManager.
             });
             pickupLocationText.setText(LocationInfo.latlngToString(request.getLocationInfo().getPickup()));
             dropoffLocationText.setText(LocationInfo.latlngToString(request.getLocationInfo().getDropoff()));
+
+            formatter = new SimpleDateFormat("h:mm a, MMMM dd yyyy", Locale.CANADA);
             if (request.getTimeInfo().getRequestOpenTime() != null) {
-                pickupTimeText.setText(request.getTimeInfo().getRequestOpenTime().toString());
+                pickupTimeText.setText(formatter.format(request.getTimeInfo().getRequestOpenTime()));
             } else {
                 pickupTimeText.setText("Time Unavailable");
             }
             if (request.getTimeInfo().getRequestAcceptedTime() != null) {
-                arrivalTimeText.setText(request.getTimeInfo().getRequestAcceptedTime().toString());
+                arrivalTimeText.setText(formatter.format(request.getTimeInfo().getRequestAcceptedTime()));
             } else {
                 arrivalTimeText.setText("Time Unavailable");
             }
@@ -219,17 +223,18 @@ public class CurrentRequestFragment extends Fragment implements FirebaseManager.
             }
             pickupLocationText.setText(LocationInfo.latlngToString(request.getLocationInfo().getPickup()));
             dropoffLocationText.setText(LocationInfo.latlngToString(request.getLocationInfo().getDropoff()));
+            formatter = new SimpleDateFormat("h:mm a, MMMM dd yyyy", Locale.CANADA);
             if (request.getTimeInfo().getRequestOpenTime() != null) {
-                pickupTimeText.setText(request.getTimeInfo().getRequestOpenTime().toString());
+                pickupTimeText.setText(formatter.format(request.getTimeInfo().getRequestOpenTime()));
             } else {
                 pickupTimeText.setText("Time Unavailable");
             }
             if (request.getTimeInfo().getRequestAcceptedTime() != null) {
-                arrivalTimeText.setText(request.getTimeInfo().getRequestAcceptedTime().toString());
+                arrivalTimeText.setText(formatter.format(request.getTimeInfo().getRequestAcceptedTime()));
             } else {
                 arrivalTimeText.setText("Time Unavailable");
             }
-            rideStatus.setText(getResources().getString(R.string.request_status, request.getStatus().toString()));
+            rideStatus.setText(getResources().getString(R.string.request_status, request.getStatus()));
             suggestedFareText.setText(String.format("$%.2f", request.getOfferedFare()));
             if (request.getStatus().toString().equals("En Route")) {
                 confirmArrival.setVisibility(View.VISIBLE);
@@ -287,6 +292,8 @@ public class CurrentRequestFragment extends Fragment implements FirebaseManager.
                 bundle.putString("make", driver.getVehicle().getModel());
                 bundle.putString("model", driver.getVehicle().getMake());
                 bundle.putString("plate", driver.getVehicle().getPlateNumber());
+                bundle.putString("positive", driver.getRating().getPosPercent(driver.getRating().getPositive(), driver.getRating().getNegative()));
+                bundle.putString("negative", driver.getRating().getNegPercent(driver.getRating().getPositive(), driver.getRating().getNegative()));
                 DriverContactInformationFragment infoFragment = new DriverContactInformationFragment();
                 infoFragment.setArguments(bundle);
                 infoFragment.show(getFragmentManager(), "user_contact_information");

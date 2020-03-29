@@ -38,9 +38,11 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 
 import com.example.gufyguber.Driver;
+import com.example.gufyguber.FirebaseManager;
 import com.example.gufyguber.GlobalDoubleClickHandler;
 import com.example.gufyguber.OfflineCache;
 import com.example.gufyguber.R;
+import com.example.gufyguber.Rating;
 
 
 //https://developer.android.com/guide/components/intents-common#Phone
@@ -59,11 +61,15 @@ public class DriverContactInformationFragment extends DialogFragment {
     private TextView contactMake;
     private TextView contactModel;
     private TextView contactPlate;
+    private TextView contactRatePos;
+    private TextView contactRateNeg;
     private String email;
     private String phoneNumber;
     private String make;
     private String model;
     private String plate;
+    private String positive;
+    private String negative;
 
     @NonNull
     @Override
@@ -76,16 +82,23 @@ public class DriverContactInformationFragment extends DialogFragment {
         make = bundle.getString("make");
         model = bundle.getString("model");
         plate = bundle.getString("plate");
+        positive = bundle.getString("positive");
+        negative = bundle.getString("negative");
 
         contactEmail = view.findViewById(R.id.contact_email);
         contactPhone = view.findViewById(R.id.contact_phone);
         contactMake = view.findViewById(R.id.contact_make);
         contactModel = view.findViewById(R.id.contact_model);
         contactPlate = view.findViewById(R.id.contact_plate);
+        contactRatePos = view.findViewById(R.id.contact_rating_pos);
+        contactRateNeg = view.findViewById(R.id.contact_rating_neg);
 
         contactMake.setText(make);
         contactModel.setText(model);
         contactPlate.setText(plate);
+
+        contactRatePos.setText(positive);
+        contactRateNeg.setText(negative);
 
         String formattedPhone = String.format("%s-%s-%s", phoneNumber.substring(0, 3), phoneNumber.substring(3, 6), phoneNumber.substring(6, 10));
 
