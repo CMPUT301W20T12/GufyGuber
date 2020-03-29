@@ -57,7 +57,6 @@ public class GenerateQR extends AppCompatActivity implements FirebaseManager.Rid
     ImageView qrCode;
     TextView qrMessage;
     ListenerRegistration rideRequestListener;
-    Button next;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -94,16 +93,6 @@ public class GenerateQR extends AppCompatActivity implements FirebaseManager.Rid
         } catch (WriterException e) {
             e.printStackTrace();
         }
-
-        //button to begin rating driver
-        next = findViewById(R.id.next);
-        next.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent rateDriver = new Intent(getApplicationContext(), RateDriver.class);
-                startActivity(rateDriver);
-            }
-        });
     }
 
     @Override
@@ -124,7 +113,8 @@ public class GenerateQR extends AppCompatActivity implements FirebaseManager.Rid
     @Override
     public void onRideRequestUpdated(RideRequest updatedRequest) {
         if(updatedRequest != null && updatedRequest.getStatus() == RideRequest.Status.COMPLETED){
-            onBackPressed();
+            Intent rateDriver = new Intent(getApplicationContext(), RateDriver.class);
+            startActivity(rateDriver);
         }
     }
 
