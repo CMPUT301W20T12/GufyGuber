@@ -130,22 +130,26 @@ public class ProfileFragment extends Fragment {
         User user = OfflineCache.getReference().retrieveCurrentUser();
         if (user != null) {
             populateForm(user);
+        }
+
+        // Re-populate the fields after a query to make sure the driver rating is up-to-date
+        // Could replace with a proper Firestore listener if we have time
+        if (driver) {
+            FirebaseManager.getReference().fetchDriverInfo(FirebaseAuth.getInstance().getCurrentUser().getUid(), new FirebaseManager.ReturnValueListener<Driver>() {
+                @Override
+                public void returnValue(Driver value) {
+                    OfflineCache.getReference().cacheCurrentUser(value);
+                    populateForm(value);
+                }
+            });
         } else {
-            if (driver) {
-                FirebaseManager.getReference().fetchDriverInfo(FirebaseAuth.getInstance().getCurrentUser().getUid(), new FirebaseManager.ReturnValueListener<Driver>() {
-                    @Override
-                    public void returnValue(Driver value) {
-                        populateForm(value);
-                    }
-                });
-            } else {
-                FirebaseManager.getReference().fetchRiderInfo(FirebaseAuth.getInstance().getCurrentUser().getUid(), new FirebaseManager.ReturnValueListener<Rider>() {
-                    @Override
-                    public void returnValue(Rider value) {
-                        populateForm(value);
-                    }
-                });
-            }
+            FirebaseManager.getReference().fetchRiderInfo(FirebaseAuth.getInstance().getCurrentUser().getUid(), new FirebaseManager.ReturnValueListener<Rider>() {
+                @Override
+                public void returnValue(Rider value) {
+                    OfflineCache.getReference().cacheCurrentUser(value);
+                    populateForm(value);
+                }
+            });
         }
 
         editProfile.setOnClickListener(new View.OnClickListener() {
