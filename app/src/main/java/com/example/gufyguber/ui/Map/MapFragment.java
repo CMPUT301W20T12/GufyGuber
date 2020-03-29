@@ -35,6 +35,7 @@ import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.test.espresso.action.ViewActions;
 
 import com.example.gufyguber.CreateRideRequestFragment;
 import com.example.gufyguber.DirectionsManager;
@@ -64,6 +65,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
@@ -107,7 +109,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
     private Button arrived_fab;
     private TextView offlineText;
     private Timer offlineTestTimer;
+    // Quick reference for the user type we're dealing with
     private boolean isDriver;
+    // Tracks the connectivity status to handle returning from being offline
+    private boolean wasOffline;
 
     private ListenerRegistration rideRequestListener;
     private ListenerRegistration allRideRequestListener;
@@ -279,23 +284,24 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
 
                 if (requestDialog != null) {
                     boolean dirty = false;
+
                     if (requestDialog.settingStart) {
-                        requestDialog.setNewPickup(latLng);
-                        if (pickupMarker != null) {
-                            pickupMarker.remove(); // replaces old pickup marker
+                        // If we have an active request, it's confusing to show its pins while we do this
+                        if (!requestDialog.hasDropoffData()) {
+                            removeDropoffFromMap();
                         }
-                        MarkerInfo newMarker = new MarkerInfo();
-                        pickupMarker = newMarker.makeMarker("Pickup", true, latLng, mMap);
+                        requestDialog.setNewPickup(latLng);
+                        addPickupToMap(latLng);
                         dirty = true;
                     }
 
                     if (requestDialog.settingEnd) {
-                        requestDialog.setNewDropoff(latLng);
-                        if (dropoffMarker != null) {
-                            dropoffMarker.remove(); //replaces old dropoff marker
+                        // If we have an active request, it's confusing to show its pins while we do this
+                        if (!requestDialog.hasPickupData()) {
+                            removePickupFromMap();
                         }
-                        MarkerInfo newMarker = new MarkerInfo();
-                        dropoffMarker = newMarker.makeMarker("Drop Off", false, latLng, mMap);
+                        requestDialog.setNewDropoff(latLng);
+                        addDropoffToMap(latLng);
                         dirty = true;
                     }
 
@@ -423,11 +429,18 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
                         @Override
                         public void run() {
                             boolean isOnline = FirebaseManager.getReference().isOnline(getContext());
-//                            fab.setVisibility(isOnline ? View.VISIBLE : View.GONE);
+
+                            // Handle things that need to be dealt with now that we're online again
+                            if (wasOffline && isOnline) {
+                                updateNavLine();
+                            }
+
                             offlineText.setVisibility(isOnline ? View.GONE : View.VISIBLE);
                             if (OfflineCache.getReference().retrieveCurrentRideRequest() == null && requestDialog == null) {
                                 onRideRequestUpdated(null);
                             }
+
+                            wasOffline = !isOnline;
                         }
                     });
                 }
@@ -526,8 +539,16 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
                         @Override
                         public void run() {
                             boolean isOnline = FirebaseManager.getReference().isOnline(getContext());
+
+                            // Handle things that need to be dealt with now that we're online again
+                            if (wasOffline && isOnline) {
+                                updateNavLine();
+                            }
+
                             offlineText.setVisibility(isOnline ? View.GONE : View.VISIBLE);
                             validateCallbacks();
+
+                            wasOffline = !isOnline;
                         }
                     });
                 }
@@ -568,13 +589,17 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
         // If our Firestore async request finished before the map loaded, this will force a UI update
         onRideRequestUpdated(OfflineCache.getReference().retrieveCurrentRideRequest());
 
-        // Checks the user's permissions beforehand, so on start the map would automatically start at your current location
-        if(mLocationPermissionsGranted && mGPSPermissionsGranted){
+        // Use open request markers for initial map zoom
+        if (pickupMarker != null && dropoffMarker != null && mMap != null){
+            zoomFit();
+        }
+        // If no request is in progress, and permissions have been granted, use location for initial map zoom
+        else if (mLocationPermissionsGranted && mGPSPermissionsGranted) {
             mMap.setMyLocationEnabled(true);
             mMap.getUiSettings().setMyLocationButtonEnabled(false);
             getDeviceLocation();
-
         }
+        // Default Edmonton fallback for initial map zoom
         else {
             // zoom to Edmonton and move the camera on start unless Permissions granted
             LatLng edmonton = new LatLng(53.5461, -113.4938);
@@ -670,6 +695,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
         removePickupFromMap();
         pickupMarker = new MarkerInfo().makeMarker("Pickup", true, location, mMap);
         updateNavLine();
+        zoomFit();
     }
 
     private void removePickupFromMap() {
@@ -684,6 +710,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
         removeDropoffFromMap();
         dropoffMarker = new MarkerInfo().makeMarker("Drop Off", false, location, mMap);
         updateNavLine();
+        zoomFit();
     }
 
     private void removeDropoffFromMap() {
@@ -725,6 +752,28 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
         }
     }
 
+    public void zoomFit() {
+        Log.d(TAG, "zoomFit: initializing ");
+
+        if (pickupMarker == null || dropoffMarker == null || mMap == null) {
+            Log.d(TAG, "zoomFit aborted due to missing marker or map. Expected behaviour.");
+            return;
+        }
+
+        LatLngBounds.Builder builder = new LatLngBounds.Builder();
+
+        builder.include(pickupMarker.getPosition());
+        builder.include(dropoffMarker.getPosition());
+
+        LatLngBounds bounds = builder.build();
+        int width = getResources().getDisplayMetrics().widthPixels;
+
+        // i2 = padding hard coded, because anthony henday is a thing
+        CameraUpdate update = CameraUpdateFactory.newLatLngBounds(bounds, width,width, 200);
+
+        mMap.animateCamera(update);
+    }
+
     @Override
     public boolean onMarkerClick(Marker marker) {
         if (isDriver && OfflineCache.getReference().retrieveCurrentRideRequest() == null) {
@@ -759,8 +808,12 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
 
         if (isDriver && updatedValue == null) {
             mMap.clear();
-            return;
+            if (rideRequestListener != null) {
+                rideRequestListener.remove();
+                rideRequestListener = null;
             }
+            return;
+        }
 
         if (!isDriver && updatedValue == null) {
             request_fab.setVisibility(View.VISIBLE);

@@ -265,36 +265,6 @@ public class FirebaseManager {
     }
 
     /**
-     * Deletes a Ride Request record from our cloud Firestore
-     * @param riderUID The Rider UID associated with the ride request to be deleted
-     */
-    public void deleteRideRequest(final String riderUID, final ReturnValueListener<Boolean> returnFunction) {
-        // Alternative handler when in test mode
-        if (testMode) {
-            Log.e(TAG, "Cannot delete ride request from Firestore in Test Mode.");
-            returnFunction.returnValue(false);
-            return;
-        }
-
-        Log.d(TAG, String.format("Trying to delete Ride Request for [%s]", riderUID));
-        DocumentReference requestDoc = FirebaseFirestore.getInstance().collection(RIDE_REQUEST_COLLECTION).document(riderUID);
-        requestDoc.delete()
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        Log.d(TAG, "Ride request deleted successfully.");
-                        returnFunction.returnValue(true);
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.e(TAG, "Error deleting ride request: ", e);
-                        returnFunction.returnValue(false);
-                    }
-                });
-    }
-    /**
      * Allows a driver to accept a ride request if it hasn't already been accepted
      * @param driverUID The UID of the driver user that is attempting to accept this ride request
      * @return True if the request acceptance succeeded, false otherwise
@@ -334,6 +304,40 @@ public class FirebaseManager {
                 returnFunction.returnValue(true);
             }
         });
+    }
+
+    /**
+     * Cancels a ride request and deletes it from Firestore
+     * @param request The ride request to cancel and delete from Firestore
+     * @param returnFunction Returns true if successful, false otherwise
+     */
+    public void riderCancelRequest(RideRequest request, final ReturnValueListener<Boolean> returnFunction) {
+        // Alternative handler when in test mode
+        if (testMode) {
+            Log.w(TAG, "Cannot properly delete ride request from Firestore in Test Mode.");
+            OfflineCache.getReference().clearCurrentRideRequest();
+            returnFunction.returnValue(true);
+            return;
+        }
+
+        Log.d(TAG, String.format("Trying to cancel and delete Ride Request:\n", request.toString()));
+        OfflineCache.getReference().clearCurrentRideRequest();
+        DocumentReference requestDoc = FirebaseFirestore.getInstance().collection(RIDE_REQUEST_COLLECTION).document(request.getRiderUID());
+        requestDoc.delete()
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Log.d(TAG, "Ride request deleted successfully.");
+                        returnFunction.returnValue(true);
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.e(TAG, "Error deleting ride request: ", e);
+                        returnFunction.returnValue(false);
+                    }
+                });
     }
 
     /**

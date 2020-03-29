@@ -126,6 +126,7 @@ public class NavigationActivity extends AppCompatActivity implements RideRequest
             case PENDING:
                 // When a driver sees a pending request, it's because the rider has rejected them
                 if (OfflineCache.getReference().retrieveCurrentUser() instanceof Driver) {
+                    OfflineCache.getReference().clearCurrentRideRequest();
                     FirebaseManager.getReference().fetchRiderInfo(OfflineCache.getReference().retrieveCurrentRideRequest().getRiderUID(), new FirebaseManager.ReturnValueListener<Rider>() {
                         @Override
                         public void returnValue(Rider value) {
@@ -193,13 +194,10 @@ public class NavigationActivity extends AppCompatActivity implements RideRequest
                 if (OfflineCache.getReference().retrieveCurrentUser() instanceof Rider) {
                     toast.setText("Payment complete.");
                     toast.show();
-                    FirebaseManager.getReference().deleteRideRequest(OfflineCache.getReference().retrieveCurrentUser().getUID(), new FirebaseManager.ReturnValueListener<Boolean>() {
+                    FirebaseManager.getReference().riderCancelRequest(OfflineCache.getReference().retrieveCurrentRideRequest(), new FirebaseManager.ReturnValueListener<Boolean>() {
                         @Override
                         public void returnValue(Boolean value) {
                             if(value) {
-                                Log.d(TAG, "Deleted ride request.");
-                                OfflineCache.getReference().clearCurrentRideRequest();
-                            } else {
                                 Log.w(TAG, "Error deleting completed ride request.");
                             }
                         }
