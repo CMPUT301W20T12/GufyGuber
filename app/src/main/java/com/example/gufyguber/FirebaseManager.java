@@ -842,7 +842,7 @@ public class FirebaseManager {
                 if (task.isSuccessful()) {
                     DocumentSnapshot snapshot = task.getResult();
                     if (snapshot.exists()) {
-                        String transaction = snapshot.getString(TRANSACTION).toString();
+                        String transaction = snapshot.getString(TRANSACTION);
                         returnValueListener.returnValue(new Wallet(transaction));
                     }
                     else {
