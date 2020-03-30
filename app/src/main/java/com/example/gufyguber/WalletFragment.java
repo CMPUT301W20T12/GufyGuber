@@ -26,9 +26,12 @@ import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -36,6 +39,9 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import org.w3c.dom.Text;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.annotation.Nullable;
 
@@ -46,7 +52,11 @@ import javax.annotation.Nullable;
  * create an instance of this fragment.
  */
 public class WalletFragment extends Fragment {
-    private TextView transaction;
+    private ListView transactionList;
+    private ArrayList<String> transactionsDataList;
+    private ArrayAdapter<String> transactionAdapter;
+    private Wallet wallet;
+
     private String transaction_info;
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
@@ -97,22 +107,34 @@ public class WalletFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_wallet, container, false);
-    }
-
-    @Override
-    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
+        View view = inflater.inflate(R.layout.fragment_wallet, container, false);
+        transactionList = view.findViewById(R.id.transaction_list);
+        transactionsDataList = new ArrayList<>();
         FirebaseManager.getReference().fetchWalletInfo(OfflineCache.getReference().retrieveCurrentUser().getUID(), new FirebaseManager.ReturnValueListener<Wallet>() {
             @Override
             public void returnValue(Wallet value) {
                 if (value == null) {
-                    transaction.setText("Wallet Info Unavailable");
+                    Log.d("Wallet", "Error getting wallet");
                 } else {
-                    transaction.setText(value.getTransaction());
+                    Log.d("Wallet", "Retrieved wallet");
+                    wallet = new Wallet();
+                    wallet.setTransaction("Dalton owes $12");
                 }
             }
         });
+
+        if (wallet != null) {
+            Log.d("Wallet", "inflating list");
+            transactionsDataList.addAll(wallet.getTransactions());
+            transactionAdapter = new CustomList(getContext(), transactionsDataList);
+            transactionList.setAdapter(transactionAdapter);
+        }
+        return view;
+    }
+
+    @Override
+    public void onViewCreated(final View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
 
     }
 }

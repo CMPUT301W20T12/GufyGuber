@@ -37,6 +37,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.GeoPoint;
 import com.google.firebase.firestore.ListenerRegistration;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import org.w3c.dom.Document;
@@ -808,7 +809,7 @@ public class FirebaseManager {
         CollectionReference transactions = FirebaseFirestore.getInstance().collection("users");
         HashMap<String, Object> walletData = new HashMap<>();
 
-        walletData.put(TRANSACTION, wallet.getTransaction());
+        walletData.put(TRANSACTION, wallet.getTransactions().get(0));
         transactions.document(userUID).collection("transactions").document(new Date().toString())
                 .set(walletData)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
@@ -835,28 +836,45 @@ public class FirebaseManager {
      * The callback to use once we've finished retrieving a Wallet
      */
     public void fetchWalletInfo(final String userUID, final ReturnValueListener<Wallet> returnValueListener) {
-        DocumentReference walletDoc = FirebaseFirestore.getInstance().collection(TRANSACTION_COLLECTION).document(userUID);
-        walletDoc.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                if (task.isSuccessful()) {
-                    DocumentSnapshot snapshot = task.getResult();
-                    if (snapshot.exists()) {
-                        String transaction = snapshot.getString(TRANSACTION);
-                        returnValueListener.returnValue(new Wallet(transaction));
+        CollectionReference transactionCollection = FirebaseFirestore.getInstance().collection("users").document(userUID).collection("transactions");
+        transactionCollection.get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            Wallet wallet = new Wallet();
+                            for (QueryDocumentSnapshot doc : task.getResult()) {
+                                wallet.setTransaction(doc.getData().toString());
+                            }
+                            returnValueListener.returnValue(wallet);
+                        } else {
+                            Log.d(TAG, "Error getting documents: ", task.getException());
+                        }
                     }
-                    else {
-                        Log.w(TAG, String.format("Wallet for user [%s] not found on Firestore.", userUID));
-                        returnValueListener.returnValue(null);
-                    }
-                }
-                else {
-                    Log.e(TAG, "Fetching wallet failed. Issue communicating with Firestore.");
-                    returnValueListener.returnValue(null);
-                }
-            }
-        });
+                });
     }
+
+//        walletDoc.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+//            @Override
+//            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+//                if (task.isSuccessful()) {
+//                    DocumentSnapshot snapshot = task.getResult();
+//                    if (snapshot.exists()) {
+//                        String transaction = snapshot.getString(TRANSACTION);
+//                        returnValueListener.returnValue(new Wallet(transaction));
+//                    }
+//                    else {
+//                        Log.w(TAG, String.format("Wallet for user [%s] not found on Firestore.", userUID));
+//                        returnValueListener.returnValue(null);
+//                    }
+//                }
+//                else {
+//                    Log.e(TAG, "Fetching wallet failed. Issue communicating with Firestore.");
+//                    returnValueListener.returnValue(null);
+//                }
+//            }
+//        });
+//    }
 
     /**
      * Temporary function. We'll need to figure out a better solution than this.
