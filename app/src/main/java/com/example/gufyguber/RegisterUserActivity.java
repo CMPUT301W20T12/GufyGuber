@@ -37,6 +37,9 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -212,9 +215,25 @@ public class RegisterUserActivity extends AppCompatActivity {
 
     @Override
     protected void onPause() {
-        if(!regComplete)
-            mAuth.getCurrentUser().delete();
+        if(!regComplete) {
+            mAuth.signOut();
+            GoogleSignInOptions gso = new
+                    GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                    // Pass server's client ID to requestIdToken method
+                    .requestIdToken(getString(R.string.default_web_client_id))
+                    .requestEmail()
+                    .build();
+            // Build a GoogleSignInClient with the options specified by gso.
+            GoogleSignInClient signInClient = GoogleSignIn.getClient(this, gso);
+            signInClient.signOut();
+        }
         super.onPause();
+    }
+
+    @Override
+    public void onBackPressed() {
+        backToSignin();
+        super.onBackPressed();
     }
 
     private void backToSignin(){

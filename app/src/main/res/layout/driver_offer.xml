@@ -21,11 +21,20 @@
   ~ Version
   -->
 
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent" android:layout_height="match_parent">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ImageView
+        android:id="@+id/imageView3"
+        android:layout_width="20sp"
+        android:layout_height="20sp"
+        android:layout_marginStart="8dp"
+        app:layout_constraintBottom_toBottomOf="@+id/driver_rating_neg"
+        app:layout_constraintStart_toStartOf="@+id/guideline8"
+        app:srcCompat="@drawable/thumbsdown" />
 
     <TextView
         android:id="@+id/textView6"
@@ -55,27 +64,35 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:drawableLeft="@android:drawable/arrow_up_float"
+        android:layout_marginEnd="8dp"
         android:text="xx"
         android:textSize="20sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.415"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/guideline8"
         app:layout_constraintTop_toBottomOf="@+id/driver_offer" />
+
+
+    <ImageView
+        android:id="@+id/imageView2"
+        android:layout_width="20sp"
+        android:layout_height="20sp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        app:layout_constraintEnd_toStartOf="@+id/driver_rating_pos"
+        app:layout_constraintHorizontal_bias="0.993"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/driver_rating_pos"
+        app:srcCompat="@drawable/thumbsup" />
 
     <TextView
         android:id="@+id/driver_rating_neg"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:drawableLeft="@android:drawable/arrow_down_float"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="16dp"
         android:text="xx"
         android:textSize="20sp"
-        app:layout_constraintBaseline_toBaselineOf="@+id/driver_rating_pos"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.563"
-        app:layout_constraintLeft_toRightOf="@+id/driver_rating_pos"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toEndOf="@+id/imageView3"
+        app:layout_constraintTop_toBottomOf="@+id/driver_offer" />
 
     <Button
         android:id="@+id/decline_driver"
@@ -87,10 +104,10 @@
         android:layout_marginEnd="99dp"
         android:layout_marginRight="99dp"
         android:text="Decline"
+        android:theme="@style/ThemeOverlay.LightButton"
         app:layout_constraintEnd_toStartOf="@+id/accept_driver"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/driver_rating_pos"
-        android:theme="@style/ThemeOverlay.LightButton"/>
+        app:layout_constraintTop_toBottomOf="@+id/driver_rating_pos" />
 
     <Button
         android:id="@+id/accept_driver"
@@ -101,9 +118,17 @@
         android:layout_marginEnd="62dp"
         android:layout_marginRight="62dp"
         android:text="Accept"
+        android:theme="@style/ThemeOverlay.LightButton"
         app:layout_constraintBaseline_toBaselineOf="@+id/decline_driver"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/decline_driver"
-        android:theme="@style/ThemeOverlay.LightButton"/>
+        app:layout_constraintStart_toEndOf="@+id/decline_driver" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline8"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.5" />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

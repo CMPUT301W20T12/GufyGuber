@@ -25,6 +25,7 @@ package com.example.gufyguber;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -117,5 +118,16 @@ public class UserTypeFragment extends DialogFragment {
         return builder
                 .setView(view)
                 .create();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+    }
+
+    @Override
+    public void onCancel(@NonNull DialogInterface dialog) {
+        ((SignInActivity) getActivity()).signOut();
+        super.onCancel(dialog);
     }
 }
