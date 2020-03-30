@@ -180,6 +180,7 @@ public class SignInActivity extends AppCompatActivity {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        findViewById(R.id.loadingPanel).setVisibility(View.VISIBLE);
 
         // Result returned from launching the Intent from
         // GoogleSignInClient.getSignInIntent(...);
