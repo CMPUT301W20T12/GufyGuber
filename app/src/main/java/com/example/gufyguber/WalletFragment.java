@@ -117,18 +117,15 @@ public class WalletFragment extends Fragment {
                     Log.d("Wallet", "Error getting wallet");
                 } else {
                     Log.d("Wallet", "Retrieved wallet");
-                    wallet = new Wallet();
-                    wallet.setTransaction("Dalton owes $12");
+                    Log.d("Wallet", "inflating list");
+                    wallet = value;
+                    transactionsDataList.addAll(wallet.getTransactions());
+                    transactionAdapter = new CustomList(getContext(), transactionsDataList);
+                    transactionList.setAdapter(transactionAdapter);
                 }
             }
         });
 
-        if (wallet != null) {
-            Log.d("Wallet", "inflating list");
-            transactionsDataList.addAll(wallet.getTransactions());
-            transactionAdapter = new CustomList(getContext(), transactionsDataList);
-            transactionList.setAdapter(transactionAdapter);
-        }
         return view;
     }
 
