@@ -805,11 +805,20 @@ public class FirebaseManager {
      * @param wallet
      * the wallet in which a transaction is being added to
      */
-    public void storeWalletInfo(String userUID, Wallet wallet, final ReturnValueListener<Boolean> returnValueListener) {
+    public void storeWalletInfo(String userUID, final Wallet wallet, final ReturnValueListener<Boolean> returnValueListener) {
         CollectionReference transactions = FirebaseFirestore.getInstance().collection("users");
-        HashMap<String, Object> walletData = new HashMap<>();
+        final HashMap<String, Object> walletData = new HashMap<>();
 
-        walletData.put(TRANSACTION, wallet.getTransactions().get(0));
+        if (OfflineCache.getReference().retrieveCurrentUser() instanceof Driver) {
+            walletData.put(TRANSACTION, wallet.getTransactions().get(0));
+        } else {
+            fetchDriverInfo(OfflineCache.getReference().retrieveCurrentRideRequest().getDriverUID(), new ReturnValueListener<Driver>() {
+                @Override
+                public void returnValue(Driver value) {
+                    walletData.put(TRANSACTION, "You owe " + value.getFirstName() + value.getLastName() + wallet.getTransactions().get(0));
+                }
+            });
+        }
         transactions.document(userUID).collection("transactions").document(new Date().toString())
                 .set(walletData)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
