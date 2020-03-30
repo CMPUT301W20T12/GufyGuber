@@ -149,12 +149,12 @@ public class SignInActivity extends AppCompatActivity {
                     }
                     else{
                         signUp(currentUser);
-                        findViewById(R.id.loadingPanel).setVisibility(View.GONE);
+                        findViewById(R.id.loading).setVisibility(View.GONE);
                     }
                 }
             });
         }
-       else findViewById(R.id.loadingPanel).setVisibility(View.GONE);
+       else findViewById(R.id.loading).setVisibility(View.GONE);
     }
 
     /**
@@ -180,7 +180,7 @@ public class SignInActivity extends AppCompatActivity {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        findViewById(R.id.loadingPanel).setVisibility(View.VISIBLE);
+        findViewById(R.id.loading).setVisibility(View.VISIBLE);
 
         // Result returned from launching the Intent from
         // GoogleSignInClient.getSignInIntent(...);
@@ -325,6 +325,7 @@ public class SignInActivity extends AppCompatActivity {
     public void signOut(){
         mFirebaseAuth.signOut();
         mGoogleSignInClient.signOut();
+        findViewById(R.id.loading).setVisibility(View.GONE);
         updateUI(null);
     }
 
