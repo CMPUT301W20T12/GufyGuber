@@ -112,7 +112,15 @@ public class startScanQR extends AppCompatActivity {
                                 if (value == null) {
                                     Log.e(TAG, "Setting ride request to complete failed.");
                                 } else {
-                                    finish();
+                                    FirebaseManager.getReference().storeWalletInfo(OfflineCache.getReference().retrieveCurrentUser().getUID(), new Wallet(barcode.displayValue), new FirebaseManager.ReturnValueListener<Boolean>() {
+                                        @Override
+                                        public void returnValue(Boolean value) {
+                                            if (value) {
+                                                finish();
+                                            } else {
+                                            }
+                                        }
+                                    });
                                 }
                             }
                         });

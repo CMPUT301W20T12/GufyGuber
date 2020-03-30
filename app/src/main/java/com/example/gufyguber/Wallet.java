@@ -39,7 +39,7 @@ public class Wallet {
     }
 
     /**
-     * Sets the objects transaction atribute
+     * Sets the objects transaction attribute
      * @param transaction
      * value of transaction
      */

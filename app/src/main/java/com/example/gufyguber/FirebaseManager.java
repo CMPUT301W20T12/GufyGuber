@@ -804,22 +804,24 @@ public class FirebaseManager {
      * @param wallet
      * the wallet in which a transaction is being added to
      */
-    public void storeWalletInfo(String userUID, Wallet wallet) {
-        CollectionReference transactions = FirebaseFirestore.getInstance().collection(TRANSACTION_COLLECTION);
+    public void storeWalletInfo(String userUID, Wallet wallet, final ReturnValueListener<Boolean> returnValueListener) {
+        CollectionReference transactions = FirebaseFirestore.getInstance().collection("users");
         HashMap<String, Object> walletData = new HashMap<>();
 
         walletData.put(TRANSACTION, wallet.getTransaction());
-        transactions.document(userUID)
+        transactions.document(userUID).collection("transactions").document(new Date().toString())
                 .set(walletData)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
+                        returnValueListener.returnValue(Boolean.TRUE);
                         Log.d(TAG, "Transaction addition successful");
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
+                        returnValueListener.returnValue(Boolean.FALSE);
                         Log.d(TAG, "Transaction addition failed" + e.toString());
                     }
                 });
