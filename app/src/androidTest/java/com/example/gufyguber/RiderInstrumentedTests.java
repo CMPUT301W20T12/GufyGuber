@@ -39,6 +39,9 @@ import androidx.test.rule.ActivityTestRule;
 
 import com.google.android.gms.maps.model.LatLng;
 
+import java.text.SimpleDateFormat;
+import java.util.Locale;
+
 /**
  * Handle some simple instrumented tests that we can do for Riders without Google authentication
  * @author Robert MacGillivray | Mar.24.2020
@@ -46,12 +49,14 @@ import com.google.android.gms.maps.model.LatLng;
 public class RiderInstrumentedTests {
     private Driver testDriver;
     private Vehicle testVehicle;
+    private Rating testRating;
     private Rider testRider;
     private float testFare;
     private RideRequest.Status testStatus;
     private LocationInfo testLocation;
     private TimeInfo testTime;
     private RideRequest testRideRequest;
+    private SimpleDateFormat formatter;
 
     @Rule
     public ActivityTestRule<NavigationActivity> navigationActivityRule = new ActivityTestRule<>(NavigationActivity.class, false, false);
@@ -62,7 +67,8 @@ public class RiderInstrumentedTests {
     @Before
     public void init() {
         testVehicle =  new Vehicle("TestModel", "TestMake", "TestPlate", 1);
-        testDriver = new Driver("1234", "user@test.com", "TestFN", "TestLN", "(123)456-7890", testVehicle);
+        testRating = new Rating(8, 2);
+        testDriver = new Driver("1234", "user@test.com", "TestFN", "TestLN", "(123)456-7890", testVehicle, testRating);
         testRider = new Rider("4321", "test@user.com", "FNTest", "LNTest", "(098)765-4321");
         testFare = 13.0f;
         testStatus = RideRequest.Status.CONFIRMED;
@@ -71,6 +77,7 @@ public class RiderInstrumentedTests {
         testTime.setRequestAcceptedTime();
         testRideRequest = new RideRequest(testRider.getUID(), testDriver.getUID(), testStatus,
                 testFare, testLocation, testTime);
+        formatter = new SimpleDateFormat("h:mm a, MMMM dd yyyy", Locale.CANADA);
 
         FirebaseManager.getReference().setTestMode(true);
         OfflineCache.getReference().cacheCurrentUser(testRider);
@@ -245,11 +252,11 @@ public class RiderInstrumentedTests {
                 .check(matches(withText(containsString(testRideRequest.getStatus().toString()))));
         // Make sure the request open time is correct
         onView(withId(R.id.user_pickup_time))
-                .check(matches(withText(testRideRequest.getTimeInfo().getRequestOpenTime().toString())));
+                .check(matches(withText(formatter.format(testRideRequest.getTimeInfo().getRequestOpenTime()))));
         // Make sure the request accepted time is correct if we have one
         if (testRideRequest.getTimeInfo().getRequestAcceptedTime() != null) {
             onView(withId(R.id.user_arrival_time))
-                    .check(matches(withText(testRideRequest.getTimeInfo().getRequestAcceptedTime().toString())));
+                    .check(matches(withText(formatter.format(testRideRequest.getTimeInfo().getRequestAcceptedTime()))));
         }
         // Make sure the pickup coordinates are correct
         onView(withId(R.id.user_pickup_location))

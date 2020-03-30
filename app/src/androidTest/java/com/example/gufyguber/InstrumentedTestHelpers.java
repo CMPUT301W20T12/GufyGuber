@@ -63,6 +63,9 @@ public class InstrumentedTestHelpers {
      * Uses the navigation drawer menu to go to the profile screen
      */
     public static void goToProfileScreenFromAnyScreen() {
+        // The profile screen will try to pull something from Firebase, we have to fix the cache manually
+        User currentUser = OfflineCache.getReference().retrieveCurrentUser();
+
         // Makes sure the drawer menu is closed, then opens it
         onView(withId(R.id.drawer_layout))
                 .check(matches(isClosed(Gravity.LEFT)))
@@ -78,6 +81,9 @@ public class InstrumentedTestHelpers {
 
         // Buffer to let transition animations finish
         onView(isRoot()).perform(waitFor(1000));
+
+        // Fixes the cache that gets wiped by the FirebaseManager refusal.
+        OfflineCache.getReference().cacheCurrentUser(currentUser);
     }
 
     /**

@@ -126,7 +126,6 @@ public class NavigationActivity extends AppCompatActivity implements RideRequest
             case PENDING:
                 // When a driver sees a pending request, it's because the rider has rejected them
                 if (OfflineCache.getReference().retrieveCurrentUser() instanceof Driver) {
-                    OfflineCache.getReference().clearCurrentRideRequest();
                     FirebaseManager.getReference().fetchRiderInfo(OfflineCache.getReference().retrieveCurrentRideRequest().getRiderUID(), new FirebaseManager.ReturnValueListener<Rider>() {
                         @Override
                         public void returnValue(Rider value) {
@@ -134,6 +133,7 @@ public class NavigationActivity extends AppCompatActivity implements RideRequest
                                 toast.setText(String.format("Your offer was declined by %s %s.",
                                         value.getFirstName(), value.getLastName()));
                                 toast.show();
+                                OfflineCache.getReference().clearCurrentRideRequest();
                             }
                         }
                     });
