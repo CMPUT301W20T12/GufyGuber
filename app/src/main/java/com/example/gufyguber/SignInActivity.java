@@ -137,7 +137,7 @@ public class SignInActivity extends AppCompatActivity {
         super.onStart();
         // Check for existing Google Sign In account, if the user is already
         // signed in the GoogleSignInAccount will be non-null.
-        FirebaseUser currentUser = mFirebaseAuth.getCurrentUser();
+        final FirebaseUser currentUser = mFirebaseAuth.getCurrentUser();
         updateUI(currentUser);
 
         if (currentUser != null) {
@@ -147,9 +147,14 @@ public class SignInActivity extends AppCompatActivity {
                     if (value) {
                         goToMapView();
                     }
+                    else{
+                        signUp(currentUser);
+                        findViewById(R.id.loadingPanel).setVisibility(View.GONE);
+                    }
                 }
             });
         }
+       else findViewById(R.id.loadingPanel).setVisibility(View.GONE);
     }
 
     /**
@@ -233,16 +238,7 @@ public class SignInActivity extends AppCompatActivity {
                                         updateUI(user);
                                         goToMapView();
                                     } else {
-                                        Log.d("ACCNT", "Sending user to sign up");
-                                        Bundle bundle = new Bundle();
-                                        // pass account info into fragment to auto-pop some details in registration form
-                                        bundle.putString("UID", user.getUid());
-                                        bundle.putString("email", account.getEmail());
-                                        bundle.putString("firstName", account.getGivenName());
-                                        bundle.putString("lastName", account.getFamilyName());
-                                        UserTypeFragment mUserTypeFragment = new UserTypeFragment();
-                                        mUserTypeFragment.setArguments(bundle);
-                                        mUserTypeFragment.show(getSupportFragmentManager(), "USER_TYPE");
+                                        signUp(user);
                                     }
                                 }
                             });
@@ -278,6 +274,20 @@ public class SignInActivity extends AppCompatActivity {
         }
     }
 
+    private void signUp(FirebaseUser user){
+        GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this);
+        Log.d("ACCNT", "Sending user to sign up");
+        Bundle bundle = new Bundle();
+        // pass account info into fragment to auto-pop some details in registration form
+        bundle.putString("UID", user.getUid());
+        bundle.putString("email", account.getEmail());
+        bundle.putString("firstName", account.getGivenName());
+        bundle.putString("lastName", account.getFamilyName());
+        UserTypeFragment mUserTypeFragment = new UserTypeFragment();
+        mUserTypeFragment.setArguments(bundle);
+        mUserTypeFragment.show(getSupportFragmentManager(), "USER_TYPE");
+    }
+
     /**
      * Goes to the app's main view
      */
@@ -309,5 +319,16 @@ public class SignInActivity extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    public void signOut(){
+        mFirebaseAuth.signOut();
+        mGoogleSignInClient.signOut();
+        updateUI(null);
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
     }
 }

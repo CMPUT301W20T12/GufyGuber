@@ -118,4 +118,10 @@ public class UserTypeFragment extends DialogFragment {
                 .setView(view)
                 .create();
     }
+
+    @Override
+    public void onDestroy() {
+        ((SignInActivity) getActivity()).signOut();
+        super.onDestroy();
+    }
 }

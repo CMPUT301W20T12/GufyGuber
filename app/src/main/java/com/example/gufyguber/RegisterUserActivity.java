@@ -213,8 +213,14 @@ public class RegisterUserActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         if(!regComplete)
-            mAuth.getCurrentUser().delete();
+            mAuth.signOut();
         super.onPause();
+    }
+
+    @Override
+    public void onBackPressed() {
+        backToSignin();
+        super.onBackPressed();
     }
 
     private void backToSignin(){
