@@ -569,7 +569,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
 
     private void riderOnViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
+        if (rideRequestListener == null && OfflineCache.getReference().retrieveCurrentRideRequest() != null) {
+            rideRequestListener = FirebaseManager.getReference().listenToRideRequest(OfflineCache.getReference().retrieveCurrentRideRequest().getRiderUID(), this);
+        }
         SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.rider_map);
         mapFragment.getMapAsync(this);
     }
