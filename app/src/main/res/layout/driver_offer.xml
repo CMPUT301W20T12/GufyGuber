@@ -27,6 +27,15 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent" android:layout_height="match_parent">
 
+    <ImageView
+        android:id="@+id/imageView3"
+        android:layout_width="20sp"
+        android:layout_height="20sp"
+        android:layout_marginEnd="4dp"
+        app:layout_constraintEnd_toStartOf="@+id/driver_rating_neg"
+        app:srcCompat="@drawable/thumbsdown"
+        tools:layout_editor_absoluteY="162dp" />
+
     <TextView
         android:id="@+id/textView6"
         android:layout_width="wrap_content"
@@ -55,7 +64,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:drawableLeft="@android:drawable/arrow_up_float"
         android:text="xx"
         android:textSize="20sp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -63,12 +71,12 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/driver_offer" />
 
+
     <TextView
         android:id="@+id/driver_rating_neg"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
-        android:drawableLeft="@android:drawable/arrow_down_float"
         android:text="xx"
         android:textSize="20sp"
         app:layout_constraintBaseline_toBaselineOf="@+id/driver_rating_pos"
@@ -105,5 +113,14 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/decline_driver"
         android:theme="@style/ThemeOverlay.LightButton"/>
+
+    <ImageView
+        android:id="@+id/imageView2"
+        android:layout_width="20sp"
+        android:layout_height="20sp"
+        android:layout_marginEnd="4dp"
+        app:layout_constraintEnd_toStartOf="@+id/driver_rating_pos"
+        app:srcCompat="@drawable/thumbsup"
+        tools:layout_editor_absoluteY="162dp" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
