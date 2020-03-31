@@ -853,7 +853,12 @@ public class FirebaseManager {
                         if (task.isSuccessful()) {
                             Wallet wallet = new Wallet();
                             for (QueryDocumentSnapshot doc : task.getResult()) {
-                                wallet.setTransaction(doc.getData().toString().replace("{transaction_details=","").replace("}", ""));
+                                if (OfflineCache.getReference().retrieveCurrentUser() instanceof Driver) {
+                                    wallet.setTransaction(doc.getData().toString().replace("{transaction_details=","").replace("}", ""));
+                                } else {
+                                    wallet.setTransaction(doc.getData().toString());
+                                }
+
                             }
                             returnValueListener.returnValue(wallet);
                         } else {
