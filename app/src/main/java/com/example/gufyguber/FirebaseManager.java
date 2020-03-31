@@ -833,7 +833,7 @@ public class FirebaseManager {
                 public void returnValue(Driver value) {
                     CollectionReference transactions = FirebaseFirestore.getInstance().collection("users");
                     HashMap<String, Object> walletData = new HashMap<>();
-                    walletData.put(TRANSACTION, "You owe " + value.getFirstName() + value.getLastName() + wallet.getTransactions().get(0));
+                    walletData.put(TRANSACTION, "You owe " + value.getFirstName() + " " + value.getLastName() + " $" + wallet.getTransactions().get(0));
                     transactions.document(userUID).collection("transactions").document(new Date().toString())
                             .set(walletData)
                             .addOnSuccessListener(new OnSuccessListener<Void>() {
@@ -875,7 +875,7 @@ public class FirebaseManager {
                                 if (OfflineCache.getReference().retrieveCurrentUser() instanceof Driver) {
                                     wallet.setTransaction(doc.getData().toString().replace("{transaction_details=","").replace("}", ""));
                                 } else {
-                                    wallet.setTransaction(doc.getData().toString());
+                                    wallet.setTransaction(doc.getData().toString().replace("{transaction_details=", "").replace("}", ""));
                                 }
 
                             }
