@@ -805,36 +805,55 @@ public class FirebaseManager {
      * @param wallet
      * the wallet in which a transaction is being added to
      */
-    public void storeWalletInfo(String userUID, final Wallet wallet, final ReturnValueListener<Boolean> returnValueListener) {
-        CollectionReference transactions = FirebaseFirestore.getInstance().collection("users");
-        final HashMap<String, Object> walletData = new HashMap<>();
+    public void storeWalletInfo(final String userUID, final Wallet wallet, final ReturnValueListener<Boolean> returnValueListener) {
 
         if (OfflineCache.getReference().retrieveCurrentUser() instanceof Driver) {
+            CollectionReference transactions = FirebaseFirestore.getInstance().collection("users");
+            HashMap<String, Object> walletData = new HashMap<>();
             walletData.put(TRANSACTION, wallet.getTransactions().get(0));
+            transactions.document(userUID).collection("transactions").document(new Date().toString())
+                    .set(walletData)
+                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void aVoid) {
+                            returnValueListener.returnValue(Boolean.TRUE);
+                            Log.d(TAG, "Transaction addition successful");
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            returnValueListener.returnValue(Boolean.FALSE);
+                            Log.d(TAG, "Transaction addition failed" + e.toString());
+                        }
+                    });
         } else {
             fetchDriverInfo(OfflineCache.getReference().retrieveCurrentRideRequest().getDriverUID(), new ReturnValueListener<Driver>() {
                 @Override
                 public void returnValue(Driver value) {
+                    CollectionReference transactions = FirebaseFirestore.getInstance().collection("users");
+                    HashMap<String, Object> walletData = new HashMap<>();
                     walletData.put(TRANSACTION, "You owe " + value.getFirstName() + value.getLastName() + wallet.getTransactions().get(0));
+                    transactions.document(userUID).collection("transactions").document(new Date().toString())
+                            .set(walletData)
+                            .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                @Override
+                                public void onSuccess(Void aVoid) {
+                                    returnValueListener.returnValue(Boolean.TRUE);
+                                    Log.d(TAG, "Transaction addition successful");
+                                }
+                            })
+                            .addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    returnValueListener.returnValue(Boolean.FALSE);
+                                    Log.d(TAG, "Transaction addition failed" + e.toString());
+                                }
+                            });
                 }
             });
         }
-        transactions.document(userUID).collection("transactions").document(new Date().toString())
-                .set(walletData)
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        returnValueListener.returnValue(Boolean.TRUE);
-                        Log.d(TAG, "Transaction addition successful");
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        returnValueListener.returnValue(Boolean.FALSE);
-                        Log.d(TAG, "Transaction addition failed" + e.toString());
-                    }
-                });
+
     }
 
     /**
