@@ -83,13 +83,13 @@ public class Rating {
     public String getPosPercent(int positive, int negative) {
         int total = positive + negative;
 
-        int posPercent;
+        double posPercent;
         if(total > 0) {
-            posPercent = (positive * 100) / total;
+            posPercent = (double)(positive * 100) / total;
         } else {
             posPercent = 0;
         }
-        String finalPercent = posPercent + "%";
+        String finalPercent = String.format("%.1f",posPercent) + "%";
 
         return finalPercent;
     }
@@ -106,13 +106,13 @@ public class Rating {
     public String getNegPercent(int positive, int negative) {
         int total = positive + negative;
 
-        int negPercent;
+        double negPercent;
         if(total > 0) {
-            negPercent = (negative * 100)/ total;
+            negPercent = (double)(negative * 100)/ total;
         } else {
             negPercent = 0;
         }
-        String finalPercent = negPercent + "%";
+        String finalPercent = String.format("%.1f", negPercent) + "%";
 
         return finalPercent;
     }
