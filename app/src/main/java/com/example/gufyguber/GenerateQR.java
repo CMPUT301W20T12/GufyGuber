@@ -114,7 +114,7 @@ public class GenerateQR extends AppCompatActivity implements FirebaseManager.Rid
     @Override
     public void onRideRequestUpdated(RideRequest updatedRequest) {
         if(updatedRequest != null && updatedRequest.getStatus() == RideRequest.Status.COMPLETED){
-            FirebaseManager.getReference().storeWalletInfo(OfflineCache.getReference().retrieveCurrentUser().getUID(), new Wallet(String.valueOf(updatedRequest.getOfferedFare())), new FirebaseManager.ReturnValueListener<Boolean>() {
+            FirebaseManager.getReference().storeWalletInfo(OfflineCache.getReference().retrieveCurrentUser().getUID(), new Wallet(String.format("%.2f",updatedRequest.getOfferedFare())), new FirebaseManager.ReturnValueListener<Boolean>() {
                 @Override
                 public void returnValue(Boolean value) {
                     if (value) {
