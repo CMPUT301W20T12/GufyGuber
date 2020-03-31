@@ -39,7 +39,7 @@ public abstract class User {
     private String lastName;
     private String phoneNumber;
     private URI profilePicture;
-    //TODO: Reference to a wallet
+    private Wallet wallet;
 
     /**
      * This is the constructor method that sets the users attributes
@@ -104,6 +104,7 @@ public abstract class User {
         return phoneNumber;
     }
 
+
     /**
      * This sets the user's UID to the unique firebase UID associated with the email
      * @param UID
@@ -148,5 +149,6 @@ public abstract class User {
     public void setPhoneNumber(String phoneNumber) {
         this.phoneNumber = phoneNumber;
     }
+
 
 }

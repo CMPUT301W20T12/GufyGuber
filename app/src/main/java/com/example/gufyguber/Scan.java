@@ -24,6 +24,7 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.ParcelUuid;
 import android.util.SparseArray;
 import android.view.MenuItem;
 import android.view.SurfaceHolder;
@@ -33,10 +34,15 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.vision.CameraSource;
 import com.google.android.gms.vision.Detector;
 import com.google.android.gms.vision.barcode.Barcode;
 import com.google.android.gms.vision.barcode.BarcodeDetector;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.protobuf.StringValue;
 
 import java.io.IOException;
 
@@ -54,6 +60,13 @@ public class Scan extends AppCompatActivity {
     BarcodeDetector barcode;
     CameraSource cameraSource;
     SurfaceHolder holder;
+//    String userID;
+//    String transaction;
+//
+//    private FirebaseAuth mAuth;
+//    private FirebaseFirestore db;
+//
+//    public static final String TRANSACTION_COLLECTION = "transactions";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,6 +87,12 @@ public class Scan extends AppCompatActivity {
             Toast.makeText(getApplicationContext(), "Error", Toast.LENGTH_LONG).show();
             this.finish();
         }
+//        mAuth = FirebaseAuth.getInstance();
+//        db = FirebaseFirestore.getInstance();
+//        RideRequest currentRequest = OfflineCache.getReference().retrieveCurrentRideRequest();
+//        userID = mAuth.getCurrentUser().getUid();
+
+
         cameraSource = new CameraSource.Builder(this, barcode)
                 .setFacing(CameraSource.CAMERA_FACING_BACK)
                 .setRequestedFps(24)
@@ -118,6 +137,15 @@ public class Scan extends AppCompatActivity {
             public void receiveDetections(Detector.Detections<Barcode> detections) {
                 final SparseArray<Barcode> barcodes = detections.getDetectedItems();
                 if (barcodes.size() > 0) {
+//                    db.collection(TRANSACTION_COLLECTION).document(userID).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+//                        @Override
+//                        public void onSuccess(DocumentSnapshot documentSnapshot) {
+//                            if (documentSnapshot.exists()) {
+//                                // not sure how to add here
+//                                //db.collection(TRANSACTION_COLLECTION).document(userID).update(barcode)
+//                            }
+//                        }
+//                    });
                     Intent intent = new Intent();
                     intent.putExtra("barcode", barcodes.valueAt(0));
                     setResult(RESULT_OK, intent);

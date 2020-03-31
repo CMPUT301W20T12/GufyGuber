@@ -24,6 +24,8 @@ package com.example.gufyguber;
 
 import java.net.URI;
 
+import io.grpc.internal.WritableBufferAllocator;
+
 /**
  * This is an instance of a User class for a 'Rider' on the app
  * @author dalton

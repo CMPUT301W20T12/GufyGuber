@@ -26,6 +26,7 @@ import android.app.ActionBar;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -113,8 +114,18 @@ public class GenerateQR extends AppCompatActivity implements FirebaseManager.Rid
     @Override
     public void onRideRequestUpdated(RideRequest updatedRequest) {
         if(updatedRequest != null && updatedRequest.getStatus() == RideRequest.Status.COMPLETED){
-            Intent rateDriver = new Intent(getApplicationContext(), RateDriver.class);
-            startActivity(rateDriver);
+            FirebaseManager.getReference().storeWalletInfo(OfflineCache.getReference().retrieveCurrentUser().getUID(), new Wallet(String.valueOf(updatedRequest.getOfferedFare())), new FirebaseManager.ReturnValueListener<Boolean>() {
+                @Override
+                public void returnValue(Boolean value) {
+                    if (value) {
+                        Intent rateDriver = new Intent(getApplicationContext(), RateDriver.class);
+                        startActivity(rateDriver);
+                    } else {
+                        Log.e(TAG, "Failed to add wallet info");
+                    }
+                }
+            });
+
         }
     }
 

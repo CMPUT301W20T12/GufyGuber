@@ -41,5 +41,10 @@
         android:name="com.example.gufyguber.ui.Profile.SignOutDialog"
         android:label="Sign Out"
         tools:layout="@layout/sign_out_dialog"/>
+    <fragment
+        android:id="@+id/nav_wallet"
+        android:name="com.example.gufyguber.WalletFragment"
+        android:label="My Wallet"
+        tools:layout="@layout/fragment_wallet" />
 
 </navigation>

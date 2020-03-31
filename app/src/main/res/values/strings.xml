@@ -43,5 +43,8 @@
     <string name="request_status">Current ride request: %s</string>
     <string name="camera_rationale">Use of the camera is <b>required</b> to receive payment</string>
 
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+
 
 </resources>

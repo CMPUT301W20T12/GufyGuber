@@ -37,6 +37,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.GeoPoint;
 import com.google.firebase.firestore.ListenerRegistration;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import org.w3c.dom.Document;
@@ -122,6 +123,10 @@ public class FirebaseManager {
     public static final String REQUEST_OPEN_TIME_KEY = "request_start";
     public static final String REQUEST_ACCEPTED_TIME_KEY = "request_accepted";
     public static final String REQUEST_CLOSED_TIME_KEY = "request_closed";
+
+    //Wallet Keys
+    public static final String TRANSACTION_COLLECTION = "transactions";
+    public static final String TRANSACTION = "transaction_details";
 
     /**
      * FireBaseManager's construction should be private since it's supposed to be a singleton
@@ -792,6 +797,117 @@ public class FirebaseManager {
             }
         });
     }
+
+    /**
+     * Adds a users transaction record to our Firestore cloud
+     * @param userUID
+     * the ID of the user who's wallet is being modified
+     * @param wallet
+     * the wallet in which a transaction is being added to
+     */
+    public void storeWalletInfo(final String userUID, final Wallet wallet, final ReturnValueListener<Boolean> returnValueListener) {
+
+        if (OfflineCache.getReference().retrieveCurrentUser() instanceof Driver) {
+            CollectionReference transactions = FirebaseFirestore.getInstance().collection("users");
+            HashMap<String, Object> walletData = new HashMap<>();
+            walletData.put(TRANSACTION, wallet.getTransactions().get(0));
+            transactions.document(userUID).collection("transactions").document(new Date().toString())
+                    .set(walletData)
+                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void aVoid) {
+                            returnValueListener.returnValue(Boolean.TRUE);
+                            Log.d(TAG, "Transaction addition successful");
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            returnValueListener.returnValue(Boolean.FALSE);
+                            Log.d(TAG, "Transaction addition failed" + e.toString());
+                        }
+                    });
+        } else {
+            fetchDriverInfo(OfflineCache.getReference().retrieveCurrentRideRequest().getDriverUID(), new ReturnValueListener<Driver>() {
+                @Override
+                public void returnValue(Driver value) {
+                    CollectionReference transactions = FirebaseFirestore.getInstance().collection("users");
+                    HashMap<String, Object> walletData = new HashMap<>();
+                    walletData.put(TRANSACTION, "You owe " + value.getFirstName() + " " + value.getLastName() + " $" + wallet.getTransactions().get(0));
+                    transactions.document(userUID).collection("transactions").document(new Date().toString())
+                            .set(walletData)
+                            .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                @Override
+                                public void onSuccess(Void aVoid) {
+                                    returnValueListener.returnValue(Boolean.TRUE);
+                                    Log.d(TAG, "Transaction addition successful");
+                                }
+                            })
+                            .addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    returnValueListener.returnValue(Boolean.FALSE);
+                                    Log.d(TAG, "Transaction addition failed" + e.toString());
+                                }
+                            });
+                }
+            });
+        }
+
+    }
+
+    /**
+     * Retrieves wallet information from Firestore
+     * @param userUID
+     * the UID of the User who's wallet is being modified
+     * @param returnValueListener
+     * The callback to use once we've finished retrieving a Wallet
+     */
+    public void fetchWalletInfo(final String userUID, final ReturnValueListener<Wallet> returnValueListener) {
+        CollectionReference transactionCollection = FirebaseFirestore.getInstance().collection("users").document(userUID).collection("transactions");
+        transactionCollection.get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            Wallet wallet = new Wallet();
+                            for (QueryDocumentSnapshot doc : task.getResult()) {
+                                if (OfflineCache.getReference().retrieveCurrentUser() instanceof Driver) {
+                                    wallet.setTransaction(doc.getData().toString().replace("{transaction_details=","").replace("}", ""));
+                                } else {
+                                    wallet.setTransaction(doc.getData().toString().replace("{transaction_details=", "").replace("}", ""));
+                                }
+
+                            }
+                            returnValueListener.returnValue(wallet);
+                        } else {
+                            Log.d(TAG, "Error getting documents: ", task.getException());
+                        }
+                    }
+                });
+    }
+
+//        walletDoc.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+//            @Override
+//            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+//                if (task.isSuccessful()) {
+//                    DocumentSnapshot snapshot = task.getResult();
+//                    if (snapshot.exists()) {
+//                        String transaction = snapshot.getString(TRANSACTION);
+//                        returnValueListener.returnValue(new Wallet(transaction));
+//                    }
+//                    else {
+//                        Log.w(TAG, String.format("Wallet for user [%s] not found on Firestore.", userUID));
+//                        returnValueListener.returnValue(null);
+//                    }
+//                }
+//                else {
+//                    Log.e(TAG, "Fetching wallet failed. Issue communicating with Firestore.");
+//                    returnValueListener.returnValue(null);
+//                }
+//            }
+//        });
+//    }
 
     /**
      * Temporary function. We'll need to figure out a better solution than this.
