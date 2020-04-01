@@ -35,7 +35,6 @@ import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
-import androidx.test.espresso.action.ViewActions;
 
 import com.example.gufyguber.CreateRideRequestFragment;
 import com.example.gufyguber.DirectionsManager;
@@ -48,8 +47,6 @@ import com.example.gufyguber.OfflineCache;
 import com.example.gufyguber.R;
 import com.example.gufyguber.RideRequest;
 import com.example.gufyguber.ui.CurrentRequest.CancelRequestFragment;
-import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
-import com.example.gufyguber.Rider;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.ResolvableApiException;
 import com.google.android.gms.common.api.Status;
@@ -78,8 +75,6 @@ import com.google.android.libraries.places.api.model.RectangularBounds;
 import com.google.android.libraries.places.api.net.PlacesClient;
 import com.google.android.libraries.places.widget.AutocompleteSupportFragment;
 import com.google.android.libraries.places.widget.listener.PlaceSelectionListener;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.ListenerRegistration;
 
 import java.io.IOException;
@@ -121,18 +116,18 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
 
     private Address address;
 
-    //for permissions
+    //for location permissions
     private static final String FINE_LOCATION = Manifest.permission.ACCESS_FINE_LOCATION;
     private static final String COARSE_LOCATION = Manifest.permission.ACCESS_COARSE_LOCATION;
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1234;
     private static final float DEFAULT_ZOOM = 15f;
+    private Boolean mLocationPermissionsGranted = false;
+    private Boolean mGPSPermissionsGranted = false;
 
     //widgets
     private Place mAutocomplete;
     private ImageView mGps;
 
-    private Boolean mLocationPermissionsGranted = false;
-    private Boolean mGPSPermissionsGranted = false;
 
     /**
      *  This class is an intermediate step to differentiate the driver from the rider
@@ -258,9 +253,12 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
             Places.initialize(getActivity(), getString(R.string.api_key), Locale.CANADA);
             PlacesClient placesClient = Places.createClient(getActivity());
         }
-
-        AutocompleteSupportFragment autocompleteFragment;
+        final AutocompleteSupportFragment autocompleteFragment;
         autocompleteFragment = (AutocompleteSupportFragment) getChildFragmentManager().findFragmentById(R.id.autocomplete_fragment);
+
+
+        autocompleteFragment.setText(""); // this only works when initializing for some reason.
+
 
         //Bias in Edmonton (SE,NW)
         autocompleteFragment.setLocationBias(RectangularBounds.newInstance(
@@ -310,9 +308,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
                         dirty = false;
                     }
                 }
-
             }
-
             @Override
             public void onError(@NonNull Status status) {
                 Log.i(TAG, "And error occurred: " + status);
@@ -320,6 +316,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
             }
         });
 
+
+
+
+        autocompleteFragment.setText("");
 
         // for current location
         mGps = v.findViewById(R.id.ic_gps);
@@ -335,14 +335,17 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
                 Log.d(TAG,"getGPS: do we have permissions? " +mLocationPermissionsGranted.toString());
 
 
-                if((ContextCompat.checkSelfPermission(getActivity(),Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) && mGPSPermissionsGranted) {
+                if((ContextCompat.checkSelfPermission(getActivity(),Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) && mGPSPermissionsGranted && mLocationPermissionsGranted) {
                     Log.d(TAG,"onClick: checking permissions");
                     mMap.setMyLocationEnabled(true);
                     mMap.getUiSettings().setMyLocationButtonEnabled(false);
                     getDeviceLocation();
+
                 }
                 else {
                     Log.d(TAG,"onClick: do we have permissions? " +mLocationPermissionsGranted.toString());
+                    Toast.makeText(getActivity(), "Please enable location to use this feature", Toast.LENGTH_SHORT).show();
+
                 }
             }
         });
@@ -469,7 +472,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
             PlacesClient placesClient = Places.createClient(getActivity());
         }
 
-        AutocompleteSupportFragment autocompleteFragment;
+        final AutocompleteSupportFragment autocompleteFragment;
         autocompleteFragment = (AutocompleteSupportFragment) getChildFragmentManager().findFragmentById(R.id.autocomplete_fragment);
 
         //Bias in Edmonton (SE,NW)
@@ -488,6 +491,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
             public void onPlaceSelected(@NonNull Place place) {
                 Log.i(TAG, "Place: + place.getName()" + ", " + place.getId());
                 mAutocomplete = place;
+
+                Log.d(TAG, "Clearing search input");
+                autocompleteFragment.setText("");
+
                 geoLocate();
             }
 
@@ -512,7 +519,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
                 Log.d(TAG,"getGPS: do we have permissions? " +mLocationPermissionsGranted.toString());
 
 
-                if(mLocationPermissionsGranted && mGPSPermissionsGranted) {
+                if((ContextCompat.checkSelfPermission(getActivity(),Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) && mGPSPermissionsGranted && mLocationPermissionsGranted) {
                     Log.d(TAG,"onClick: checking permissions");
                     mMap.setMyLocationEnabled(true);
                     mMap.getUiSettings().setMyLocationButtonEnabled(false);
@@ -520,6 +527,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
                 }
                 else {
                     Log.d(TAG,"onClick: do we have permissions? " +mLocationPermissionsGranted.toString());
+                    Toast.makeText(getActivity(), "Please enable location to use this feature", Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -596,7 +604,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
             zoomFit();
         }
         // If no request is in progress, and permissions have been granted, use location for initial map zoom
-        else if (mLocationPermissionsGranted && mGPSPermissionsGranted) {
+        else if ((ContextCompat.checkSelfPermission(getActivity(),Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) && mLocationPermissionsGranted && mGPSPermissionsGranted) {
             mMap.setMyLocationEnabled(true);
             mMap.getUiSettings().setMyLocationButtonEnabled(false);
             getDeviceLocation();
@@ -753,6 +761,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
                     });
         }
     }
+
+    /**
+     * This function allows the map to zoom to fit both pickup and dropoff markers when the information is filled
+     */
 
     public void zoomFit() {
         Log.d(TAG, "zoomFit: initializing ");
@@ -975,7 +987,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
         FusedLocationProviderClient mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(getActivity());
 
         try {
-            if(mLocationPermissionsGranted && mGPSPermissionsGranted) {
+            if((ContextCompat.checkSelfPermission(getActivity(),Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) &&mLocationPermissionsGranted && mGPSPermissionsGranted) {
                 Task location = mFusedLocationProviderClient.getLastLocation();
                 location.addOnCompleteListener(new OnCompleteListener() {
                     @Override
@@ -984,8 +996,13 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
                             Log.d(TAG,"onComplete: found location");
                             Location currentLocation = (Location) task.getResult();
 
-                            moveCamera(new LatLng(currentLocation.getLatitude(),currentLocation.getLongitude()),DEFAULT_ZOOM);
-
+                            if (currentLocation == null){
+                                Log.d(TAG,"onComplete: location services is turned off");
+                                Toast.makeText(getActivity(), "Please enable location to use this feature", Toast.LENGTH_SHORT).show();
+                            }
+                            else {
+                                moveCamera(new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude()), DEFAULT_ZOOM);
+                            }
                         }
                         else {
                             Log.d(TAG,"onComplete: current location is null");
@@ -1039,6 +1056,13 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
 
     }
 
+    /**
+     * This function checks if we have permissions and will initialize the map
+     * @param requestCode
+     * @param permissions
+     * @param grantResults
+     */
+
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         mLocationPermissionsGranted = false;
 
@@ -1049,7 +1073,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
                         if (grantResults[i] != PackageManager.PERMISSION_GRANTED) {
                             mLocationPermissionsGranted = false;
                             Log.d(TAG,"onRequestPermissionsResult: do we have permissions? " +mLocationPermissionsGranted.toString());
-                            Toast.makeText(getActivity(), "Please allow us to use your location",Toast.LENGTH_SHORT).show();
                             return;
                         }
                         mLocationPermissionsGranted = true;
