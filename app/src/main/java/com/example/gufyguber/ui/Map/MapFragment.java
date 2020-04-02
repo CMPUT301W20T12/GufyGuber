@@ -18,7 +18,6 @@ import android.Manifest;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.location.Address;
-import android.location.Geocoder;
 import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
@@ -77,10 +76,8 @@ import com.google.android.libraries.places.widget.AutocompleteSupportFragment;
 import com.google.android.libraries.places.widget.listener.PlaceSelectionListener;
 import com.google.firebase.firestore.ListenerRegistration;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -257,9 +254,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
         autocompleteFragment = (AutocompleteSupportFragment) getChildFragmentManager().findFragmentById(R.id.autocomplete_fragment);
 
 
-        autocompleteFragment.setText(""); // this only works when initializing for some reason.
-
-
         //Bias in Edmonton (SE,NW)
         autocompleteFragment.setLocationBias(RectangularBounds.newInstance(
                 new LatLng(53.415299,-113.674242),
@@ -269,16 +263,16 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
         autocompleteFragment.setCountries("CA");
 
         //specify the types of place data to return
-        autocompleteFragment.setPlaceFields(Arrays.asList(Place.Field.ID, Place.Field.NAME, Place.Field.ADDRESS,Place.Field.ID,Place.Field.ADDRESS_COMPONENTS));
+        autocompleteFragment.setPlaceFields(Arrays.asList(Place.Field.ID, Place.Field.NAME, Place.Field.ADDRESS,Place.Field.ID,Place.Field.ADDRESS_COMPONENTS,Place.Field.LAT_LNG));
 
         autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
             @Override
             public void onPlaceSelected(@NonNull Place place) {
-                Log.i(TAG, "Place: + place.getName()" + ", " + place.getId());
+                Log.i(TAG, "Place: " + place.getName() + ", " + place.getLatLng());
                 mAutocomplete = place;
 
-                Address searchAddress = geoLocate();
-                LatLng latLng = new LatLng(searchAddress.getLatitude(),searchAddress.getLongitude());
+                Log.d(TAG, "Moving camera to selected location");
+                moveCamera(new LatLng(place.getLatLng().latitude, place.getLatLng().longitude), DEFAULT_ZOOM);
 
                 if (requestDialog != null) {
                     boolean dirty = false;
@@ -288,8 +282,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
                         if (!requestDialog.hasDropoffData()) {
                             removeDropoffFromMap();
                         }
-                        requestDialog.setNewPickup(latLng);
-                        addPickupToMap(latLng);
+                        requestDialog.setNewPickup(place.getLatLng());
+                        addPickupToMap(place.getLatLng());
                         dirty = true;
                     }
 
@@ -298,8 +292,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
                         if (!requestDialog.hasPickupData()) {
                             removePickupFromMap();
                         }
-                        requestDialog.setNewDropoff(latLng);
-                        addDropoffToMap(latLng);
+                        requestDialog.setNewDropoff(place.getLatLng());
+                        addDropoffToMap(place.getLatLng());
                         dirty = true;
                     }
 
@@ -315,11 +309,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
 
             }
         });
-
-
-
-
-        autocompleteFragment.setText("");
 
         // for current location
         mGps = v.findViewById(R.id.ic_gps);
@@ -484,18 +473,17 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
         autocompleteFragment.setCountries("CA");
 
         //specify the types of place data to return
-        autocompleteFragment.setPlaceFields(Arrays.asList(Place.Field.ID, Place.Field.NAME, Place.Field.ADDRESS,Place.Field.ID,Place.Field.ADDRESS_COMPONENTS));
+        autocompleteFragment.setPlaceFields(Arrays.asList(Place.Field.ID, Place.Field.NAME, Place.Field.ADDRESS,Place.Field.ID,Place.Field.ADDRESS_COMPONENTS,Place.Field.LAT_LNG));
 
         autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
             @Override
             public void onPlaceSelected(@NonNull Place place) {
-                Log.i(TAG, "Place: + place.getName()" + ", " + place.getId());
+                Log.i(TAG, "Place: " + place.getName() + ", " + place.getLatLng());
                 mAutocomplete = place;
 
-                Log.d(TAG, "Clearing search input");
-                autocompleteFragment.setText("");
+                Log.d(TAG, "Moving camera to selected location");
+                moveCamera(new LatLng(place.getLatLng().latitude, place.getLatLng().longitude), DEFAULT_ZOOM);
 
-                geoLocate();
             }
 
             @Override
@@ -941,41 +929,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
     }
 
 
-    //___________________________ GEOLOCATION / CURRENT LOCATION FEATURES _______________________________
-
-    /**
-     *  This function allows the user to input a name and retrieve the address in the search bar
-     *  Also moves the camera to the searched location
-     * @return
-     * returns the Address value
-     */
-
-    private Address geoLocate(){
-        Log.d(TAG,"geoLocate: geolocating");
-
-        String autoSearch = mAutocomplete.getName();
-
-        Geocoder geocoder = new Geocoder(getActivity());
-        List<Address> list = new ArrayList<>();
-        try {
-            // only looking for one result
-            list = geocoder.getFromLocationName(autoSearch, 1);
-
-        }
-        catch (IOException e){
-            Log.e(TAG, "geoLocate: IOException: " + e.getMessage());
-
-        }
-        // that means we have some requests
-        if(list.size() > 0){
-            // made final for request fragment
-            address = list.get(0);
-            Log.d(TAG,"goeLocate: found a location: " + address.toString());
-
-            moveCamera(new LatLng(address.getLatitude(), address.getLongitude()), DEFAULT_ZOOM);
-        }
-        return address;
-    }
+    //___________________________  CURRENT LOCATION FEATURES _______________________________
 
     /**
      *  This function allows the camera to move to the user's current location when the location button is pressed
