@@ -280,7 +280,12 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
                 mAutocomplete = place;
 
                 Address searchAddress = geoLocate();
-                LatLng latLng = new LatLng(searchAddress.getLatitude(),searchAddress.getLongitude());
+                if (searchAddress == null) {
+                    Toast.makeText(getActivity(), "Location Retrieval Failed", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                
+                LatLng latLng = new LatLng(searchAddress.getLatitude(), searchAddress.getLongitude());
 
                 if (requestDialog != null) {
                     boolean dirty = false;
