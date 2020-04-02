@@ -33,6 +33,12 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import java.util.ArrayList;
 
+/**
+ * A custom list the extends an ArrayAdapter to display a Wallet object to
+ * display the users transaction history
+ * @author dalton
+ * @see Wallet
+ */
 public class CustomList extends ArrayAdapter<String> {
     private ArrayList<String> transactions;
     private Context context;

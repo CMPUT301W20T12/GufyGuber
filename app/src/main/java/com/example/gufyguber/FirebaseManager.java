@@ -887,28 +887,6 @@ public class FirebaseManager {
                 });
     }
 
-//        walletDoc.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-//            @Override
-//            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-//                if (task.isSuccessful()) {
-//                    DocumentSnapshot snapshot = task.getResult();
-//                    if (snapshot.exists()) {
-//                        String transaction = snapshot.getString(TRANSACTION);
-//                        returnValueListener.returnValue(new Wallet(transaction));
-//                    }
-//                    else {
-//                        Log.w(TAG, String.format("Wallet for user [%s] not found on Firestore.", userUID));
-//                        returnValueListener.returnValue(null);
-//                    }
-//                }
-//                else {
-//                    Log.e(TAG, "Fetching wallet failed. Issue communicating with Firestore.");
-//                    returnValueListener.returnValue(null);
-//                }
-//            }
-//        });
-//    }
-
     /**
      * Temporary function. We'll need to figure out a better solution than this.
      * @param userUID The user ID to look up.
@@ -1003,8 +981,11 @@ public class FirebaseManager {
     }
 
     /**
-     *
+     * Sets the ride status to EN_ROUTE when a driver has confirmed rider pick up
      * @param request
+     *  The RideRequest object to be updated
+     * @param returnFunction
+     *  Asynchronously returns true if request updated, false otherwise
      */
     public void confirmPickup(RideRequest request, final ReturnValueListener<Boolean> returnFunction) {
         // Alternative handler when in test mode
@@ -1026,8 +1007,11 @@ public class FirebaseManager {
     }
 
     /**
-     *
+     * Sets the ride status to ARRIVED when a rider has confirmed arrival
      * @param request
+     *  The RideRequest object to be updated
+     * @param returnFunction
+     *  Asynchronously returns true if request updated, false otherwise
      */
     public void confirmArrival(RideRequest request, final ReturnValueListener<Boolean> returnFunction) {
         // Alternative handler when in test mode
@@ -1048,6 +1032,13 @@ public class FirebaseManager {
         });
     }
 
+    /**
+     * Sets the ride status to COMPLETED when a payment has been received 
+     * @param request
+     *  The RideRequest object to be updated
+     * @param returnFunction
+     *  Asynchronously returns true if request updated, false otherwise
+     */
     public void completeRide(RideRequest request, final ReturnValueListener<Boolean> returnFunction) {
         // Alternative handler when in test mode
         if (testMode) {
