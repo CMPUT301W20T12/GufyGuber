@@ -18,7 +18,6 @@ import android.Manifest;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.location.Address;
-import android.location.Geocoder;
 import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
@@ -35,7 +34,6 @@ import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
-import androidx.test.espresso.action.ViewActions;
 
 import com.example.gufyguber.CreateRideRequestFragment;
 import com.example.gufyguber.DirectionsManager;
@@ -48,8 +46,6 @@ import com.example.gufyguber.OfflineCache;
 import com.example.gufyguber.R;
 import com.example.gufyguber.RideRequest;
 import com.example.gufyguber.ui.CurrentRequest.CancelRequestFragment;
-import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
-import com.example.gufyguber.Rider;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.ResolvableApiException;
 import com.google.android.gms.common.api.Status;
@@ -78,14 +74,10 @@ import com.google.android.libraries.places.api.model.RectangularBounds;
 import com.google.android.libraries.places.api.net.PlacesClient;
 import com.google.android.libraries.places.widget.AutocompleteSupportFragment;
 import com.google.android.libraries.places.widget.listener.PlaceSelectionListener;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.ListenerRegistration;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -121,18 +113,18 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
 
     private Address address;
 
-    //for permissions
+    //for location permissions
     private static final String FINE_LOCATION = Manifest.permission.ACCESS_FINE_LOCATION;
     private static final String COARSE_LOCATION = Manifest.permission.ACCESS_COARSE_LOCATION;
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1234;
     private static final float DEFAULT_ZOOM = 15f;
+    private Boolean mLocationPermissionsGranted = false;
+    private Boolean mGPSPermissionsGranted = false;
 
     //widgets
     private Place mAutocomplete;
     private ImageView mGps;
 
-    private Boolean mLocationPermissionsGranted = false;
-    private Boolean mGPSPermissionsGranted = false;
 
     /**
      *  This class is an intermediate step to differentiate the driver from the rider
@@ -253,14 +245,17 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
 
         //______________________________________ AutoComplete Widget ______________________________________
 
+        /* Google Guides : https://developers.google.com/places/android-sdk/autocomplete
+        */
+
         // need to initialize places
         if (!Places.isInitialized()) {
             Places.initialize(getActivity(), getString(R.string.api_key), Locale.CANADA);
             PlacesClient placesClient = Places.createClient(getActivity());
         }
-
-        AutocompleteSupportFragment autocompleteFragment;
+        final AutocompleteSupportFragment autocompleteFragment;
         autocompleteFragment = (AutocompleteSupportFragment) getChildFragmentManager().findFragmentById(R.id.autocomplete_fragment);
+
 
         //Bias in Edmonton (SE,NW)
         autocompleteFragment.setLocationBias(RectangularBounds.newInstance(
@@ -271,21 +266,16 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
         autocompleteFragment.setCountries("CA");
 
         //specify the types of place data to return
-        autocompleteFragment.setPlaceFields(Arrays.asList(Place.Field.ID, Place.Field.NAME, Place.Field.ADDRESS,Place.Field.ID,Place.Field.ADDRESS_COMPONENTS));
+        autocompleteFragment.setPlaceFields(Arrays.asList(Place.Field.ID, Place.Field.NAME, Place.Field.ADDRESS,Place.Field.ID,Place.Field.ADDRESS_COMPONENTS,Place.Field.LAT_LNG));
 
         autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
             @Override
             public void onPlaceSelected(@NonNull Place place) {
-                Log.i(TAG, "Place: + place.getName()" + ", " + place.getId());
+                Log.i(TAG, "Place: " + place.getName() + ", " + place.getLatLng());
                 mAutocomplete = place;
 
-                Address searchAddress = geoLocate();
-                if (searchAddress == null) {
-                    Toast.makeText(getActivity(), "Location Retrieval Failed", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-                
-                LatLng latLng = new LatLng(searchAddress.getLatitude(), searchAddress.getLongitude());
+                Log.d(TAG, "Moving camera to selected location");
+                moveCamera(new LatLng(place.getLatLng().latitude, place.getLatLng().longitude), DEFAULT_ZOOM);
 
                 if (requestDialog != null) {
                     boolean dirty = false;
@@ -295,8 +285,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
                         if (!requestDialog.hasDropoffData()) {
                             removeDropoffFromMap();
                         }
-                        requestDialog.setNewPickup(latLng);
-                        addPickupToMap(latLng);
+                        requestDialog.setNewPickup(place.getLatLng());
+                        addPickupToMap(place.getLatLng());
                         dirty = true;
                     }
 
@@ -305,8 +295,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
                         if (!requestDialog.hasPickupData()) {
                             removePickupFromMap();
                         }
-                        requestDialog.setNewDropoff(latLng);
-                        addDropoffToMap(latLng);
+                        requestDialog.setNewDropoff(place.getLatLng());
+                        addDropoffToMap(place.getLatLng());
                         dirty = true;
                     }
 
@@ -315,16 +305,13 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
                         dirty = false;
                     }
                 }
-
             }
-
             @Override
             public void onError(@NonNull Status status) {
                 Log.i(TAG, "And error occurred: " + status);
 
             }
         });
-
 
         // for current location
         mGps = v.findViewById(R.id.ic_gps);
@@ -340,14 +327,17 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
                 Log.d(TAG,"getGPS: do we have permissions? " +mLocationPermissionsGranted.toString());
 
 
-                if((ContextCompat.checkSelfPermission(getActivity(),Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) && mGPSPermissionsGranted) {
+                if((ContextCompat.checkSelfPermission(getActivity(),Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) && mGPSPermissionsGranted && mLocationPermissionsGranted) {
                     Log.d(TAG,"onClick: checking permissions");
                     mMap.setMyLocationEnabled(true);
                     mMap.getUiSettings().setMyLocationButtonEnabled(false);
                     getDeviceLocation();
+
                 }
                 else {
                     Log.d(TAG,"onClick: do we have permissions? " +mLocationPermissionsGranted.toString());
+                    Toast.makeText(getActivity(), "Please enable location to use this feature", Toast.LENGTH_SHORT).show();
+
                 }
             }
         });
@@ -467,14 +457,15 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
 
         View v = inflater.inflate(R.layout.fragment_driver_map, container, false);
         //______________________________________ AutoComplete Widget ______________________________________
-
+        /* Google Guides : https://developers.google.com/places/android-sdk/autocomplete
+         */
         // need to initialize places
         if (!Places.isInitialized()) {
             Places.initialize(getActivity(), getString(R.string.api_key), Locale.CANADA);
             PlacesClient placesClient = Places.createClient(getActivity());
         }
 
-        AutocompleteSupportFragment autocompleteFragment;
+        final AutocompleteSupportFragment autocompleteFragment;
         autocompleteFragment = (AutocompleteSupportFragment) getChildFragmentManager().findFragmentById(R.id.autocomplete_fragment);
 
         //Bias in Edmonton (SE,NW)
@@ -486,14 +477,17 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
         autocompleteFragment.setCountries("CA");
 
         //specify the types of place data to return
-        autocompleteFragment.setPlaceFields(Arrays.asList(Place.Field.ID, Place.Field.NAME, Place.Field.ADDRESS,Place.Field.ID,Place.Field.ADDRESS_COMPONENTS));
+        autocompleteFragment.setPlaceFields(Arrays.asList(Place.Field.ID, Place.Field.NAME, Place.Field.ADDRESS,Place.Field.ID,Place.Field.ADDRESS_COMPONENTS,Place.Field.LAT_LNG));
 
         autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
             @Override
             public void onPlaceSelected(@NonNull Place place) {
-                Log.i(TAG, "Place: + place.getName()" + ", " + place.getId());
+                Log.i(TAG, "Place: " + place.getName() + ", " + place.getLatLng());
                 mAutocomplete = place;
-                geoLocate();
+
+                Log.d(TAG, "Moving camera to selected location");
+                moveCamera(new LatLng(place.getLatLng().latitude, place.getLatLng().longitude), DEFAULT_ZOOM);
+
             }
 
             @Override
@@ -517,7 +511,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
                 Log.d(TAG,"getGPS: do we have permissions? " +mLocationPermissionsGranted.toString());
 
 
-                if(mLocationPermissionsGranted && mGPSPermissionsGranted) {
+                if((ContextCompat.checkSelfPermission(getActivity(),Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) && mGPSPermissionsGranted && mLocationPermissionsGranted) {
                     Log.d(TAG,"onClick: checking permissions");
                     mMap.setMyLocationEnabled(true);
                     mMap.getUiSettings().setMyLocationButtonEnabled(false);
@@ -525,6 +519,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
                 }
                 else {
                     Log.d(TAG,"onClick: do we have permissions? " +mLocationPermissionsGranted.toString());
+                    Toast.makeText(getActivity(), "Please enable location to use this feature", Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -603,7 +598,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
             zoomFit();
         }
         // If no request is in progress, and permissions have been granted, use location for initial map zoom
-        else if (mLocationPermissionsGranted && mGPSPermissionsGranted) {
+        else if ((ContextCompat.checkSelfPermission(getActivity(),Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) && mLocationPermissionsGranted && mGPSPermissionsGranted) {
             mMap.setMyLocationEnabled(true);
             mMap.getUiSettings().setMyLocationButtonEnabled(false);
             getDeviceLocation();
@@ -761,7 +756,16 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
         }
     }
 
+    /**
+     * This function allows the map to zoom to fit both pickup and dropoff markers when the information is filled
+     */
+
     public void zoomFit() {
+        /* Stackoverflow post by sharmilee https://stackoverflow.com/users/1759525/sharmilee
+           Answer for bounds: https://stackoverflow.com/a/16416817, girish-nair https://stackoverflow.com/users/1231359/girish-nair
+           Answer for camera update: https://stackoverflow.com/questions/16416041/zoom-to-fit-all-markers-on-map-google-maps-v2#comment33527887_16416817, rahul sainani https://stackoverflow.com/users/1262089/rahul-sainani
+           This makes the camera zoom appropriately to fit markers
+        */
         Log.d(TAG, "zoomFit: initializing ");
 
         if (pickupMarker == null || dropoffMarker == null || mMap == null) {
@@ -938,53 +942,22 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
     }
 
 
-    //___________________________ GEOLOCATION / CURRENT LOCATION FEATURES _______________________________
-
-    /**
-     *  This function allows the user to input a name and retrieve the address in the search bar
-     *  Also moves the camera to the searched location
-     * @return
-     * returns the Address value
-     */
-
-    private Address geoLocate(){
-        Log.d(TAG,"geoLocate: geolocating");
-
-        String autoSearch = mAutocomplete.getName();
-
-        Geocoder geocoder = new Geocoder(getActivity());
-        List<Address> list = new ArrayList<>();
-        try {
-            // only looking for one result
-            list = geocoder.getFromLocationName(autoSearch, 1);
-
-        }
-        catch (IOException e){
-            Log.e(TAG, "geoLocate: IOException: " + e.getMessage());
-
-        }
-        // that means we have some requests
-        if(list.size() > 0){
-            // made final for request fragment
-            address = list.get(0);
-            Log.d(TAG,"goeLocate: found a location: " + address.toString());
-
-            moveCamera(new LatLng(address.getLatitude(), address.getLongitude()), DEFAULT_ZOOM);
-        }
-        return address;
-    }
+    //___________________________  CURRENT LOCATION FEATURES _______________________________
 
     /**
      *  This function allows the camera to move to the user's current location when the location button is pressed
      */
 
     private void getDeviceLocation() {
+        /*
+            GitHub: Mitchtabian Repository: https://github.com/mitchtabian/Google-Maps-Google-Places
+         */
         Log.d(TAG,"getDeviceLocation: getting the device's current location");
         //vars
         FusedLocationProviderClient mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(getActivity());
 
         try {
-            if(mLocationPermissionsGranted && mGPSPermissionsGranted) {
+            if((ContextCompat.checkSelfPermission(getActivity(),Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) &&mLocationPermissionsGranted && mGPSPermissionsGranted) {
                 Task location = mFusedLocationProviderClient.getLastLocation();
                 location.addOnCompleteListener(new OnCompleteListener() {
                     @Override
@@ -993,8 +966,13 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
                             Log.d(TAG,"onComplete: found location");
                             Location currentLocation = (Location) task.getResult();
 
-                            moveCamera(new LatLng(currentLocation.getLatitude(),currentLocation.getLongitude()),DEFAULT_ZOOM);
-
+                            if (currentLocation == null){
+                                Log.d(TAG,"onComplete: location services is turned off");
+                                Toast.makeText(getActivity(), "Please enable location to use this feature", Toast.LENGTH_SHORT).show();
+                            }
+                            else {
+                                moveCamera(new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude()), DEFAULT_ZOOM);
+                            }
                         }
                         else {
                             Log.d(TAG,"onComplete: current location is null");
@@ -1030,6 +1008,11 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
      */
 
     private void getLocationPermissions() {
+        /* Google Guide: https://developers.google.com/android/guides/permissions
+           This asks the user to allow the app to use location services
+        */
+
+
         Log.d(TAG,"getLocationPermissions: getting the APP's location permissions");
         String[] permissions = {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION};
 
@@ -1048,7 +1031,19 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
 
     }
 
+    /**
+     * This function checks if we have permissions and will initialize the map
+     * @param requestCode
+     * @param permissions
+     * @param grantResults
+     */
+
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        /* Stackoverflow post by mufri-a https://stackoverflow.com/users/4016369/mufri-a
+           Answer: https://stackoverflow.com/a/50796199, arul pandian https://stackoverflow.com/users/1688068/arul-pandian
+           This checks all of our permissions if they are granted
+        */
+
         mLocationPermissionsGranted = false;
 
         switch (requestCode) {
@@ -1058,7 +1053,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
                         if (grantResults[i] != PackageManager.PERMISSION_GRANTED) {
                             mLocationPermissionsGranted = false;
                             Log.d(TAG,"onRequestPermissionsResult: do we have permissions? " +mLocationPermissionsGranted.toString());
-                            Toast.makeText(getActivity(), "Please allow us to use your location",Toast.LENGTH_SHORT).show();
                             return;
                         }
                         mLocationPermissionsGranted = true;
@@ -1074,14 +1068,17 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
      */
 
     public void getGPS() {
+        /* Stackoverflow post by mufri-a https://stackoverflow.com/users/4016369/mufri-a
+           Answer: https://stackoverflow.com/a/50796199, arul pandian https://stackoverflow.com/users/1688068/arul-pandian
+           This asks the device for location permissions
+        */
         Log.d(TAG,"askLocationPermissions: This gets the permission for GPS");
         LocationRequest mLocationRequest = new LocationRequest();
         mLocationRequest.setInterval(10);
         mLocationRequest.setSmallestDisplacement(10);
         mLocationRequest.setFastestInterval(10);
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-        LocationSettingsRequest.Builder builder = new
-                LocationSettingsRequest.Builder();
+        LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder();
         builder.addLocationRequest(mLocationRequest);
 
         Task<LocationSettingsResponse> task = LocationServices.getSettingsClient(getActivity()).checkLocationSettings(builder.build());
