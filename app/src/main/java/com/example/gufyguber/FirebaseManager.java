@@ -755,6 +755,12 @@ public class FirebaseManager {
      * @param rating The rating that the rider is assigning
      */
     public void storeRatingInfo(String driverUID, Rating rating) {
+        // Alternative handler when in test mode
+        if (testMode) {
+            Log.e(TAG, "Cannot store rating info on Firestore in test mode");
+            return;
+        }
+
         CollectionReference ratings = FirebaseFirestore.getInstance().collection(RATING_COLLECTION);
         HashMap<String, Object> ratingData = new HashMap<>();
 
@@ -782,6 +788,13 @@ public class FirebaseManager {
      * @param returnValueListener The callback to use once we've finished retrieving a Rating
      */
     public void fetchRatingInfo(final String driverUID, final ReturnValueListener<Rating> returnValueListener) {
+        // Alternative handler when in test mode
+        if (testMode) {
+            Log.e(TAG, "Cannot retrieve rating info from Firestore in test mode");
+            returnValueListener.returnValue(null);
+            return;
+        }
+
         DocumentReference ratingDoc = FirebaseFirestore.getInstance().collection(RATING_COLLECTION).document(driverUID);
         ratingDoc.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
@@ -814,6 +827,12 @@ public class FirebaseManager {
      * the wallet in which a transaction is being added to
      */
     public void storeWalletInfo(final String userUID, final Wallet wallet, final ReturnValueListener<Boolean> returnValueListener) {
+        // Alternative handler when in test mode
+        if (testMode) {
+            Log.e(TAG, "Cannot store wallet info on Firestore in test mode");
+            returnValueListener.returnValue(false);
+            return;
+        }
 
         if (OfflineCache.getReference().retrieveCurrentUser() instanceof Driver) {
             CollectionReference transactions = FirebaseFirestore.getInstance().collection("users");
@@ -872,6 +891,13 @@ public class FirebaseManager {
      * The callback to use once we've finished retrieving a Wallet
      */
     public void fetchWalletInfo(final String userUID, final ReturnValueListener<Wallet> returnValueListener) {
+        // Alternative handler when in test mode
+        if (testMode) {
+            Log.e(TAG, "Cannot fetch wallet info from Firestore in test mode");
+            returnValueListener.returnValue(null);
+            return;
+        }
+
         CollectionReference transactionCollection = FirebaseFirestore.getInstance().collection("users").document(userUID).collection("transactions");
         transactionCollection.get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
@@ -950,6 +976,10 @@ public class FirebaseManager {
      * @param driverUID The UID associated with the driver that belongs to the rating
      */
     public void deleteRatingInfo(final String driverUID) {
+        if (testMode) {
+            Log.e(TAG, "Cannot delete rating from Firebase in test mode");
+            return;
+        }
         DocumentReference ratingDoc = FirebaseFirestore.getInstance().collection(RATING_COLLECTION).document(driverUID);
         ratingDoc.delete();
     }

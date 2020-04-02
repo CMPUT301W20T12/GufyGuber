@@ -135,19 +135,23 @@ public class ProfileFragment extends Fragment {
         // Re-populate the fields after a query to make sure the driver rating is up-to-date
         // Could replace with a proper Firestore listener if we have time
         if (driver) {
-            FirebaseManager.getReference().fetchDriverInfo(FirebaseAuth.getInstance().getCurrentUser().getUid(), new FirebaseManager.ReturnValueListener<Driver>() {
+            FirebaseManager.getReference().fetchDriverInfo(OfflineCache.getReference().retrieveCurrentUser().getUID(), new FirebaseManager.ReturnValueListener<Driver>() {
                 @Override
                 public void returnValue(Driver value) {
-                    OfflineCache.getReference().cacheCurrentUser(value);
-                    populateForm(value);
+                    if (value != null) {
+                        OfflineCache.getReference().cacheCurrentUser(value);
+                        populateForm(value);
+                    }
                 }
             });
         } else {
-            FirebaseManager.getReference().fetchRiderInfo(FirebaseAuth.getInstance().getCurrentUser().getUid(), new FirebaseManager.ReturnValueListener<Rider>() {
+            FirebaseManager.getReference().fetchRiderInfo(OfflineCache.getReference().retrieveCurrentUser().getUID(), new FirebaseManager.ReturnValueListener<Rider>() {
                 @Override
                 public void returnValue(Rider value) {
-                    OfflineCache.getReference().cacheCurrentUser(value);
-                    populateForm(value);
+                    if (value != null) {
+                        OfflineCache.getReference().cacheCurrentUser(value);
+                        populateForm(value);
+                    }
                 }
             });
         }
