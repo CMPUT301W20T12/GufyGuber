@@ -194,6 +194,7 @@ public class SignInActivity extends AppCompatActivity {
                 // Sign into firebase with google info
                 firebaseAuthWithGoogle(account);
             } catch (ApiException e) {
+                findViewById(R.id.loading).setVisibility(View.GONE);
                 Log.w(TAG, "Sign in failed", e);
                 updateUI(null);
             }
