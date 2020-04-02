@@ -1033,7 +1033,7 @@ public class FirebaseManager {
     }
 
     /**
-     * Sets the ride status to COMPLETED when a payment has been received 
+     * Sets the ride status to COMPLETED when a payment has been received
      * @param request
      *  The RideRequest object to be updated
      * @param returnFunction

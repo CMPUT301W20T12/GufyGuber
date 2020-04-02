@@ -251,8 +251,12 @@ public class ProfileFragment extends Fragment {
         });
     }
 
-    // https://stackoverflow.com/a/43061269
+
     private void closeFragment(){
+        /* Stackoverflow post by esQmo_ https://stackoverflow.com/users/5374691/esqmo
+           Answer: https://stackoverflow.com/a/43061269, sreejith v s https://stackoverflow.com/users/5206523/sreejith-v-s
+           This dismisses the keyboard if its still open when the fragment closes.
+        */
         if (getActivity().getCurrentFocus() != null) {
             InputMethodManager inputManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
             inputManager.hideSoftInputFromWindow(getActivity().getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);

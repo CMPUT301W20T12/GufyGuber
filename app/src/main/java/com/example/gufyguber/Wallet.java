@@ -33,7 +33,7 @@ import java.util.ListIterator;
 
 /**
  * This class models a User's wallet
- * @author woldegio
+ * @author woldegio, harrison, dalton
  */
 public class Wallet {
     private ArrayList<String> transactions;

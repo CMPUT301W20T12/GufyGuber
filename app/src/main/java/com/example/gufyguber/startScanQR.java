@@ -106,12 +106,13 @@ public class startScanQR extends AppCompatActivity {
                     @Override
                     public void run() {
                         result.setText(barcode.displayValue);
+                        // when the QR code is scanned, ride status will be updated to COMPLETE
                         FirebaseManager.getReference().completeRide(OfflineCache.getReference().retrieveCurrentRideRequest(), new FirebaseManager.ReturnValueListener<Boolean>() {
                             @Override
                             public void returnValue(Boolean value) {
                                 if (value == null) {
                                     Log.e(TAG, "Setting ride request to complete failed.");
-                                } else {
+                                } else {    // If status successfully updates, store the transaction in the Drive's wallet
                                     FirebaseManager.getReference().storeWalletInfo(OfflineCache.getReference().retrieveCurrentUser().getUID(), new Wallet(barcode.displayValue), new FirebaseManager.ReturnValueListener<Boolean>() {
                                         @Override
                                         public void returnValue(Boolean value) {

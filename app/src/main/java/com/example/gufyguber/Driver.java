@@ -42,11 +42,15 @@ public class Driver extends User{
      * @param email
      *  The email address associated with the rider's account
      * @param firstName
-     *  The rider's first name
+     *  The driver's first name
      * @param lastName
-     * The riders' last name
+     * The drivers' last name
      * @param phoneNumber
-     *  The rider's phone number
+     *  The driver's phone number
+     * @param vehicle
+     *  The driver's vehicle
+     * @param rating
+     *  The driver'd rating
      */
     public Driver(String UID, String email, String firstName, String lastName,
                   String phoneNumber, Vehicle vehicle, Rating rating) {

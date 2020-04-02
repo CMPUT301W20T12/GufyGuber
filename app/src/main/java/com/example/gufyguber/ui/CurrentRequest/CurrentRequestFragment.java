@@ -90,6 +90,11 @@ public class CurrentRequestFragment extends Fragment implements FirebaseManager.
         }
     }
 
+    /**
+     * Creates the view of UI elements, depending on if user is a Rider or Driver
+     * @param view
+     * @param savedInstanceState
+     */
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -130,6 +135,10 @@ public class CurrentRequestFragment extends Fragment implements FirebaseManager.
         }
     }
 
+    /**
+     * Updates CUI elements according to the Driver's layout
+     * @param request
+     */
     private void updateUIDriver(final RideRequest request) {
         if (request != null) {
             FirebaseManager.getReference().fetchRiderInfo(request.getRiderUID(), new FirebaseManager.ReturnValueListener<Rider>() {
@@ -202,6 +211,10 @@ public class CurrentRequestFragment extends Fragment implements FirebaseManager.
         }
     }
 
+    /**
+     * Updates CUI elements according to the Rider's layout
+     * @param request
+     */
     private void updateUIRider(final RideRequest request) {
         if (request != null) {
             if (request.getDriverUID() == null) {
@@ -236,7 +249,10 @@ public class CurrentRequestFragment extends Fragment implements FirebaseManager.
             }
             rideStatus.setText(getResources().getString(R.string.request_status, request.getStatus()));
             suggestedFareText.setText(String.format("$%.2f", request.getOfferedFare()));
+
             if (request.getStatus().toString().equals("En Route")) {
+                // When status is En Route, make rider's button set to confirm
+                // arrival at drop off destination
                 confirmArrival.setVisibility(View.VISIBLE);
                 confirmArrival.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -256,7 +272,10 @@ public class CurrentRequestFragment extends Fragment implements FirebaseManager.
                     }
                 });
             }
+
             if (request.getStatus().toString().equals("Arrived")) {
+                // When status is Arrived, give rider a button that
+                // generates QR code for their driver
                 cancelBtn.setVisibility(View.GONE);
                 confirmArrival.setVisibility(View.GONE);
                 makePayment.setVisibility(View.VISIBLE);
@@ -275,8 +294,8 @@ public class CurrentRequestFragment extends Fragment implements FirebaseManager.
         } else {
             rideStatus.setText(getResources().getString(R.string.request_status, ' '));
         }
-
     }
+
     private void activateDriverContactButton(final Driver driver, Button contactBtn){
         contactBtn.setVisibility(View.VISIBLE);
         contactBtn.setOnClickListener(new View.OnClickListener() {

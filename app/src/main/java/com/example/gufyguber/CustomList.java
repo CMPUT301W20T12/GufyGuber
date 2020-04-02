@@ -35,7 +35,8 @@ import java.util.ArrayList;
 
 /**
  * A custom list the extends an ArrayAdapter to display a Wallet object to
- * display the users transaction history
+ * display the users transaction history. Based on CustomList class implemented
+ * in labs.
  * @author dalton
  * @see Wallet
  */
