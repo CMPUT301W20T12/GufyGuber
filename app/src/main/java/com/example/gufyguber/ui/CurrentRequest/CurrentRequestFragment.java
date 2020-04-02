@@ -153,8 +153,8 @@ public class CurrentRequestFragment extends Fragment implements FirebaseManager.
                     }
                 }
             });
-            pickupLocationText.setText(LocationInfo.latlngToString(request.getLocationInfo().getPickup()));
-            dropoffLocationText.setText(LocationInfo.latlngToString(request.getLocationInfo().getDropoff()));
+            pickupLocationText.setText(request.getLocationInfo().getPickupName());
+            dropoffLocationText.setText(request.getLocationInfo().getDropoffName());
 
             formatter = new SimpleDateFormat("h:mm a, MMMM dd yyyy", Locale.CANADA);
             if (request.getTimeInfo().getRequestOpenTime() != null) {
@@ -234,8 +234,8 @@ public class CurrentRequestFragment extends Fragment implements FirebaseManager.
 
                 });
             }
-            pickupLocationText.setText(LocationInfo.latlngToString(request.getLocationInfo().getPickup()));
-            dropoffLocationText.setText(LocationInfo.latlngToString(request.getLocationInfo().getDropoff()));
+            pickupLocationText.setText(request.getLocationInfo().getPickupName());
+            dropoffLocationText.setText(request.getLocationInfo().getDropoffName());
             formatter = new SimpleDateFormat("h:mm a, MMMM dd yyyy", Locale.CANADA);
             if (request.getTimeInfo().getRequestOpenTime() != null) {
                 pickupTimeText.setText(formatter.format(request.getTimeInfo().getRequestOpenTime()));

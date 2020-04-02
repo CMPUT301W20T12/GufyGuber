@@ -280,12 +280,14 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
                 if (requestDialog != null) {
                     boolean dirty = false;
 
+                    // Build a string representation to show to users
+                    String placeString = String.format("%s - %s", place.getName(), place.getAddress());
                     if (requestDialog.settingStart) {
                         // If we have an active request, it's confusing to show its pins while we do this
                         if (!requestDialog.hasDropoffData()) {
                             removeDropoffFromMap();
                         }
-                        requestDialog.setNewPickup(place.getLatLng());
+                        requestDialog.setNewPickup(place.getLatLng(), placeString);
                         addPickupToMap(place.getLatLng());
                         dirty = true;
                     }
@@ -295,7 +297,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
                         if (!requestDialog.hasPickupData()) {
                             removePickupFromMap();
                         }
-                        requestDialog.setNewDropoff(place.getLatLng());
+                        requestDialog.setNewDropoff(place.getLatLng(), placeString);
                         addDropoffToMap(place.getLatLng());
                         dirty = true;
                     }
@@ -305,6 +307,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
                         dirty = false;
                     }
                 }
+
+                autocompleteFragment.setText("");
             }
             @Override
             public void onError(@NonNull Status status) {
@@ -625,7 +629,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
                             if (!requestDialog.hasDropoffData()) {
                                 removeDropoffFromMap();
                             }
-                            requestDialog.setNewPickup(latLng);
+                            requestDialog.setNewPickup(latLng, null);
                             addPickupToMap(latLng);
                             dirty = true;
                         }
@@ -635,7 +639,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
                             if (!requestDialog.hasPickupData()) {
                                 removePickupFromMap();
                             }
-                            requestDialog.setNewDropoff(latLng);
+                            requestDialog.setNewDropoff(latLng, null);
                             addDropoffToMap(latLng);
                             dirty = true;
                         }

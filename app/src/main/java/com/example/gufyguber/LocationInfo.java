@@ -34,9 +34,37 @@ public class LocationInfo {
     public void setPickup(LatLng pickup) { this.pickup = pickup; }
     public LatLng getPickup() { return pickup; }
 
+    private String pickupName;
+    public void setPickupName(String pickupName) { this.pickupName = pickupName; }
+
+    /**
+     * @return The name of the pickup location if set, or a string representation of the pickup LatLng otherwise
+     */
+    public String getPickupName() {
+        if (pickupName == null) {
+            return latlngToString(pickup);
+        } else {
+            return pickupName;
+        }
+    }
+
     private LatLng dropoff;
     public void setDropoff(LatLng dropoff) { this.dropoff = dropoff; }
-    public LatLng getDropoff() { return this.dropoff; }
+    public LatLng getDropoff() { return dropoff; }
+
+    private String dropoffName;
+    public void setDropoffName(String dropoffName) { this.dropoffName = dropoffName; }
+
+    /**
+     * @return The name of the pickup location if set, or a string representation of the pickup LatLng otherwise
+     */
+    public String getDropoffName() {
+        if (dropoffName == null) {
+            return latlngToString(dropoff);
+        } else {
+            return dropoffName;
+        }
+    }
 
     public LatLng current;
     public void setCurrent(LatLng current) { this.current = current; }

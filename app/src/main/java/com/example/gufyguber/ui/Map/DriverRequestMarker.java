@@ -79,11 +79,12 @@ public class DriverRequestMarker {
         marker = mMap.addMarker(new MarkerOptions()
                 .position(rideRequest.getLocationInfo().getPickup())
                 .title(markerTitle)
-                .snippet(String.format("Opened: %s\nPickup: %s\nDrop Off: %s\nTotal Distance: %.0f Metres\n Fare: $%.2f",
+                .snippet(String.format("Opened: %s\n\nPickup: %s\n\nDrop Off: %s\n\nTotal Distance: %.2f km\n\nFare: $%.2f",
                         rideRequest.getTimeInfo().getRequestOpenTime().toString(),
-                        LocationInfo.latlngToString(rideRequest.getLocationInfo().getPickup()),
-                        LocationInfo.latlngToString(rideRequest.getLocationInfo().getPickup()),
-                        rideRequest.getLocationInfo().getTotalDist(), rideRequest.getOfferedFare()))
+                        rideRequest.getLocationInfo().getPickupName(),
+                        rideRequest.getLocationInfo().getDropoffName(),
+                        rideRequest.getLocationInfo().getTotalDist() / 1000.0,
+                        rideRequest.getOfferedFare()))
                 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE))
         );
 

@@ -119,7 +119,9 @@ public class FirebaseManager {
     public static final String DRIVER_KEY = "driver_uid";
     public static final String FARE_KEY = "fare";
     public static final String PICKUP_KEY = "pickup";
+    public static final String PICKUP_NAME_KEY = "pickup_name";
     public static final String DROPOFF_KEY = "dropoff";
+    public static final String DROPOFF_NAME_KEY = "dropoff_name";
     public static final String REQUEST_OPEN_TIME_KEY = "request_start";
     public static final String REQUEST_ACCEPTED_TIME_KEY = "request_accepted";
     public static final String REQUEST_CLOSED_TIME_KEY = "request_closed";
@@ -170,7 +172,9 @@ public class FirebaseManager {
         data.put(STATUS_KEY, rideRequest.getStatus().name());
         data.put(FARE_KEY, rideRequest.getOfferedFare());
         data.put(PICKUP_KEY, rideRequest.getLocationInfo().pickupToGeoPoint());
+        data.put(PICKUP_NAME_KEY, rideRequest.getLocationInfo().getPickupName());
         data.put(DROPOFF_KEY, rideRequest.getLocationInfo().dropoffToGeoPoint());
+        data.put(DROPOFF_NAME_KEY, rideRequest.getLocationInfo().getDropoffName());
         data.put(REQUEST_OPEN_TIME_KEY, rideRequest.getTimeInfo().getRequestOpenTime());
         data.put(REQUEST_ACCEPTED_TIME_KEY, rideRequest.getTimeInfo().getRequestAcceptedTime());
         data.put(REQUEST_CLOSED_TIME_KEY, rideRequest.getTimeInfo().getRequestClosedTime());
@@ -234,8 +238,12 @@ public class FirebaseManager {
         RideRequest.Status rideStatus = RideRequest.Status.valueOf(document.getString(STATUS_KEY));
         float fare = document.getDouble(FARE_KEY).floatValue();
         GeoPoint pickup = document.getGeoPoint(PICKUP_KEY);
+        String pickupName = document.getString(PICKUP_NAME_KEY);
         GeoPoint dropoff = document.getGeoPoint(DROPOFF_KEY);
+        String dropoffName = document.getString(DROPOFF_NAME_KEY);
         LocationInfo locationInfo = new LocationInfo(pickup, dropoff);
+        locationInfo.setPickupName(pickupName);
+        locationInfo.setDropoffName(dropoffName);
         Date requestOpenDate = document.getDate(REQUEST_OPEN_TIME_KEY);
         Date requestAcceptedDate = document.getDate(REQUEST_ACCEPTED_TIME_KEY);
         Date requestClosedDate = document.getDate(REQUEST_CLOSED_TIME_KEY);

@@ -80,12 +80,12 @@ public class CreateRideRequestFragment extends DialogFragment {
 
         if (tempLocationInfo != null) {
             if (tempLocationInfo.getPickup() != null) {
-                startLocationEditText.setText(LocationInfo.latlngToString(tempLocationInfo.getPickup()));
+                startLocationEditText.setText(tempLocationInfo.getPickupName());
             } else {
                 startLocationEditText.setText("");
             }
             if (tempLocationInfo.getDropoff() != null) {
-                endLocationEditText.setText(LocationInfo.latlngToString(tempLocationInfo.getDropoff()));
+                endLocationEditText.setText(tempLocationInfo.getDropoffName());
             } else {
                 endLocationEditText.setText("");
             }
@@ -204,21 +204,23 @@ public class CreateRideRequestFragment extends DialogFragment {
         return dialog;
     }
 
-    public void setNewPickup(LatLng pickup) {
+    public void setNewPickup(LatLng pickup, String pickupName) {
         if (tempLocationInfo == null) {
             tempLocationInfo = new LocationInfo();
         }
 
         tempLocationInfo.setPickup(pickup);
+        tempLocationInfo.setPickupName(pickupName);
         settingStart = false;
     }
 
-    public void setNewDropoff(LatLng dropoff) {
+    public void setNewDropoff(LatLng dropoff, String dropoffName) {
         if (tempLocationInfo == null) {
             tempLocationInfo = new LocationInfo();
         }
 
         tempLocationInfo.setDropoff(dropoff);
+        tempLocationInfo.setDropoffName(dropoffName);
         settingEnd = false;
     }
 
