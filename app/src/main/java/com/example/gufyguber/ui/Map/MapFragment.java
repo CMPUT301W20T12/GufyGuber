@@ -569,6 +569,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
 
     private void riderOnViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        // Need to subscribe a RideRequest listener for Rider view if a request is active and there is no current user
+        // This can happen if the rider closes the app/starts a new map fragment with a request open
         if (rideRequestListener == null && OfflineCache.getReference().retrieveCurrentRideRequest() != null) {
             rideRequestListener = FirebaseManager.getReference().listenToRideRequest(OfflineCache.getReference().retrieveCurrentRideRequest().getRiderUID(), this);
         }
@@ -870,6 +872,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
             }
         }
 
+        // If user is a rider, we update what FAB is available for them depending
+        // on the current ride status
         if(!isDriver) {
             switch (updatedValue.getStatus()) {
                 // freeeee fallin'
