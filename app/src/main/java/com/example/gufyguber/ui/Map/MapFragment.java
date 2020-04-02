@@ -245,6 +245,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
 
         //______________________________________ AutoComplete Widget ______________________________________
 
+        /* Google Guides : https://developers.google.com/places/android-sdk/autocomplete
+        */
+
         // need to initialize places
         if (!Places.isInitialized()) {
             Places.initialize(getActivity(), getString(R.string.api_key), Locale.CANADA);
@@ -454,7 +457,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
 
         View v = inflater.inflate(R.layout.fragment_driver_map, container, false);
         //______________________________________ AutoComplete Widget ______________________________________
-
+        /* Google Guides : https://developers.google.com/places/android-sdk/autocomplete
+         */
         // need to initialize places
         if (!Places.isInitialized()) {
             Places.initialize(getActivity(), getString(R.string.api_key), Locale.CANADA);
@@ -755,6 +759,11 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
      */
 
     public void zoomFit() {
+        /* Stackoverflow post by sharmilee https://stackoverflow.com/users/1759525/sharmilee
+           Answer for bounds: https://stackoverflow.com/a/16416817, girish-nair https://stackoverflow.com/users/1231359/girish-nair
+           Answer for camera update: https://stackoverflow.com/questions/16416041/zoom-to-fit-all-markers-on-map-google-maps-v2#comment33527887_16416817, rahul sainani https://stackoverflow.com/users/1262089/rahul-sainani
+           This makes the camera zoom appropriately to fit markers
+        */
         Log.d(TAG, "zoomFit: initializing ");
 
         if (pickupMarker == null || dropoffMarker == null || mMap == null) {
@@ -936,6 +945,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
      */
 
     private void getDeviceLocation() {
+        /*
+            GitHub: Mitchtabian Repository: https://github.com/mitchtabian/Google-Maps-Google-Places
+         */
         Log.d(TAG,"getDeviceLocation: getting the device's current location");
         //vars
         FusedLocationProviderClient mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(getActivity());
@@ -992,6 +1004,11 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
      */
 
     private void getLocationPermissions() {
+        /* Google Guide: https://developers.google.com/android/guides/permissions
+           This asks the user to allow the app to use location services
+        */
+
+
         Log.d(TAG,"getLocationPermissions: getting the APP's location permissions");
         String[] permissions = {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION};
 
@@ -1018,6 +1035,11 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
      */
 
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        /* Stackoverflow post by mufri-a https://stackoverflow.com/users/4016369/mufri-a
+           Answer: https://stackoverflow.com/a/50796199, arul pandian https://stackoverflow.com/users/1688068/arul-pandian
+           This checks all of our permissions if they are granted
+        */
+
         mLocationPermissionsGranted = false;
 
         switch (requestCode) {
@@ -1042,14 +1064,17 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, CreateR
      */
 
     public void getGPS() {
+        /* Stackoverflow post by mufri-a https://stackoverflow.com/users/4016369/mufri-a
+           Answer: https://stackoverflow.com/a/50796199, arul pandian https://stackoverflow.com/users/1688068/arul-pandian
+           This asks the device for location permissions
+        */
         Log.d(TAG,"askLocationPermissions: This gets the permission for GPS");
         LocationRequest mLocationRequest = new LocationRequest();
         mLocationRequest.setInterval(10);
         mLocationRequest.setSmallestDisplacement(10);
         mLocationRequest.setFastestInterval(10);
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-        LocationSettingsRequest.Builder builder = new
-                LocationSettingsRequest.Builder();
+        LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder();
         builder.addLocationRequest(mLocationRequest);
 
         Task<LocationSettingsResponse> task = LocationServices.getSettingsClient(getActivity()).checkLocationSettings(builder.build());
