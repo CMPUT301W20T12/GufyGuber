@@ -60,13 +60,6 @@ public class Scan extends AppCompatActivity {
     BarcodeDetector barcode;
     CameraSource cameraSource;
     SurfaceHolder holder;
-//    String userID;
-//    String transaction;
-//
-//    private FirebaseAuth mAuth;
-//    private FirebaseFirestore db;
-//
-//    public static final String TRANSACTION_COLLECTION = "transactions";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -87,11 +80,6 @@ public class Scan extends AppCompatActivity {
             Toast.makeText(getApplicationContext(), "Error", Toast.LENGTH_LONG).show();
             this.finish();
         }
-//        mAuth = FirebaseAuth.getInstance();
-//        db = FirebaseFirestore.getInstance();
-//        RideRequest currentRequest = OfflineCache.getReference().retrieveCurrentRideRequest();
-//        userID = mAuth.getCurrentUser().getUid();
-
 
         cameraSource = new CameraSource.Builder(this, barcode)
                 .setFacing(CameraSource.CAMERA_FACING_BACK)
@@ -137,15 +125,6 @@ public class Scan extends AppCompatActivity {
             public void receiveDetections(Detector.Detections<Barcode> detections) {
                 final SparseArray<Barcode> barcodes = detections.getDetectedItems();
                 if (barcodes.size() > 0) {
-//                    db.collection(TRANSACTION_COLLECTION).document(userID).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-//                        @Override
-//                        public void onSuccess(DocumentSnapshot documentSnapshot) {
-//                            if (documentSnapshot.exists()) {
-//                                // not sure how to add here
-//                                //db.collection(TRANSACTION_COLLECTION).document(userID).update(barcode)
-//                            }
-//                        }
-//                    });
                     Intent intent = new Intent();
                     intent.putExtra("barcode", barcodes.valueAt(0));
                     setResult(RESULT_OK, intent);

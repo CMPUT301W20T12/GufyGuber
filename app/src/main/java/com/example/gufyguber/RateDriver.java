@@ -35,6 +35,11 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+/**
+ * This activity allows the Rider to rate the Driver
+ * @author kenzbauer
+ */
+
 public class RateDriver extends AppCompatActivity {
     ImageButton thumbsUp;
     ImageButton thumbsDown;

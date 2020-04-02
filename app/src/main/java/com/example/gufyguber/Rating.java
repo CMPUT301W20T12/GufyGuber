@@ -78,7 +78,7 @@ public class Rating {
      * @param negative
      * The negative number of ratings
      * @return
-     * Return the positive ratings percentage
+     * Return the positive ratings percentage as a string
      */
     public String getPosPercent(int positive, int negative) {
         int total = positive + negative;
@@ -101,7 +101,7 @@ public class Rating {
      * @param negative
      * The negative number of ratings
      * @return
-     * Return the negative ratings percentage
+     * Return the negative ratings percentage as a string
      */
     public String getNegPercent(int positive, int negative) {
         int total = positive + negative;

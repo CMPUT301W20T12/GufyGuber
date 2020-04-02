@@ -44,9 +44,6 @@ import com.journeyapps.barcodescanner.BarcodeEncoder;
 
 /**
  * This activity encodes a message and stores it as a Bitmap to be shown to the user.
- *
- * Right now the message is set to an arbitrary value, but it will be set to the rider's username
- *      and the cost of the ride.
  */
 
 public class GenerateQR extends AppCompatActivity implements FirebaseManager.RideRequestListener {
