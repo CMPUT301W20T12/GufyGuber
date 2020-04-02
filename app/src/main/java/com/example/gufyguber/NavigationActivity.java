@@ -223,9 +223,13 @@ public class NavigationActivity extends AppCompatActivity implements RideRequest
      * This method starts a new sign in activity so that the user can sign in again
      */
     public void logout(){
+        /*Stack overflow post by Zoleas https://stackoverflow.com/users/562418/zoleas
+        Answer:
+        https://stackoverflow.com/questions/7599955/android-finish-activity-and-start-another-one*/
+
         finish(); // Can't forget to finish this activity to clear the stack
         Intent intent = new Intent(getApplicationContext(), SignInActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP); //https://stackoverflow.com/questions/7599955/android-finish-activity-and-start-another-one
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivity(intent);
     }
 
@@ -234,7 +238,8 @@ public class NavigationActivity extends AppCompatActivity implements RideRequest
         super.onResume();
         RideRequest currentRideRequest = OfflineCache.getReference().retrieveCurrentRideRequest();
         if (currentRideRequest != null) {
-            if (OfflineCache.getReference().retrieveCurrentRideRequest().getStatus() == RideRequest.Status.COMPLETED) {
+            if (OfflineCache.getReference().retrieveCurrentRideRequest().getStatus() ==
+                    RideRequest.Status.COMPLETED) {
                 onStatusChanged(RideRequest.Status.COMPLETED);
             }
         }

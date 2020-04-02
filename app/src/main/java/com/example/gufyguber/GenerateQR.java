@@ -135,7 +135,7 @@ public class GenerateQR extends AppCompatActivity implements FirebaseManager.Rid
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) { //https://stackoverflow.com/questions/36457564/display-back-button-of-action-bar-is-not-going-back-in-android/36457747
+    public boolean onOptionsItemSelected(MenuItem item) { // Stackoverflow post by Ravi Teja https://stackoverflow.com/users/4321808/ravi-teja Answer https://stackoverflow.com/questions/36457564/display-back-button-of-action-bar-is-not-going-back-in-android/36457747
         switch (item.getItemId()){
             case android.R.id.home:
                 onBackPressed();
