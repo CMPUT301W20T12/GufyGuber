@@ -63,6 +63,7 @@ public class GenerateQR extends AppCompatActivity implements FirebaseManager.Rid
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.generate_qr);
+        // subscribe a RideRequest listener so when the Driver scans the QR, and the status is updated, the QR screen will automatically dismiss in real time
         rideRequestListener = FirebaseManager.getReference().listenToRideRequest(OfflineCache.getReference().retrieveCurrentRideRequest().getRiderUID(), this);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
@@ -96,8 +97,10 @@ public class GenerateQR extends AppCompatActivity implements FirebaseManager.Rid
         }
     }
 
+
     @Override
     protected void onDestroy() {
+        // Need to remove the listener when the activity is dismissed
         if(rideRequestListener != null) {
             rideRequestListener.remove();
             rideRequestListener = null;
@@ -114,10 +117,12 @@ public class GenerateQR extends AppCompatActivity implements FirebaseManager.Rid
     @Override
     public void onRideRequestUpdated(RideRequest updatedRequest) {
         if(updatedRequest != null && updatedRequest.getStatus() == RideRequest.Status.COMPLETED){
+            // when request is updated to COMPLETE, store the transaction info in the user's wallet in the DB
             FirebaseManager.getReference().storeWalletInfo(OfflineCache.getReference().retrieveCurrentUser().getUID(), new Wallet(String.format("%.2f",updatedRequest.getOfferedFare())), new FirebaseManager.ReturnValueListener<Boolean>() {
                 @Override
                 public void returnValue(Boolean value) {
                     if (value) {
+                        // When the wallet info is stored, proceed to rate driver activity
                         Intent rateDriver = new Intent(getApplicationContext(), RateDriver.class);
                         startActivity(rateDriver);
                     } else {
