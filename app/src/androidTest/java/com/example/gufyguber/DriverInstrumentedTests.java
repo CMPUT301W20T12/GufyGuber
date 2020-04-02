@@ -310,10 +310,10 @@ public class DriverInstrumentedTests {
                 .check(matches(withText(formatter.format(testRideRequest.getTimeInfo().getRequestAcceptedTime()))));
         // Make sure the pickup coordinates are correct
         onView(withId(R.id.user_pickup_location))
-                .check(matches(withText(LocationInfo.latlngToString(testRideRequest.getLocationInfo().getPickup()))));
+                .check(matches(withText(testRideRequest.getLocationInfo().getPickupName())));
         // Make sure the dropoff coordinates are correct
         onView(withId(R.id.user_dropoff_location))
-                .check(matches(withText(LocationInfo.latlngToString(testRideRequest.getLocationInfo().getDropoff()))));
+                .check(matches(withText(testRideRequest.getLocationInfo().getDropoffName())));
         // Make sure the fare is correct
         onView(withId(R.id.user_fare))
                 .check(matches(withText(String.format("$%.2f", testRideRequest.getOfferedFare()))));
