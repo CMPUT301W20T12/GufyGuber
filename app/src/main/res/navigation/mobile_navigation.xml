@@ -20,36 +20,31 @@
 
     <fragment
         android:id="@+id/nav_map"
-        android:name="com.example.gufyguber.ui.Map.MapFragment"
+        android:name="com.example.gufyguber.Map.MapFragment"
         android:label="Map"
         tools:layout="@layout/fragment_map" />
 
     <fragment
         android:id="@+id/nav_profile"
-        android:name="com.example.gufyguber.ui.Profile.ProfileFragment"
+        android:name="com.example.gufyguber.Profile.ProfileFragment"
         android:label="Profile"
         tools:layout="@layout/fragment_profile_rider" />
 
     <fragment
         android:id="@+id/nav_current_requests"
-        android:name="com.example.gufyguber.ui.CurrentRequest.CurrentRequestFragment"
+        android:name="com.example.gufyguber.CurrentRequest.CurrentRequestFragment"
         android:label="Current Requests"
-        tools:layout="@layout/fragment_current_requests" />
+        tools:layout="@layout/fragment_current_requests_rider" />
 
     <dialog
         android:id="@+id/nav_sign_out"
-        android:name="com.example.gufyguber.ui.Profile.SignOutDialog"
+        android:name="com.example.gufyguber.Profile.SignOutDialog"
         android:label="Sign Out"
         tools:layout="@layout/sign_out_dialog"/>
-
-    <dialog
-        android:id="@+id/nav_generateQR"
-        android:name="com.example.gufyguber.GenerateQrFragment"
-        android:label="Generate" />
-
-    <dialog
-        android:id="@+id/nav_scan"
-        android:name="com.example.gufyguber.ScanQrFragment"
-        android:label="Scan" />
+    <fragment
+        android:id="@+id/nav_wallet"
+        android:name="com.example.gufyguber.QRBucks.WalletFragment"
+        android:label="My Wallet"
+        tools:layout="@layout/fragment_wallet" />
 
 </navigation>

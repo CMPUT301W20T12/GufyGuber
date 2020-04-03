@@ -23,9 +23,9 @@
 
 package com.example.gufyguber;
 
+import com.example.gufyguber.Models.LocationInfo;
+import com.example.gufyguber.Models.RideRequest;
 import com.google.android.gms.maps.model.LatLng;
-
-import android.location.Location;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -53,16 +53,30 @@ public class RideRequestTests {
         assertEquals(1, RideRequest.Status.ACCEPTED.ordinal());
         assertEquals("Accepted", RideRequest.Status.ACCEPTED.toString());
         assertEquals("ACCEPTED", RideRequest.Status.ACCEPTED.name());
-        assertEquals(RideRequest.Status.ACCEPTED, RideRequest.Status.valueOf("ACCEPTED"));
+
+        // Test CONFIRMED enum for incorrect overrides
+        assertEquals(2, RideRequest.Status.CONFIRMED.ordinal());
+        assertEquals("Confirmed", RideRequest.Status.CONFIRMED.toString());
+        assertEquals("CONFIRMED", RideRequest.Status.CONFIRMED.name());
+
+        // Test EN_ROUTE enum for incorrect overrides
+        assertEquals(3, RideRequest.Status.EN_ROUTE.ordinal());
+        assertEquals("En Route", RideRequest.Status.EN_ROUTE.toString());
+        assertEquals("EN_ROUTE", RideRequest.Status.EN_ROUTE.name());
+
+        // Test ARRIVED enum for incorrect overrides
+        assertEquals(4, RideRequest.Status.ARRIVED.ordinal());
+        assertEquals("Arrived", RideRequest.Status.ARRIVED.toString());
+        assertEquals("ARRIVED", RideRequest.Status.ARRIVED.name());
 
         // Test COMPLETED enum for incorrect overrides
-        assertEquals(2, RideRequest.Status.COMPLETED.ordinal());
+        assertEquals(5, RideRequest.Status.COMPLETED.ordinal());
         assertEquals("Completed", RideRequest.Status.COMPLETED.toString());
         assertEquals("COMPLETED", RideRequest.Status.COMPLETED.name());
         assertEquals(RideRequest.Status.COMPLETED, RideRequest.Status.valueOf("COMPLETED"));
 
         // Test CANCELLED enum for incorrect overrides
-        assertEquals(3, RideRequest.Status.CANCELLED.ordinal());
+        assertEquals(6, RideRequest.Status.CANCELLED.ordinal());
         assertEquals("Cancelled", RideRequest.Status.CANCELLED.toString());
         assertEquals("CANCELLED", RideRequest.Status.CANCELLED.name());
         assertEquals(RideRequest.Status.CANCELLED, RideRequest.Status.valueOf("CANCELLED"));
@@ -71,8 +85,8 @@ public class RideRequestTests {
         assertEquals(RideRequest.Status.PENDING, testRideRequest.getStatus());
         testRideRequest.setStatus(RideRequest.Status.ACCEPTED);
         assertEquals(RideRequest.Status.ACCEPTED, testRideRequest.getStatus());
-        testRideRequest.setStatus(RideRequest.Status.values()[2]);
-        assertEquals(RideRequest.Status.COMPLETED, testRideRequest.getStatus());
+        testRideRequest.setStatus(RideRequest.Status.values()[3]);
+        assertEquals(RideRequest.Status.EN_ROUTE, testRideRequest.getStatus());
     }
 
     @Test
@@ -84,14 +98,6 @@ public class RideRequestTests {
         } else {
             assertEquals(testRideRequest.fairFareEstimate(Float.MAX_VALUE), Float.MAX_VALUE * RideRequest.FAIR_FARE_PER_METRE);
         }
-    }
-
-    @Test
-    public void testDriverAccept() {
-        assertEquals(testRideRequest.driverAcceptRideRequest("Test Driver"), true);
-        assertEquals(testRideRequest.getDriverUID(), "Test Driver");
-        assertEquals(testRideRequest.driverAcceptRideRequest("Test Driver 2"), false);
-        assertEquals(testRideRequest.getDriverUID(), "Test Driver");
     }
 
   public static RideRequest generateTestRequest() {

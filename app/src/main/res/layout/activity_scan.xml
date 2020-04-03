@@ -20,7 +20,7 @@
     android:id="@+id/activity_scan"
     android:layout_height="match_parent"
     android:layout_width="match_parent"
-    tools:context=".Scan">
+    tools:context=".QRBucks.Scan">
 
     <SurfaceView
         android:id="@+id/cameraView"
