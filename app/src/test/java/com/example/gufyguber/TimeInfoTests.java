@@ -22,6 +22,8 @@
 
 package com.example.gufyguber;
 
+import com.example.gufyguber.Models.TimeInfo;
+
 import org.junit.Test;
 
 import java.util.Date;

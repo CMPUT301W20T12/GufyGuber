@@ -22,9 +22,9 @@
 
 package com.example.gufyguber;
 
-import org.junit.Test;
+import com.example.gufyguber.Models.LocationInfo;
 
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.Test;
 
 public class LocationInfoTests {
     @Test

@@ -27,7 +27,13 @@
 
 package com.example.gufyguber;
 
-import org.junit.Before;
+import com.example.gufyguber.Models.Driver;
+import com.example.gufyguber.Models.Rating;
+import com.example.gufyguber.Models.RideRequest;
+import com.example.gufyguber.Models.Rider;
+import com.example.gufyguber.Models.Vehicle;
+import com.example.gufyguber.Singletons.FirebaseManager;
+
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.jupiter.api.BeforeAll;

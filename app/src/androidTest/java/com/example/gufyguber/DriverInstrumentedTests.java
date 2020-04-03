@@ -17,7 +17,6 @@
 package com.example.gufyguber;
 
 import android.content.Intent;
-import android.util.Log;
 import android.view.Gravity;
 
 import org.junit.After;
@@ -39,8 +38,15 @@ import static org.hamcrest.core.StringContains.containsString;
 
 import androidx.test.rule.ActivityTestRule;
 
-import com.google.android.gms.maps.MapFragment;
-import com.google.android.gms.maps.model.LatLng;
+import com.example.gufyguber.Models.Driver;
+import com.example.gufyguber.Models.LocationInfo;
+import com.example.gufyguber.Models.Rating;
+import com.example.gufyguber.Models.RideRequest;
+import com.example.gufyguber.Models.Rider;
+import com.example.gufyguber.Models.TimeInfo;
+import com.example.gufyguber.Models.Vehicle;
+import com.example.gufyguber.Singletons.FirebaseManager;
+import com.example.gufyguber.Singletons.OfflineCache;
 
 import java.text.SimpleDateFormat;
 import java.util.Locale;

@@ -16,21 +16,23 @@ package com.example.gufyguber;
 import android.content.Intent;
 import android.os.Bundle;
 
-import com.example.gufyguber.ui.CurrentRequest.CurrentRequestFragment;
-import com.example.gufyguber.ui.Map.MapFragment;
+import com.example.gufyguber.CurrentRequest.DriverAcceptFragment;
+import com.example.gufyguber.Models.Driver;
+import com.example.gufyguber.Models.RideRequest;
+import com.example.gufyguber.Models.Rider;
+import com.example.gufyguber.Models.User;
+import com.example.gufyguber.Singletons.FirebaseManager;
 
 import android.util.Log;
 import android.view.Gravity;
-import android.view.MenuItem;
 
-import androidx.annotation.Nullable;
-import androidx.core.view.GravityCompat;
-import androidx.fragment.app.FragmentManager;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
+import com.example.gufyguber.Singletons.OfflineCache;
+import com.example.gufyguber.Profile.SignInActivity;
 import com.google.android.material.navigation.NavigationView;
 
 import androidx.drawerlayout.widget.DrawerLayout;
@@ -38,7 +40,6 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
-import android.view.Menu;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;

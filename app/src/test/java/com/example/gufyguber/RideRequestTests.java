@@ -23,9 +23,9 @@
 
 package com.example.gufyguber;
 
+import com.example.gufyguber.Models.LocationInfo;
+import com.example.gufyguber.Models.RideRequest;
 import com.google.android.gms.maps.model.LatLng;
-
-import android.location.Location;
 
 import org.junit.Before;
 import org.junit.Test;

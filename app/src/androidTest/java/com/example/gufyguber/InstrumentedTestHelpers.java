@@ -37,6 +37,9 @@ import androidx.test.espresso.action.Tap;
 import androidx.test.espresso.contrib.DrawerActions;
 import androidx.test.espresso.contrib.NavigationViewActions;
 
+import com.example.gufyguber.Models.User;
+import com.example.gufyguber.Singletons.OfflineCache;
+
 import org.hamcrest.Matcher;
 
 import static androidx.test.espresso.Espresso.onView;

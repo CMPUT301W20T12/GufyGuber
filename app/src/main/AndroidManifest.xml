@@ -24,7 +24,7 @@
             android:name="com.google.android.gms.vision.DEPENDENCIES"
             android:value="barcode" />
 
-        <activity android:name=".SignInActivity"
+        <activity android:name=".Profile.SignInActivity"
             android:screenOrientation="portrait"
             android:noHistory="true">
             <intent-filter>
@@ -56,34 +56,34 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyCc00eAPUQZI2VghOGY9GybhOOj5vfO42M" />
 
-        <activity android:name=".RegisterUserActivity"
-                  android:parentActivityName=".SignInActivity"
+        <activity android:name=".Profile.RegisterUserActivity"
+                  android:parentActivityName=".Profile.SignInActivity"
                   android:label="Register User"
                   android:noHistory="true">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".SignInActivity"/>
+                android:value=".Profile.SignInActivity"/>
         </activity>
 
-	    <activity android:name=".GenerateQR"
+	    <activity android:name=".QRBucks.GenerateQR"
             android:label="Generate QR"
             android:noHistory="true"
             android:theme="@style/AppTheme"
             android:parentActivityName=".NavigationActivity">
         </activity>
-        <activity android:name=".startScanQR"
+        <activity android:name=".QRBucks.startScanQR"
             android:label="Scan QR"
             android:theme="@style/AppTheme"
             android:parentActivityName=".NavigationActivity"/>
-        <activity android:name=".Scan"
+        <activity android:name=".QRBucks.Scan"
             android:label="Scan QR"
             android:theme="@style/AppTheme"
             android:noHistory="true"
-            android:parentActivityName=".startScanQR"/>
-        <activity android:name=".RateDriver"
+            android:parentActivityName=".QRBucks.startScanQR"/>
+        <activity android:name=".Profile.RateDriver"
             android:label="Rate Driver"
             android:theme="@style/AppTheme"
-            android:parentActivityName=".GenerateQR"/>
+            android:parentActivityName=".QRBucks.GenerateQR"/>
     </application>
 
 </manifest>
